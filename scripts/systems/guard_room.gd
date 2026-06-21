@@ -36,7 +36,10 @@ var _desk_lamp: SpotLight3D
 var _desk_lamp_mat: StandardMaterial3D
 var _altar_light: OmniLight3D
 var _altar_mat: StandardMaterial3D
-var _monitor_mat: StandardMaterial3D
+var _screen_mat: ShaderMaterial      # desk CRT showing cycling camera feeds
+var _screen_feeds: Array = []
+var _screen_idx := 0
+var _screen_timer := 0.0
 
 var _yaw := 0.0
 var _yaw_target := 0.0
@@ -167,17 +170,57 @@ func _build_room() -> void:
 	# desk
 	_box(Vector3(3.2, 0.12, 1.2), Vector3(0, 1.0, -1.7), _mat("desk.svg", Color(0.7, 0.6, 0.45), 1.0, false, 0.7))
 	_box(Vector3(3.2, 0.9, 0.1), Vector3(0, 0.5, -1.2), _mat("desk.svg", Color(0.45, 0.38, 0.3)))
-	# CRT monitor prop with a faint screen glow
-	_box(Vector3(0.9, 0.7, 0.6), Vector3(0.9, 1.4, -1.8), _mat("", Color(0.05, 0.06, 0.08), 1.0, false, 0.5, 0.3))
-	_monitor_mat = StandardMaterial3D.new()
-	_monitor_mat.albedo_color = Color(0.1, 0.16, 0.2)
-	_monitor_mat.emission_enabled = true
-	_monitor_mat.emission = Color(0.25, 0.5, 0.6)
-	_monitor_mat.emission_energy_multiplier = 1.2
-	_box(Vector3(0.74, 0.54, 0.02), Vector3(0.9, 1.42, -1.52), _monitor_mat)
+	# CRT security monitor on the desk — a real-looking screen with live, cycling
+	# camera feeds (not a black block).
+	var case_mat := _mat("", Color(0.07, 0.075, 0.09), 1.0, false, 0.5, 0.2)
+	_box(Vector3(0.98, 0.76, 0.62), Vector3(0.9, 1.45, -1.78), case_mat)   # casing
+	_box(Vector3(0.16, 0.14, 0.16), Vector3(0.9, 1.02, -1.74), case_mat)   # neck
+	_box(Vector3(0.4, 0.05, 0.3), Vector3(0.9, 0.96, -1.68), case_mat)     # base
+	_build_monitor_screen()
 
 	_build_desk_lamp()
 	_build_altar()
+
+func _build_monitor_screen() -> void:
+	var sh := Shader.new()
+	sh.code = """
+shader_type spatial;
+render_mode unshaded, cull_disabled;
+uniform sampler2D feed : source_color;
+uniform float t = 0.0;
+uniform float lit = 1.0;
+float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
+void fragment() {
+	vec2 uv = UV;
+	vec3 col = texture(feed, uv).rgb;
+	col *= 0.86 + 0.14 * sin(uv.y * 240.0);              // scanlines
+	vec2 d = uv - 0.5;
+	col *= 1.0 - dot(d, d) * 0.7;                        // vignette
+	col *= 0.92 + 0.08 * sin(t * 7.0);                  // flicker
+	col += rand(uv * vec2(91.0, 75.0) + fract(t)) * 0.035;  // faint static
+	col *= vec3(0.82, 1.0, 0.92);                        // cool CRT tint
+	col *= lit;                                          // dies on blackout
+	ALBEDO = col;
+	EMISSION = col * 0.7;
+}
+"""
+	_screen_mat = ShaderMaterial.new()
+	_screen_mat.shader = sh
+	for cam in MapGraph.CAMERAS:
+		var p := "res://assets/art/cameras/cam_%s.svg" % cam
+		if ResourceLoader.exists(p):
+			_screen_feeds.append(load(p))
+	if not _screen_feeds.is_empty():
+		_screen_mat.set_shader_parameter("feed", _screen_feeds[0])
+	_screen_mat.set_shader_parameter("t", 0.0)
+	_screen_timer = 2.6
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.8, 0.6, 0.02)
+	mi.mesh = bm
+	mi.material_override = _screen_mat
+	mi.position = Vector3(0.9, 1.47, -1.46)
+	add_child(mi)
 
 func _build_desk_lamp() -> void:
 	# A warm desk lamp pooling light over the desk — the cozy island in the dark.
@@ -348,6 +391,15 @@ func _process(delta: float) -> void:
 	else:
 		# subtle fluorescent flutter while powered
 		_ceiling.light_energy = CEILING_ENERGY * (0.96 + 0.04 * sin(_t * 9.0))
+	# desk CRT: animate scanlines/flicker and cycle through the camera feeds
+	if _screen_mat:
+		_screen_mat.set_shader_parameter("t", _t)
+		_screen_mat.set_shader_parameter("lit", 1.0 if _powered else 0.0)
+		_screen_timer -= delta
+		if _screen_timer <= 0.0 and not _screen_feeds.is_empty():
+			_screen_timer = 2.6
+			_screen_idx = (_screen_idx + 1) % _screen_feeds.size()
+			_screen_mat.set_shader_parameter("feed", _screen_feeds[_screen_idx])
 
 func _update_look_targets() -> void:
 	var vp := get_viewport()

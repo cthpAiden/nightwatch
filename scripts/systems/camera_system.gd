@@ -19,7 +19,9 @@ func _build() -> void:
 	UI.full(bg)
 	add_child(bg)
 
-	_feed = UI.texture_rect("res://assets/art/cameras/cam_gate.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED)
+	# SCALE (not KEEP_ASPECT_COVERED) so the whole feed image fills the screen
+	# without being zoomed in / cropped — the bezel art frames the edges.
+	_feed = UI.texture_rect("res://assets/art/cameras/cam_gate.svg", TextureRect.STRETCH_SCALE)
 	UI.place(_feed, 0, 0, 1, 1, 40, 36, -40, -36)
 	add_child(_feed)
 
