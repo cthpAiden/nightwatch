@@ -273,15 +273,22 @@ func _build_doorway(side: int, x: float) -> void:
 	# of it — the old layout put a dark slab between the camera and the door, which
 	# hid the door and the threat entirely).
 	var dir := -1.0 if side == GameEnums.Side.LEFT else 1.0
-	# A short corridor recess so the doorway reads as a hallway and threats have a
-	# space to stand in (lit by the doorway lamp when you switch it on).
-	var corr := _mat("wall.svg", Color(0.3, 0.32, 0.34), 1.5)
-	var cx := x + dir * 0.95                                   # corridor centre
-	_box(Vector3(0.2, 2.6, 2.6), Vector3(x + dir * 1.55, 1.2, 0), corr)     # far wall
-	_box(Vector3(1.4, 2.6, 0.2), Vector3(cx, 1.2, -1.3), corr)             # side wall
-	_box(Vector3(1.4, 2.6, 0.2), Vector3(cx, 1.2, 1.3), corr)             # side wall
-	_box(Vector3(1.4, 0.2, 2.4), Vector3(cx, -0.1, 0), _mat("floor.svg", Color(0.34, 0.34, 0.34), 1.5))
-	_box(Vector3(1.4, 0.2, 2.4), Vector3(cx, 2.5, 0), corr)               # ceiling
+	# A long, very dark hallway that recedes into black (NOT a shallow lit
+	# deadend). Materials are near-black so it stays pitch black by default; only
+	# the doorway lamp (when you switch it on) reveals the near stretch + whatever
+	# is standing in it. The far end fades to black, so it reads as "leads away".
+	var depth := 7.0
+	var cx := x + dir * (depth * 0.5)
+	var hall := _mat("wall.svg", Color(0.07, 0.075, 0.085), 2.0)
+	var hall_floor := _mat("floor.svg", Color(0.06, 0.06, 0.07), 2.0)
+	_box(Vector3(depth, 2.8, 0.2), Vector3(cx, 1.3, -1.3), hall)            # side wall
+	_box(Vector3(depth, 2.8, 0.2), Vector3(cx, 1.3, 1.3), hall)            # side wall
+	_box(Vector3(depth, 0.2, 2.4), Vector3(cx, -0.1, 0), hall_floor)        # floor
+	_box(Vector3(depth, 0.2, 2.4), Vector3(cx, 2.6, 0), hall)              # ceiling
+	# faint cross-corridor at the far end so the hall clearly turns/continues
+	var ex := x + dir * depth
+	_box(Vector3(0.2, 2.8, 5.0), Vector3(ex + dir * 0.1, 1.3, 0), _mat("", Color(0.03, 0.03, 0.035)))
+	_box(Vector3(2.2, 0.2, 5.0), Vector3(ex - dir * 1.0, -0.1, 0), hall_floor)
 	# threat billboard standing just OUTSIDE the door, in the corridor mouth
 	var spr := Sprite3D.new()
 	spr.pixel_size = 0.007

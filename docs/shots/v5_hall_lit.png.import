@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ce3dmiccavk0e"
-path="res://.godot/imported/lighting_door.png-f50921af4b4fa080e90bab330a9f34dc.ctex"
+uid="uid://vuaulc0hbixi"
+path="res://.godot/imported/v5_hall_lit.png-1986119cab3a2f2d7f2eb6e0df23170a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/shots/lighting_door.png"
-dest_files=["res://.godot/imported/lighting_door.png-f50921af4b4fa080e90bab330a9f34dc.ctex"]
+source_file="res://docs/shots/v5_hall_lit.png"
+dest_files=["res://.godot/imported/v5_hall_lit.png-1986119cab3a2f2d7f2eb6e0df23170a.ctex"]
 
 [params]
 

@@ -436,118 +436,48 @@ def vendor_bell():
     save("vendor_bell.wav", s, peak=0.55)
 
 # ---------------------------------------------------------------- ambience (stereo)
-def ambience_night():
-    dur = 14.0
+def _cricket(left, right, n, at, freq, pan, gain):
+    # one cricket chirp (short trilled high tone), panned, summed into L/R
+    cn = int(SR * 0.12)
+    start = int(at * SR)
+    for i in range(cn):
+        j = start + i
+        if not (0 <= j < n):
+            continue
+        t = i / SR
+        trill = 1.0 if (math.sin(t * 2 * math.pi * 38) > 0) else 0.18
+        env = math.sin(math.pi * (t / 0.12))
+        sm = math.sin(2 * math.pi * freq * t) * env * trill
+        left[j] += sm * gain * (1.0 - pan)
+        right[j] += sm * gain * pan
+
+def _cricket_bed(dur, gap_lo, gap_hi, f_lo, f_hi, gain):
     n = int(SR * dur)
     left = [0.0] * n
     right = [0.0] * n
-    # low drone (two detuned oscillators)
-    for i in range(n):
-        t = i / SR
-        d = (0.5 * math.sin(2 * math.pi * 55 * t)
-             + 0.45 * math.sin(2 * math.pi * 55.4 * t)
-             + 0.2 * math.sin(2 * math.pi * 110 * t))
-        d *= 0.12 * (0.9 + 0.1 * math.sin(t * 0.3))
-        left[i] += d
-        right[i] += d * 0.95
-    # crickets: short high chirps scattered, panned
-    def chirp(at, freq, pan):
-        cn = int(SR * 0.12)
-        seg = []
-        for i in range(cn):
-            t = i / SR
-            trill = 1.0 if (math.sin(t * 2 * math.pi * 40) > 0) else 0.2
-            env = math.sin(math.pi * (t / 0.12))
-            seg.append(math.sin(2 * math.pi * freq * t) * env * trill)
-        start = int(at * SR)
-        for i, sm in enumerate(seg):
-            j = start + i
-            if 0 <= j < n:
-                left[j] += sm * 0.18 * (1.0 - pan)
-                right[j] += sm * 0.18 * pan
     tt = 0.0
     while tt < dur:
-        chirp(tt, random.choice([3800, 4200, 4600, 5000]), random.random())
-        tt += random.uniform(0.18, 0.5)
-    # distant dog bark occasionally
-    def dog(at, pan):
-        bn = int(SR * 0.25)
-        seg = []
-        for i in range(bn):
-            t = i / SR
-            f = 300 - 120 * (t / 0.25)
-            seg.append(0.6 * math.sin(2 * math.pi * f * t) + 0.3 * random.uniform(-1, 1))
-        seg = lowpass(seg, 1200)
-        seg = adsr(seg, a=0.01, d=0.05, s=0.5, r=0.1)
-        start = int(at * SR)
-        for i, sm in enumerate(seg):
-            j = start + i
-            if 0 <= j < n:
-                left[j] += sm * 0.10 * (1.0 - pan)
-                right[j] += sm * 0.10 * pan
-    for at in (2.7, 6.4, 11.1):
-        dog(at, random.random())
-    # distant motorbike whoosh (Vietnamese night detail)
-    def moto(at):
-        mn = int(SR * 1.6)
-        seg = []
-        for i in range(mn):
-            t = i / SR
-            env = math.sin(math.pi * (t / 1.6))
-            f = 90 + 30 * math.sin(t * 3)
-            seg.append((0.5 * math.sin(2 * math.pi * f * t)
-                        + 0.3 * random.uniform(-1, 1)) * env)
-        seg = lowpass(seg, 800)
-        start = int(at * SR)
-        for i, sm in enumerate(seg):
-            j = start + i
-            if 0 <= j < n:
-                p = i / mn
-                left[j] += sm * 0.12 * (1.0 - p)
-                right[j] += sm * 0.12 * p
-    moto(4.0); moto(9.5)
-    # normalize jointly
+        _cricket(left, right, n, tt, random.uniform(f_lo, f_hi), random.random(), gain)
+        tt += random.uniform(gap_lo, gap_hi)
+    # very faint airy bed so it isn't dead silence between chirps
+    air = lowpass(noise(dur), 900)
+    for i in range(n):
+        left[i] += air[i] * 0.012
+        right[i] += air[i] * 0.012
     peak = max(max(abs(x) for x in left), max(abs(x) for x in right), 1e-9)
     g = 0.7 / peak
-    stereo = [(left[i] * g, right[i] * g) for i in range(n)]
+    return [(left[i] * g, right[i] * g) for i in range(n)]
+
+def ambience_night():
+    # Calm night: a lively, dense cricket bed (no drone/wind/traffic — those read
+    # as a bug). Just crickets, per the brief.
+    stereo = _cricket_bed(14.0, 0.10, 0.30, 3600, 5200, 0.22)
     save("ambience_night.wav", stereo, folder=MUSIC_DIR, stereo=True, peak=0.7)
 
 def ambience_dread():
-    # tenser ambience for late nights: lower drone + heartbeat-ish pulse + wind
-    dur = 14.0
-    n = int(SR * dur)
-    left = [0.0] * n
-    right = [0.0] * n
-    for i in range(n):
-        t = i / SR
-        d = (0.5 * math.sin(2 * math.pi * 41 * t)
-             + 0.4 * math.sin(2 * math.pi * 41.5 * t)
-             + 0.25 * math.sin(2 * math.pi * 82 * t))
-        wind = 0.15 * (random.uniform(-1, 1))
-        v = d * 0.13 + 0.0
-        left[i] += v
-        right[i] += v * 0.96
-    # filtered wind layer
-    wind = bandpass(noise(dur), 200, 1400)
-    for i in range(n):
-        t = i / SR
-        env = 0.06 * (0.6 + 0.4 * math.sin(t * 0.4))
-        left[i] += wind[i] * env
-        right[i] += wind[i] * env * 0.9
-    # slow ominous pulses
-    tt = 0.0
-    while tt < dur:
-        pul = exp_decay(sine(48, 0.6), 0.2)
-        start = int(tt * SR)
-        for i, sm in enumerate(pul):
-            j = start + i
-            if 0 <= j < n:
-                left[j] += sm * 0.25
-                right[j] += sm * 0.25
-        tt += 2.6
-    peak = max(max(abs(x) for x in left), max(abs(x) for x in right), 1e-9)
-    g = 0.7 / peak
-    stereo = [(left[i] * g, right[i] * g) for i in range(n)]
+    # Late nights: the same crickets, sparser and a touch lower — tenser, but
+    # still just crickets (no wind/drone).
+    stereo = _cricket_bed(14.0, 0.30, 0.75, 3000, 4400, 0.20)
     save("ambience_dread.wav", stereo, folder=MUSIC_DIR, stereo=True, peak=0.7)
 
 # ---------------------------------------------------------------- run
