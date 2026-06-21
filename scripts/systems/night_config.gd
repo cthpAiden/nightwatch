@@ -16,10 +16,12 @@ extends Resource
 
 ## Power economy (percent per second). Idle is low enough to survive a full night
 ## doing nothing; doors/lights/cameras are the real cost (FNAF-style tension).
-@export var power_drain_idle: float = 0.09
-@export var power_drain_per_door: float = 2.2
-@export var power_drain_camera: float = 0.5
-@export var power_drain_per_light: float = 1.0
+## Tuned so a careful camera/door user comfortably clears the night, while
+## camping the cameras or holding doors all night still drains you out.
+@export var power_drain_idle: float = 0.05
+@export var power_drain_per_door: float = 1.1
+@export var power_drain_camera: float = 0.12
+@export var power_drain_per_light: float = 0.55
 
 ## Via (spirit/sanity) economy.
 @export var via_enabled: bool = true

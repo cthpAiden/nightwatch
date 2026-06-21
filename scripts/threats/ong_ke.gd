@@ -15,19 +15,21 @@ func _configure() -> void:
 	via_drain_at_door = 4.0
 
 func _process_attack(delta: float) -> void:
+	# Closing the door always repels him (the panic / power-hungry counter).
 	if _is_repelled_now():
 		repel()
 		return
-	# "Ngoan": behave at the door — monitor down, doorway light off, sit still — and
-	# after a moment he loses interest and leaves (a power-free counter). Hiding in
-	# the cameras does NOT count as behaving.
-	var behaving: bool = _controller != null \
+	# "Ngoan": stand your ground — shine the doorway LIGHT on him and stay calm
+	# (monitor down, don't whip the view around). Faced and unafraid, he loses
+	# interest and leaves: a low-power counter that still demands you react.
+	# Ignoring him in the dark is NOT safe — he keeps advancing and takes you.
+	var facing_him_calmly: bool = _controller != null \
+		and _controller.is_light_on(threatening_side) \
 		and not _controller.is_monitor_open() \
-		and not _controller.is_light_on(threatening_side) \
-		and _controller.get_pan_speed() < 0.2
-	if behaving:
+		and _controller.get_pan_speed() < 0.3
+	if facing_him_calmly:
 		_behave_t += delta
-		if _behave_t >= 3.0:
+		if _behave_t >= 2.5:
 			repel()
 		return
 	_behave_t = 0.0

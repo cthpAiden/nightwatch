@@ -66,10 +66,14 @@ func _build_map() -> void:
 	var bg := UI.texture_rect("res://assets/art/ui/map_panel.svg", TextureRect.STRETCH_KEEP_ASPECT)
 	UI.full(bg)
 	map.add_child(bg)
+	# Click target is deliberately larger than the drawn dot so you don't have to
+	# hit the circle exactly; the icon stays centered at a comfortable visual size.
+	const DOT_HIT := 64.0   # clickable square
 	for cam in MapGraph.CAMERAS:
 		var pos: Vector2 = MapGraph.MAP_POS[cam]
-		var b := UI.icon_button("res://assets/art/ui/cam_dot.svg", 38)
-		b.position = pos - Vector2(19, 19)
+		var b := UI.icon_button("res://assets/art/ui/cam_dot.svg", DOT_HIT)
+		b.size = Vector2(DOT_HIT, DOT_HIT)
+		b.position = pos - Vector2(DOT_HIT * 0.5, DOT_HIT * 0.5)
 		b.tooltip_text = tr(MapGraph.name_key(cam))
 		b.pressed.connect(_select.bind(cam))
 		map.add_child(b)

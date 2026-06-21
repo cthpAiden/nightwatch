@@ -1,7 +1,7 @@
 extends Node3D
-## The 2.5D guard office. Builds simple 3D geometry in code, a pannable camera
+## The 2.5D guard office. Builds the 3D scene in code: a pannable camera
 ## (mouse-to-edges or pan_left/right/reset keys), two doorways with animated
-## shutters + lights, and a billboard for whatever threat is at each door.
+## shutters + real wall lamps, a lit desk, an ancestor altar, and a moonlit window.
 ## Pure "view + look controls" — gameplay rules live in NightController.
 
 const YAW_MAX := 1.15
@@ -11,15 +11,31 @@ const EDGE := 0.14            # outer screen fraction that pans the view
 
 const ROOM_TEX := "res://assets/art/room/"
 
+# Light energies (kept as named constants so power-loss / restore is consistent).
+const CEILING_ENERGY := 1.7
+const DOOR_LIGHT_ENERGY := 7.0
+const DESK_LAMP_ENERGY := 3.2
+const ALTAR_ENERGY := 2.0
+
+const DOOR_CLOSED_Y := 1.35
+const DOOR_OPEN_Y := 3.7
+
 var _pivot: Node3D
 var _cam: Camera3D
 var _doors := {}             # side -> Node3D
 var _door_closed := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}
 var _lights := {}            # side -> SpotLight3D
 var _light_on := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}
+var _lamp_mats := {}         # side -> StandardMaterial3D (visible wall fixture glow)
 var _threat_sprites := {}    # side -> Sprite3D
+
 var _ceiling: OmniLight3D
+var _tube_mat: StandardMaterial3D
+var _desk_lamp: SpotLight3D
+var _desk_lamp_mat: StandardMaterial3D
 var _altar_light: OmniLight3D
+var _altar_mat: StandardMaterial3D
+var _monitor_mat: StandardMaterial3D
 
 var _yaw := 0.0
 var _yaw_target := 0.0
@@ -29,13 +45,12 @@ var _look_enabled := true
 var _powered := true
 var _pan_speed := 0.0
 var _kb_dir := 0.0
-
-const DOOR_CLOSED_Y := 1.35
-const DOOR_OPEN_Y := 3.7
+var _t := 0.0
 
 func _ready() -> void:
 	_build_environment()
 	_build_room()
+	_build_window()
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
 	set_process(true)
@@ -46,14 +61,33 @@ func _build_environment() -> void:
 	var we := WorldEnvironment.new()
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.02, 0.03, 0.05)
+	env.background_color = Color(0.015, 0.02, 0.035)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.18, 0.22, 0.3)
-	env.ambient_light_energy = 0.35
+	env.ambient_light_color = Color(0.22, 0.26, 0.34)
+	env.ambient_light_energy = 0.5
+	# Atmospheric depth, but lighter than before so the room reads clearly.
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.05, 0.07, 0.1)
-	env.fog_density = 0.04
+	env.fog_light_color = Color(0.06, 0.08, 0.12)
+	env.fog_density = 0.018
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_exposure = 1.05
+	env.tonemap_white = 2.0
+	# Bloom makes lamps actually read as light sources (not flat "orbs").
+	env.glow_enabled = true
+	env.glow_intensity = 0.6
+	env.glow_strength = 1.05
+	env.glow_bloom = 0.12
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
+	env.glow_hdr_threshold = 0.95
+	# Contact shadows / grounding.
+	env.ssao_enabled = true
+	env.ssao_radius = 1.2
+	env.ssao_intensity = 1.6
+	# Subtle grade: a touch of contrast + slight desaturation for the night mood.
+	env.adjustment_enabled = true
+	env.adjustment_brightness = 1.02
+	env.adjustment_contrast = 1.08
+	env.adjustment_saturation = 0.94
 	we.environment = env
 	add_child(we)
 
@@ -65,21 +99,40 @@ func _build_environment() -> void:
 	_cam.current = true
 	_pivot.add_child(_cam)
 
+	# Main ceiling light + a visible fluorescent tube so there is a real source.
 	_ceiling = OmniLight3D.new()
-	_ceiling.position = Vector3(0, 2.8, -0.5)
-	_ceiling.light_color = Color(0.7, 0.78, 0.85)
-	_ceiling.light_energy = 0.5
-	_ceiling.omni_range = 9.0
+	_ceiling.position = Vector3(0, 2.82, -0.6)
+	_ceiling.light_color = Color(0.78, 0.84, 0.92)
+	_ceiling.light_energy = CEILING_ENERGY
+	_ceiling.omni_range = 12.0
+	_ceiling.omni_attenuation = 1.4
+	_ceiling.shadow_enabled = true
 	add_child(_ceiling)
+	# soft fill so corners aren't pitch black
+	var fill := OmniLight3D.new()
+	fill.position = Vector3(0, 2.5, 1.8)
+	fill.light_color = Color(0.5, 0.58, 0.72)
+	fill.light_energy = 0.5
+	fill.omni_range = 10.0
+	add_child(fill)
+
+	_tube_mat = StandardMaterial3D.new()
+	_tube_mat.albedo_color = Color(0.9, 0.95, 1.0)
+	_tube_mat.emission_enabled = true
+	_tube_mat.emission = Color(0.85, 0.92, 1.0)
+	_tube_mat.emission_energy_multiplier = 4.0
+	var tube := _box(Vector3(2.4, 0.08, 0.2), Vector3(0, 2.92, -0.6), _tube_mat)
+	tube.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 func _mat(tex: String, tint: Color = Color.WHITE, scale: float = 1.0,
-		emissive: bool = false) -> StandardMaterial3D:
+		emissive: bool = false, rough: float = 0.95, metal: float = 0.0) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	var path := ROOM_TEX + tex
-	if ResourceLoader.exists(path):
+	if tex != "" and ResourceLoader.exists(path):
 		m.albedo_texture = load(path)
 	m.albedo_color = tint
-	m.roughness = 0.95
+	m.roughness = rough
+	m.metallic = metal
 	if scale != 1.0:
 		m.uv1_scale = Vector3(scale, scale, 1.0)
 	if emissive:
@@ -100,7 +153,7 @@ func _box(size: Vector3, pos: Vector3, mat: StandardMaterial3D, parent: Node3D =
 
 func _build_room() -> void:
 	var wall := _mat("wall.svg", Color(0.55, 0.6, 0.55), 2.0)
-	_box(Vector3(9, 0.2, 9), Vector3(0, -0.1, 0), _mat("floor.svg", Color(0.5, 0.5, 0.5), 3.0))
+	_box(Vector3(9, 0.2, 9), Vector3(0, -0.1, 0), _mat("floor.svg", Color(0.5, 0.5, 0.5), 3.0, false, 0.85))
 	_box(Vector3(9, 0.2, 9), Vector3(0, 3.0, 0), _mat("ceiling.svg", Color(0.4, 0.42, 0.45), 2.0))
 	# front wall (what you face) with chalkboard + altar
 	_box(Vector3(9, 3.2, 0.2), Vector3(0, 1.5, -4.3), wall)
@@ -108,18 +161,85 @@ func _build_room() -> void:
 	# back wall (behind you)
 	_box(Vector3(9, 3.2, 0.2), Vector3(0, 1.5, 4.3), wall)
 	# desk
-	_box(Vector3(3.2, 0.12, 1.2), Vector3(0, 1.0, -1.7), _mat("desk.svg", Color(0.7, 0.6, 0.45), 1.0))
+	_box(Vector3(3.2, 0.12, 1.2), Vector3(0, 1.0, -1.7), _mat("desk.svg", Color(0.7, 0.6, 0.45), 1.0, false, 0.7))
 	_box(Vector3(3.2, 0.9, 0.1), Vector3(0, 0.5, -1.2), _mat("desk.svg", Color(0.45, 0.38, 0.3)))
-	# CRT monitor prop
-	_box(Vector3(0.9, 0.7, 0.6), Vector3(0.9, 1.4, -1.8), _mat("", Color(0.06, 0.07, 0.09)))
-	# desk altar (amber safe zone) + warm light
-	var altar := _box(Vector3(0.6, 0.5, 0.4), Vector3(-1.2, 1.35, -1.8), _mat("", Color(0.5, 0.2, 0.08), 1.0, true))
+	# CRT monitor prop with a faint screen glow
+	_box(Vector3(0.9, 0.7, 0.6), Vector3(0.9, 1.4, -1.8), _mat("", Color(0.05, 0.06, 0.08), 1.0, false, 0.5, 0.3))
+	_monitor_mat = StandardMaterial3D.new()
+	_monitor_mat.albedo_color = Color(0.1, 0.16, 0.2)
+	_monitor_mat.emission_enabled = true
+	_monitor_mat.emission = Color(0.25, 0.5, 0.6)
+	_monitor_mat.emission_energy_multiplier = 1.2
+	_box(Vector3(0.74, 0.54, 0.02), Vector3(0.9, 1.42, -1.52), _monitor_mat)
+
+	_build_desk_lamp()
+	_build_altar()
+
+func _build_desk_lamp() -> void:
+	# A warm desk lamp pooling light over the desk — the cozy island in the dark.
+	var arm := _mat("", Color(0.12, 0.12, 0.14), 1.0, false, 0.4, 0.6)
+	_box(Vector3(0.06, 0.5, 0.06), Vector3(-0.7, 1.3, -2.0), arm)
+	_desk_lamp_mat = StandardMaterial3D.new()
+	_desk_lamp_mat.albedo_color = Color(0.9, 0.7, 0.4)
+	_desk_lamp_mat.emission_enabled = true
+	_desk_lamp_mat.emission = Color(1.0, 0.75, 0.4)
+	_desk_lamp_mat.emission_energy_multiplier = 3.0
+	var shade := _box(Vector3(0.34, 0.14, 0.34), Vector3(-0.7, 1.6, -2.0), _desk_lamp_mat)
+	shade.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_desk_lamp = SpotLight3D.new()
+	_desk_lamp.position = Vector3(-0.7, 1.55, -1.9)
+	_desk_lamp.rotation = Vector3(-PI / 2.0 + 0.25, 0, 0)
+	_desk_lamp.light_color = Color(1.0, 0.82, 0.55)
+	_desk_lamp.light_energy = DESK_LAMP_ENERGY
+	_desk_lamp.spot_range = 4.0
+	_desk_lamp.spot_angle = 55.0
+	_desk_lamp.spot_attenuation = 1.2
+	_desk_lamp.shadow_enabled = true
+	add_child(_desk_lamp)
+
+func _build_altar() -> void:
+	# Ancestor altar (amber safe zone) — warm candlelight that survives a blackout.
+	_altar_mat = _mat("", Color(0.55, 0.22, 0.09), 1.0, true)
+	_altar_mat.emission_energy_multiplier = 2.2
+	_box(Vector3(0.6, 0.5, 0.4), Vector3(-1.2, 1.35, -1.8), _altar_mat)
+	# two little candle flames
+	for dx in [-0.12, 0.12]:
+		var flame := _mat("", Color(1.0, 0.6, 0.2), 1.0, true)
+		flame.emission_energy_multiplier = 5.0
+		var f := _box(Vector3(0.05, 0.12, 0.05), Vector3(-1.2 + dx, 1.66, -1.7), flame)
+		f.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_altar_light = OmniLight3D.new()
-	_altar_light.position = Vector3(-1.2, 1.7, -1.6)
-	_altar_light.light_color = Color(1.0, 0.6, 0.2)
-	_altar_light.light_energy = 1.2
-	_altar_light.omni_range = 3.0
+	_altar_light.position = Vector3(-1.2, 1.75, -1.6)
+	_altar_light.light_color = Color(1.0, 0.6, 0.22)
+	_altar_light.light_energy = ALTAR_ENERGY
+	_altar_light.omni_range = 3.6
 	add_child(_altar_light)
+
+func _build_window() -> void:
+	# A barred window on the back wall lets cool moonlight rake across the room,
+	# giving depth and a cold rim opposite the warm desk.
+	var frame := _mat("", Color(0.1, 0.11, 0.13), 1.0, false, 0.5, 0.4)
+	_box(Vector3(2.0, 1.4, 0.08), Vector3(0, 1.9, 4.22), frame)
+	var pane := StandardMaterial3D.new()
+	pane.albedo_color = Color(0.2, 0.3, 0.45)
+	pane.emission_enabled = true
+	pane.emission = Color(0.3, 0.42, 0.62)
+	pane.emission_energy_multiplier = 1.4
+	var p := _box(Vector3(1.8, 1.2, 0.04), Vector3(0, 1.9, 4.18), pane)
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# window bars
+	for bx in [-0.45, 0.0, 0.45]:
+		_box(Vector3(0.05, 1.2, 0.06), Vector3(bx, 1.9, 4.14), frame)
+	var moon := SpotLight3D.new()
+	moon.position = Vector3(0, 2.4, 3.9)
+	moon.rotation = Vector3(0.35, PI, 0)   # shine forward (-z) and slightly down
+	moon.light_color = Color(0.55, 0.66, 0.9)
+	moon.light_energy = 2.6
+	moon.spot_range = 9.0
+	moon.spot_angle = 42.0
+	moon.spot_attenuation = 1.0
+	moon.shadow_enabled = true
+	add_child(moon)
 
 func _build_doorway(side: int, x: float) -> void:
 	var wall := _mat("wall.svg", Color(0.5, 0.55, 0.5), 2.0)
@@ -128,9 +248,8 @@ func _build_doorway(side: int, x: float) -> void:
 	_box(Vector3(0.2, 3.2, 2.8), Vector3(x, 1.5, 2.7), wall)
 	_box(Vector3(0.2, 0.6, 2.6), Vector3(x, 2.7, 0), wall)
 	# corridor backing (dark) seen through the doorway
-	var back := _box(Vector3(0.1, 2.4, 2.4), Vector3(x + (0.6 if side == GameEnums.Side.LEFT else -0.6), 1.2, 0),
+	_box(Vector3(0.1, 2.4, 2.4), Vector3(x + (0.6 if side == GameEnums.Side.LEFT else -0.6), 1.2, 0),
 		_mat("", Color(0.02, 0.025, 0.04)))
-	back.visible = true
 	# threat billboard in the doorway (hidden until shown)
 	var spr := Sprite3D.new()
 	spr.pixel_size = 0.006
@@ -142,21 +261,34 @@ func _build_doorway(side: int, x: float) -> void:
 	_threat_sprites[side] = spr
 	# roller shutter door
 	var door := _box(Vector3(0.16, 2.6, 2.5), Vector3(x, DOOR_OPEN_Y, 0),
-		_mat("door.svg", Color(0.6, 0.62, 0.66)))
+		_mat("door.svg", Color(0.6, 0.62, 0.66), 1.0, false, 0.5, 0.5))
 	_doors[side] = door
-	# doorway spotlight
+	# visible wall lamp fixture beside the doorway (glows when switched on)
+	var inward := -0.7 if side == GameEnums.Side.LEFT else 0.7
+	var lamp_mat := StandardMaterial3D.new()
+	lamp_mat.albedo_color = Color(0.18, 0.18, 0.2)
+	lamp_mat.emission_enabled = true
+	lamp_mat.emission = Color(1.0, 0.93, 0.7)
+	lamp_mat.emission_energy_multiplier = 0.0   # off until lit
+	var fixture := _box(Vector3(0.16, 0.3, 0.16), Vector3(x + inward, 2.3, 0.0), lamp_mat)
+	fixture.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_lamp_mats[side] = lamp_mat
+	# doorway spotlight — wide + bright so it truly illuminates the doorway
 	var sl := SpotLight3D.new()
-	sl.position = Vector3(x + (1.0 if side == GameEnums.Side.LEFT else -1.0), 1.6, 0)
-	sl.rotation = Vector3(0, (PI / 2.0 if side == GameEnums.Side.LEFT else -PI / 2.0), 0)
-	sl.light_color = Color(1.0, 0.95, 0.8)
+	sl.position = Vector3(x + (0.9 if side == GameEnums.Side.LEFT else -0.9), 2.1, 0)
+	sl.rotation = Vector3(-0.35, (PI / 2.0 if side == GameEnums.Side.LEFT else -PI / 2.0), 0)
+	sl.light_color = Color(1.0, 0.95, 0.82)
 	sl.light_energy = 0.0
-	sl.spot_range = 6.0
-	sl.spot_angle = 38.0
+	sl.spot_range = 8.5
+	sl.spot_angle = 50.0
+	sl.spot_attenuation = 0.8
+	sl.shadow_enabled = true
 	add_child(sl)
 	_lights[side] = sl
 
 # --- look controls ----------------------------------------------------------
 func _process(delta: float) -> void:
+	_t += delta
 	if _look_enabled:
 		_update_look_targets()
 	var prev_yaw := _yaw
@@ -165,9 +297,18 @@ func _process(delta: float) -> void:
 	_pivot.rotation.y = _yaw
 	_pivot.rotation.x = _pitch
 	_pan_speed = absf(_yaw - prev_yaw) / maxf(delta, 0.0001)
-	# subtle ceiling flicker when unpowered
+	# candle flicker (always — it's fire, not mains power)
+	if _altar_light:
+		var f := 0.85 + 0.1 * sin(_t * 7.3) + 0.05 * sin(_t * 19.0)
+		_altar_light.light_energy = ALTAR_ENERGY * f
 	if not _powered:
-		_ceiling.light_energy = maxf(0.0, _ceiling.light_energy - delta * 2.0)
+		# blackout: mains lights die out, only the altar candle remains
+		_ceiling.light_energy = maxf(0.0, _ceiling.light_energy - delta * 2.5)
+		if _tube_mat:
+			_tube_mat.emission_energy_multiplier = maxf(0.0, _tube_mat.emission_energy_multiplier - delta * 6.0)
+	else:
+		# subtle fluorescent flutter while powered
+		_ceiling.light_energy = CEILING_ENERGY * (0.96 + 0.04 * sin(_t * 9.0))
 
 func _update_look_targets() -> void:
 	var vp := get_viewport()
@@ -223,9 +364,19 @@ func set_look_enabled(on: bool) -> void:
 func set_powered(on: bool) -> void:
 	_powered = on
 	if on:
-		_ceiling.light_energy = 0.5
+		_ceiling.light_energy = CEILING_ENERGY
+		if _tube_mat:
+			_tube_mat.emission_energy_multiplier = 4.0
+		if _desk_lamp:
+			_desk_lamp.light_energy = DESK_LAMP_ENERGY
+		if _desk_lamp_mat:
+			_desk_lamp_mat.emission_energy_multiplier = 3.0
 	else:
-		for s in _light_on:
+		if _desk_lamp:
+			_desk_lamp.light_energy = 0.0
+		if _desk_lamp_mat:
+			_desk_lamp_mat.emission_energy_multiplier = 0.0
+		for s in _light_on.keys():
 			set_light(s, false)
 
 func is_door_closed(side: int) -> bool:
@@ -249,7 +400,9 @@ func set_light(side: int, on: bool) -> void:
 	if _light_on.get(side) == on:
 		return
 	_light_on[side] = on
-	(_lights[side] as SpotLight3D).light_energy = 2.2 if on else 0.0
+	(_lights[side] as SpotLight3D).light_energy = DOOR_LIGHT_ENERGY if on else 0.0
+	if _lamp_mats.has(side):
+		(_lamp_mats[side] as StandardMaterial3D).emission_energy_multiplier = 3.5 if on else 0.0
 	Audio.play_sfx("light_switch", -8.0)
 	Events.light_toggled.emit(side, on)
 
