@@ -20,7 +20,7 @@ var active_config: NightConfig
 ## "spd" = real seconds per in-game hour (×6 hours = night length). Tuned a bit
 ## quicker than before so a night moves at a livelier pace.
 const STORY := {
-	1: {"levels": {"ong_ke": 2}, "vendor": false, "spd": 68.0},
+	1: {"levels": {"ong_ke": 2, "co_hon": 2}, "vendor": false, "spd": 68.0},
 	2: {"levels": {"ong_ke": 3, "ma_da": 2}, "vendor": true, "spd": 66.0},
 	3: {"levels": {"ong_ke": 4, "ma_da": 3, "co_hon": 3}, "vendor": true, "spd": 64.0},
 	4: {"levels": {"ong_ke": 5, "ma_da": 4, "co_hon": 4, "quy_nhap_trang": 3}, "vendor": true, "spd": 62.0},

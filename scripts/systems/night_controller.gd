@@ -154,6 +154,12 @@ func _begin_night() -> void:
 	_running = true
 	director.set_paused(false)
 	vendor.begin()
+	# Start with one stick of incense (nhang) in hand so the player always has the
+	# calm tool available and learns what it does.
+	if item_held == null:
+		var nhang := ItemRegistry.get_def("nhang")
+		if nhang:
+			acquire_item(nhang)
 	Events.notify.emit("NIGHT_BEGIN", [])
 
 # --- main loop --------------------------------------------------------------

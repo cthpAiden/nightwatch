@@ -5,7 +5,7 @@ extends Node3D
 ## Pure "view + look controls" — gameplay rules live in NightController.
 
 const YAW_MAX := 1.15
-const PITCH_MAX := 0.42
+const PITCH_MAX := 0.62      # enough downward tilt to see your own chair/lap
 const LOOK_LERP := 6.0
 const EDGE := 0.14            # outer screen fraction that pans the view
 
@@ -19,7 +19,7 @@ const ALTAR_ENERGY := 2.0
 const TUBE_EMISSION := 1.6
 
 const DOOR_CLOSED_Y := 1.35
-const DOOR_OPEN_Y := 3.7
+const DOOR_OPEN_Y := 3.45   # raised, but a visible lip remains so you see the shutter
 
 var _pivot: Node3D
 var _cam: Camera3D
@@ -52,6 +52,7 @@ func _ready() -> void:
 	_build_environment()
 	_build_room()
 	_build_window()
+	_build_chair()
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
 	set_process(true)
@@ -218,6 +219,24 @@ func _build_altar() -> void:
 	_altar_light.omni_range = 3.6
 	add_child(_altar_light)
 
+func _build_chair() -> void:
+	# The guard's wooden chair, right under the camera pivot (≈0,1.6,0.5) so when
+	# you look down you see you're sitting in it.
+	var wood := _mat("desk.svg", Color(0.5, 0.36, 0.22), 1.0, false, 0.65)
+	var wood_dark := _mat("desk.svg", Color(0.4, 0.28, 0.17), 1.0, false, 0.65)
+	var sx := 0.0
+	var sz := 0.45
+	_box(Vector3(0.56, 0.09, 0.54), Vector3(sx, 0.95, sz), wood)         # seat
+	_box(Vector3(0.56, 0.72, 0.09), Vector3(sx, 1.33, sz + 0.3), wood)   # backrest
+	# arm rests (extend forward so they frame the bottom of your view)
+	for ax in [-0.31, 0.31]:
+		_box(Vector3(0.07, 0.09, 0.6), Vector3(sx + ax, 1.18, sz - 0.06), wood_dark)
+		_box(Vector3(0.07, 0.26, 0.07), Vector3(sx + ax, 1.06, sz - 0.3), wood_dark)
+	# four legs
+	for lx in [-0.25, 0.25]:
+		for lz in [sz - 0.24, sz + 0.24]:
+			_box(Vector3(0.08, 0.92, 0.08), Vector3(sx + lx, 0.46, lz), wood_dark)
+
 func _build_window() -> void:
 	# A barred window on the back wall lets cool moonlight rake across the room,
 	# giving depth and a cold rim opposite the warm desk.
@@ -250,14 +269,24 @@ func _build_doorway(side: int, x: float) -> void:
 	_box(Vector3(0.2, 3.2, 2.8), Vector3(x, 1.5, -2.7), wall)
 	_box(Vector3(0.2, 3.2, 2.8), Vector3(x, 1.5, 2.7), wall)
 	_box(Vector3(0.2, 0.6, 2.6), Vector3(x, 2.7, 0), wall)
-	# corridor backing (dark) seen through the doorway
-	_box(Vector3(0.1, 2.4, 2.4), Vector3(x + (0.6 if side == GameEnums.Side.LEFT else -0.6), 1.2, 0),
-		_mat("", Color(0.02, 0.025, 0.04)))
-	# threat billboard in the doorway (hidden until shown)
+	# dir points OUT of the room (the corridor is BEYOND the door, never in front
+	# of it — the old layout put a dark slab between the camera and the door, which
+	# hid the door and the threat entirely).
+	var dir := -1.0 if side == GameEnums.Side.LEFT else 1.0
+	# A short corridor recess so the doorway reads as a hallway and threats have a
+	# space to stand in (lit by the doorway lamp when you switch it on).
+	var corr := _mat("wall.svg", Color(0.3, 0.32, 0.34), 1.5)
+	var cx := x + dir * 0.95                                   # corridor centre
+	_box(Vector3(0.2, 2.6, 2.6), Vector3(x + dir * 1.55, 1.2, 0), corr)     # far wall
+	_box(Vector3(1.4, 2.6, 0.2), Vector3(cx, 1.2, -1.3), corr)             # side wall
+	_box(Vector3(1.4, 2.6, 0.2), Vector3(cx, 1.2, 1.3), corr)             # side wall
+	_box(Vector3(1.4, 0.2, 2.4), Vector3(cx, -0.1, 0), _mat("floor.svg", Color(0.34, 0.34, 0.34), 1.5))
+	_box(Vector3(1.4, 0.2, 2.4), Vector3(cx, 2.5, 0), corr)               # ceiling
+	# threat billboard standing just OUTSIDE the door, in the corridor mouth
 	var spr := Sprite3D.new()
-	spr.pixel_size = 0.006
+	spr.pixel_size = 0.007
 	spr.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	spr.position = Vector3(x + (0.4 if side == GameEnums.Side.LEFT else -0.4), 1.35, 0)
+	spr.position = Vector3(x + dir * 0.45, 1.35, 0)
 	spr.modulate = Color(0.7, 0.72, 0.72)
 	spr.visible = false
 	add_child(spr)
