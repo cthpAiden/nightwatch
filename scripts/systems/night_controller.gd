@@ -290,6 +290,9 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e.is_action_pressed("pause_game"):
 		request_pause()
 		return
+	if e.is_action_pressed("toggle_help"):
+		hud.toggle_help()
+		return
 	if shop.visible or cassette.visible or pause.visible:
 		return
 	if not _running:

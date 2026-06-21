@@ -12,10 +12,11 @@ const EDGE := 0.14            # outer screen fraction that pans the view
 const ROOM_TEX := "res://assets/art/room/"
 
 # Light energies (kept as named constants so power-loss / restore is consistent).
-const CEILING_ENERGY := 1.7
+const CEILING_ENERGY := 2.6
 const DOOR_LIGHT_ENERGY := 7.0
 const DESK_LAMP_ENERGY := 3.2
 const ALTAR_ENERGY := 2.0
+const TUBE_EMISSION := 1.6
 
 const DOOR_CLOSED_Y := 1.35
 const DOOR_OPEN_Y := 3.7
@@ -63,22 +64,23 @@ func _build_environment() -> void:
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color(0.015, 0.02, 0.035)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.22, 0.26, 0.34)
-	env.ambient_light_energy = 0.5
+	env.ambient_light_color = Color(0.26, 0.3, 0.4)
+	env.ambient_light_energy = 0.95
 	# Atmospheric depth, but lighter than before so the room reads clearly.
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.06, 0.08, 0.12)
-	env.fog_density = 0.018
+	env.fog_light_color = Color(0.07, 0.09, 0.13)
+	env.fog_density = 0.012
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.05
-	env.tonemap_white = 2.0
-	# Bloom makes lamps actually read as light sources (not flat "orbs").
+	env.tonemap_exposure = 1.1
+	env.tonemap_white = 3.0
+	# Gentle bloom so lamps read as light sources — kept low so the ceiling tube
+	# no longer blows out into a giant white blob.
 	env.glow_enabled = true
-	env.glow_intensity = 0.6
-	env.glow_strength = 1.05
-	env.glow_bloom = 0.12
-	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
-	env.glow_hdr_threshold = 0.95
+	env.glow_intensity = 0.3
+	env.glow_strength = 0.9
+	env.glow_bloom = 0.06
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
+	env.glow_hdr_threshold = 1.3
 	# Contact shadows / grounding.
 	env.ssao_enabled = true
 	env.ssao_radius = 1.2
@@ -104,23 +106,24 @@ func _build_environment() -> void:
 	_ceiling.position = Vector3(0, 2.82, -0.6)
 	_ceiling.light_color = Color(0.78, 0.84, 0.92)
 	_ceiling.light_energy = CEILING_ENERGY
-	_ceiling.omni_range = 12.0
-	_ceiling.omni_attenuation = 1.4
+	_ceiling.omni_range = 15.0
+	_ceiling.omni_attenuation = 1.0
 	_ceiling.shadow_enabled = true
 	add_child(_ceiling)
-	# soft fill so corners aren't pitch black
-	var fill := OmniLight3D.new()
-	fill.position = Vector3(0, 2.5, 1.8)
-	fill.light_color = Color(0.5, 0.58, 0.72)
-	fill.light_energy = 0.5
-	fill.omni_range = 10.0
-	add_child(fill)
+	# soft fills so the floor and corners aren't pitch black
+	for fp in [Vector3(0, 2.5, 1.8), Vector3(-2.4, 2.4, -1.5), Vector3(2.4, 2.4, -1.5)]:
+		var fill := OmniLight3D.new()
+		fill.position = fp
+		fill.light_color = Color(0.55, 0.62, 0.76)
+		fill.light_energy = 1.0
+		fill.omni_range = 9.0
+		add_child(fill)
 
 	_tube_mat = StandardMaterial3D.new()
 	_tube_mat.albedo_color = Color(0.9, 0.95, 1.0)
 	_tube_mat.emission_enabled = true
 	_tube_mat.emission = Color(0.85, 0.92, 1.0)
-	_tube_mat.emission_energy_multiplier = 4.0
+	_tube_mat.emission_energy_multiplier = TUBE_EMISSION
 	var tube := _box(Vector3(2.4, 0.08, 0.2), Vector3(0, 2.92, -0.6), _tube_mat)
 	tube.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
@@ -366,7 +369,7 @@ func set_powered(on: bool) -> void:
 	if on:
 		_ceiling.light_energy = CEILING_ENERGY
 		if _tube_mat:
-			_tube_mat.emission_energy_multiplier = 4.0
+			_tube_mat.emission_energy_multiplier = TUBE_EMISSION
 		if _desk_lamp:
 			_desk_lamp.light_energy = DESK_LAMP_ENERGY
 		if _desk_lamp_mat:
@@ -388,8 +391,13 @@ func set_door(side: int, closed: bool) -> void:
 	_door_closed[side] = closed
 	var door: Node3D = _doors[side]
 	var ty := DOOR_CLOSED_Y if closed else DOOR_OPEN_Y
+	# A visible roller-shutter slide: down with a firm settle when closing, up
+	# (a touch slower) when opening. Always retargets cleanly if toggled mid-slide.
 	var tw := create_tween()
-	tw.tween_property(door, "position:y", ty, 0.35).set_trans(Tween.TRANS_QUAD)
+	if closed:
+		tw.tween_property(door, "position:y", ty, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	else:
+		tw.tween_property(door, "position:y", ty, 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	Audio.play_sfx("door_slam" if closed else "door_creak", -4.0)
 	Events.door_toggled.emit(side, closed)
 

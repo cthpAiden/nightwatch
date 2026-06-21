@@ -149,10 +149,11 @@ func _arrive_at_door(side: int) -> void:
 	_attack_accum = 0.0
 	Events.threat_relocated.emit(id, current_location)
 	Events.threat_at_door.emit(id, side)
-	# Audible warning: you should know something reached a door even with the
-	# doorway light off (it's the cue to react — light it up or shut the door).
-	Audio.play_sfx("knock", -5.0)
-	Events.notify.emit("THREAT_AT_DOOR", [tr(name_key)])
+	# Diegetic warning only: a knock + a vague unease. It does NOT say which door
+	# or what it is — you have to check the doorway lights to find out, then react
+	# (light it up and hold still, or shut the door). That's the tension.
+	Audio.play_sfx("knock", -4.0)
+	Events.notify.emit("THREAT_NEARBY", [])
 	# If the relevant counter is already engaged, leave immediately.
 	if _is_repelled_now():
 		repel()

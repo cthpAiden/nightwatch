@@ -128,7 +128,14 @@ MADA_LURE,"Cứu... cứu tôi với...","Help... please, help me..."
 MADA_RESIST,"Kệ tiếng dưới nước. Đừng trả lời.","Ignore the voice in the water. Don't answer."
 MATROI_RULE,"Thấy đốm xanh thì đi chậm. Đừng chạy.","See the blue flame? Walk slow. Don't run."
 CAT_WARN,Con Mun nhảy qua rồi! Coi chừng!,Mun jumped over it! Watch out!
-THREAT_AT_DOOR,"Có gì đó ngoài cửa... ({0})","Something's at the door... ({0})"
+THREAT_NEARBY,"Có tiếng động đâu đó... kiểm tra đèn cửa đi.","A noise somewhere... check the doorway lights."
+HELP_TITLE,Phím tắt  (H để ẩn/hiện),Controls  (H to show/hide)
+HELP_LOOK,"Nhìn quanh: Chuột ra mép / ← →","Look around: Mouse to edges / ← →"
+HELP_CAM,Camera: C hoặc Tab,Cameras: C or Tab
+HELP_DOORS,Cửa: A (trái) · L (phải),Doors: A (left) · L (right)
+HELP_LIGHTS,Đèn: S (trái) · K (phải),Lights: S (left) · K (right)
+HELP_OFFERING2,Đặt mâm cúng: F,Place offering: F
+HELP_PAUSE,Tạm dừng: Esc,Pause: Esc
 DAWN_GREET,"6 giờ. Trời sáng rồi. Mình qua được rồi.","6 o'clock. Dawn. We made it."
 TABOO_NO_NAME,Đừng gọi tên ai sau nửa đêm.,Don't call anyone's name after midnight.
 INCENSE_RULE,"Thắp nhang lẻ — một, ba, năm. Đừng bốn.","Light odd incense — one, three, five. Never four."

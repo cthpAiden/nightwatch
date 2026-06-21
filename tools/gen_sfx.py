@@ -183,33 +183,40 @@ def clock_chime():
     save("clock_chime.wav", s, peak=0.7)
 
 # ---------------------------------------------------------------- doors / lights
-def door_slam():
-    s = buf(0.6)
-    # heavy low impact
-    imp = exp_decay(sine(70, 0.5), 0.12)
-    imp = add(imp, exp_decay(sine(105, 0.4), 0.10), gain=0.6)
-    # wood/metal crack
-    crack = exp_decay(bandpass(noise(0.25), 200, 3500), 0.05)
-    add(s, imp, 0.0, 1.0)
-    add(s, crack, 0.0, 0.7)
-    # small rattle tail
-    add(s, exp_decay(bandpass(noise(0.3), 300, 1200), 0.15), 0.18, 0.15)
-    save("door_slam.wav", soft_clip(s), peak=0.95)
-
-def door_creak():
-    # rising/falling detuned tone through filtered noise = creak
-    n = int(SR * 1.1)
-    out = []
+def _shutter_slide(dur, rate_hz, fade="in"):
+    # Rattly metal roller-shutter slide: segmented noise (each "segment" of the
+    # roller passing the guide) band-limited to a metallic range.
+    n = int(SR * dur)
+    seg = []
     for i in range(n):
         t = i / SR
-        f = 220 + 180 * math.sin(t * 2.3) + 60 * t
-        # stick-slip jitter
-        jit = 1.0 + 0.06 * math.sin(t * 47.0)
-        out.append((0.6 * math.sin(2 * math.pi * f * t * jit)
-                    + 0.4 * random.uniform(-1, 1)))
-    out = bandpass(out, 300, 2200)
-    out = adsr(out, a=0.05, d=0.2, s=0.6, r=0.4)
-    save("door_creak.wav", out, peak=0.6)
+        rattle = 1.0 if (math.sin(t * 2 * math.pi * rate_hz) > -0.2) else 0.32
+        if fade == "in":
+            env = min(1.0, t / 0.04)
+        else:  # fade out as the door rolls up and away
+            env = max(0.0, 1.0 - t / dur)
+        seg.append(random.uniform(-1, 1) * rattle * env)
+    return bandpass(seg, 360, 2600)
+
+def door_slam():
+    # CLOSING: shutter rolls DOWN, then a solid clunk as it meets the floor.
+    s = buf(0.7)
+    add(s, _shutter_slide(0.30, 26, "in"), 0.0, 0.5)
+    clunk = exp_decay(sine(82, 0.4), 0.10)
+    clunk = add(clunk, exp_decay(sine(120, 0.3), 0.08), gain=0.6)
+    clunk = add(clunk, exp_decay(bandpass(noise(0.2), 150, 2000), 0.04), gain=0.55)
+    add(s, clunk, 0.29, 1.0)
+    add(s, exp_decay(sine(430, 0.22), 0.07), 0.31, 0.10)  # faint metal ring
+    save("door_slam.wav", soft_clip(s), peak=0.92)
+
+def door_creak():
+    # OPENING: a latch release clunk, then the shutter rolls UP and fades away.
+    s = buf(0.7)
+    rel = exp_decay(sine(110, 0.2), 0.05)
+    rel = add(rel, exp_decay(bandpass(noise(0.1), 200, 2500), 0.02), gain=0.6)
+    add(s, rel, 0.0, 0.7)
+    add(s, _shutter_slide(0.40, 24, "out"), 0.06, 0.42)
+    save("door_creak.wav", soft_clip(s), peak=0.7)
 
 def light_switch():
     s = buf(0.12)

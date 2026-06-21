@@ -19,6 +19,8 @@ var _use_btn: Button
 var _answer_btn: Button
 var _drain_btn: Button
 var _invite_btn: Button
+var _help_panel: Control
+var _help_lines: VBoxContainer
 var _door_btn := {}
 var _light_btn := {}
 var _toast_t := 0.0
@@ -131,6 +133,8 @@ func _build() -> void:
 	_invite_btn.modulate = Color(1.0, 0.85, 0.5)
 	add_child(_invite_btn)
 
+	_build_help()
+
 	# toast + warning (center)
 	_toast = UI.text_label("", 22, Color(1, 0.95, 0.8), HORIZONTAL_ALIGNMENT_CENTER)
 	UI.place(_toast, 0.5, 0, 0.5, 0, -400, 112, 400, 150)
@@ -145,6 +149,34 @@ func _ctrl_btn(key: String, cb: Callable, w: float = 180.0) -> Button:
 	b.mouse_filter = Control.MOUSE_FILTER_STOP
 	b.pressed.connect(cb)
 	return b
+
+# Top-right keybindings cheat-sheet, under the offerings count. Toggle with the
+# header button or the H key (request_toggle from NightController).
+func _build_help() -> void:
+	_help_panel = Control.new()
+	_help_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UI.place(_help_panel, 1, 0, 1, 0, -288, 128, -22, 372)
+	add_child(_help_panel)
+	var bg := UI.color_rect(Color(0.04, 0.05, 0.07, 0.62))
+	UI.full(bg)
+	_help_panel.add_child(bg)
+	var col := UI.vbox(3)
+	UI.place(col, 0, 0, 1, 1, 12, 8, -12, -8)
+	_help_panel.add_child(col)
+	var hdr := UI.button("HELP_TITLE", 0, 30)
+	hdr.flat = true
+	hdr.mouse_filter = Control.MOUSE_FILTER_STOP
+	hdr.add_theme_font_size_override("font_size", 16)
+	hdr.pressed.connect(toggle_help)
+	col.add_child(hdr)
+	_help_lines = UI.vbox(2)
+	col.add_child(_help_lines)
+	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_OFFERING2", "HELP_PAUSE"]:
+		_help_lines.add_child(UI.label(k, 15, UI.COL_DIM))
+
+func toggle_help() -> void:
+	if _help_lines:
+		_help_lines.visible = not _help_lines.visible
 
 func _connect() -> void:
 	Events.power_changed.connect(func(c, m): _power_bar.value = c)
