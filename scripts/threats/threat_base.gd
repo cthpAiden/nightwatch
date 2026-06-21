@@ -231,6 +231,10 @@ func on_offering(_location: String) -> void:
 func on_via_state(_state: int) -> void:
 	pass
 
+## Incense calm (item calm_zone). Default no-op; meter threats lower their meter.
+func on_calm() -> void:
+	pass
+
 # --- queries for views / items ---------------------------------------------
 func distance_to_office() -> int:
 	return MapGraph.distance(current_location, MapGraph.OFFICE)

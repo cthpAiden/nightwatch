@@ -262,8 +262,9 @@ func show_threat(side: int, tex: Texture2D, hostile: bool = false) -> void:
 	spr.modulate = Color(0.85, 0.3, 0.3) if hostile else Color(0.72, 0.74, 0.74)
 	spr.visible = _light_on.get(side, false)
 
-func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null) -> void:
+func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null, hostile: bool = false) -> void:
 	var spr: Sprite3D = _threat_sprites[side]
 	if has_threat and tex:
 		spr.texture = tex
+	spr.modulate = Color(0.85, 0.3, 0.3) if hostile else Color(0.72, 0.74, 0.74)
 	spr.visible = has_threat and _light_on.get(side, false)

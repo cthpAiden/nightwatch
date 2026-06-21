@@ -36,6 +36,8 @@ func _process(delta: float) -> void:
 			if _timer <= 0.0:
 				_appear()
 		GameEnums.VendorState.SHOP:
+			if _c.shop and _c.shop.visible:
+				return   # freeze the window while the player is browsing
 			_shop_t -= delta
 			if _shop_t <= 0.0:
 				if counterfeit:
@@ -61,6 +63,8 @@ func _appear() -> void:
 	Events.notify.emit("VENDOR_FAKE_TELL" if counterfeit else "SHOP_PROMPT", [])
 
 func on_bought(def: ItemDef) -> void:
+	if state != GameEnums.VendorState.SHOP:
+		return   # window already closed/turned hostile; no late purchase
 	_c.acquire_item(def)
 	_leave()
 

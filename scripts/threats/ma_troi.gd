@@ -17,11 +17,13 @@ func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
 	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
-	var running: bool = _controller != null and _controller.get_pan_speed() > 0.7
-	if running:
+	# "Running" = panic: fast panning OR rapid camera-flipping (works even on the
+	# monitor, where raw pan speed is forced to ~0).
+	var agit: float = _controller.get_agitation() if _controller else 0.0
+	if agit > 0.4:
 		lock = minf(100.0, lock + (7.0 + lvl) * delta)
 	else:
-		lock = maxf(0.0, lock - 12.0 * delta)
+		lock = maxf(0.0, lock - 8.0 * delta)
 	if lock > 40.0 and _controller:
 		_controller.add_via(-(lock - 40.0) * 0.05 * delta)
 	_move_accum += delta
@@ -35,7 +37,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 func _surge() -> void:
 	# locks on: a hard vía + light hit, then resets — never an instant kill
 	if _controller:
-		_controller.add_via(-26.0)
+		_controller.add_startle(-26.0)
 		_controller.add_power(-8.0)
 	Audio.play_sfx("stinger", -4.0)
 	Events.notify.emit("MATROI_RULE", [])

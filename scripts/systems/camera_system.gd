@@ -105,6 +105,9 @@ func _refresh_threats() -> void:
 		c.queue_free()
 	if _c == null or _c.director == null:
 		return
+	# Reset map dots to base every pass so reveal highlights never go stale.
+	for cam in _map_buttons:
+		_map_buttons[cam].modulate = Color(1, 0.85, 0.4) if cam == _c.current_cam else Color(1, 1, 1)
 	var revealed: bool = _c.is_revealed()
 	for t in _c.director.threats:
 		var here: bool = t.current_location == _c.current_cam

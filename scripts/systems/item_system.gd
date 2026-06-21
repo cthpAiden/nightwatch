@@ -13,6 +13,7 @@ func apply(def: ItemDef) -> void:
 		"calm_zone":
 			_c.add_via(def.magnitude)
 			_c.start_reveal(6.0)
+			_c.broadcast_calm()   # incense actually settles ma da / cô hồn / oan hồn
 		"salt_line":
 			_c.setback_nearest()
 			_c.add_via(4.0)

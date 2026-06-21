@@ -185,9 +185,7 @@ func _refresh_clock(m: int) -> void:
 	_clock.text = "%d:%02d %s" % [disp_h, mm, tr("CLOCK_AM")]
 
 func _on_via_state(state: int) -> void:
-	if state == GameEnums.ViaState.SHAKEN:
-		_via_bar.get_theme_stylebox("fill")
-	# tint via bar by state
+	# tint the vía bar by state
 	var col := Color(0.6, 0.82, 0.78)
 	if state == GameEnums.ViaState.SHAKEN:
 		col = Color(0.9, 0.75, 0.3)

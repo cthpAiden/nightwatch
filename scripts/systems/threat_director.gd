@@ -59,7 +59,11 @@ func nearest_threat() -> ThreatBase:
 	var best: ThreatBase = null
 	var best_d := 99999
 	for t in threats:
-		if t.phase == GameEnums.ThreatPhase.ATTACKING:
+		# Only positional rushers can be meaningfully "set back" to spawn; meter
+		# threats store their danger in flood/crowd/agro/lock, not in position.
+		if t.movement_model != ThreatBase.MODEL_PATH and t.movement_model != ThreatBase.MODEL_FLYER:
+			continue
+		if t.phase == GameEnums.ThreatPhase.ATTACKING or t.phase == GameEnums.ThreatPhase.DORMANT:
 			continue
 		var d := t.distance_to_office()
 		if d < best_d:
@@ -98,6 +102,10 @@ func broadcast_via_state(state: int) -> void:
 func broadcast_offering(location: String) -> void:
 	for t in threats:
 		t.on_offering(location)
+
+func broadcast_calm() -> void:
+	for t in threats:
+		t.on_calm()
 
 func set_speed_all(mult: float) -> void:
 	for t in threats:

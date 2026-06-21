@@ -40,6 +40,9 @@ func process_ai(delta: float, night_progress: float) -> void:
 
 func _trigger() -> void:
 	triggered = true
+	# Now a conditional stalker: it only lurches forward while you move/pan; hold
+	# still to keep it back. The left door remains a backup counter.
+	movement_model = MODEL_CREEPER
 	Events.cat_triggered.emit()
 	Events.notify.emit("CAT_WARN", [])
 	Audio.play_sfx("stinger", -3.0)

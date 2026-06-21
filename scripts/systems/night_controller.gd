@@ -40,6 +40,8 @@ var reveal_timer := 0.0
 var barrier_timer := 0.0
 var speed_timer := 0.0
 var taint_timer := 0.0
+var _via_drain_cd := 0.0     # pauses vía regen briefly after any drain
+var _agitation := 0.0        # "panic" signal (fast pan + rapid cam-switching) for Ma trơi
 
 var _running := false
 var _ending := false
@@ -50,6 +52,10 @@ func _ready() -> void:
 		Game.current_night = int(OS.get_environment("NW_NIGHT"))
 		Game.active_config = null
 	config = Game.active_config if Game.active_config else Game.get_night_config(Game.current_night)
+	if OS.has_environment("NW_FASTWIN"):   # debug: race to 06:00 with no threats
+		config.seconds_per_hour = 1.0
+		config.threat_levels = {}
+		config.vendor_enabled = false
 	via_max = config.via_max
 	via = via_max
 	power = 100.0
@@ -73,6 +79,7 @@ func _build_world() -> void:
 	room = load("res://scripts/systems/guard_room.gd").new()
 	room.name = "GuardRoom"
 	add_child(room)
+	room.set_look_enabled(false)   # locked until the night begins
 	director = ThreatDirector.new()
 	director.name = "Director"
 	add_child(director)
@@ -157,9 +164,15 @@ func _process(delta: float) -> void:
 	_update_power(delta)
 	_update_via(delta)
 	_update_timers(delta)
+	# Panic/agitation: fast panning raises it (rapid cam-switching does too, in
+	# on_camera_changed); it decays over time. Drives Ma trơi.
+	if room.get_pan_speed() > 0.7:
+		_agitation = minf(1.0, _agitation + delta * 2.0)
+	_agitation = maxf(0.0, _agitation - delta * 0.7)
+	# Look-pan only during free play — not on the monitor or behind a modal overlay.
+	room.set_look_enabled(not monitor_open and not shop.visible and not pause.visible and not cassette.visible)
 	director.night_progress = night_progress()
 	director.broadcast_pan(room.get_pan_speed() > 0.7)
-	# keep door billboards in sync with phase/texture changes
 	_refresh_door_sprite(GameEnums.Side.LEFT)
 	_refresh_door_sprite(GameEnums.Side.RIGHT)
 
@@ -170,16 +183,16 @@ func _advance_clock(delta: float) -> void:
 	if m != _last_minute:
 		_last_minute = m
 		Events.clock_advanced.emit(m)
-		if m % 60 == 0:
-			var h := m / 60
-			if h != _last_hour:
-				_last_hour = h
-				Events.hour_reached.emit(h)
-				if h >= 6:
-					_win()
-					return
-				if h > 0:
-					Audio.play_sfx("clock_chime", -10.0)
+	# Fire every hour actually crossed so a long frame can never skip the chime
+	# or, critically, the 06:00 win (which would softlock the night).
+	var h := int(game_minutes) / 60
+	while _last_hour < h:
+		_last_hour += 1
+		Events.hour_reached.emit(_last_hour)
+		if _last_hour > 0 and _last_hour < 6:
+			Audio.play_sfx("clock_chime", -10.0)
+	if game_minutes >= NIGHT_MINUTES:
+		_win()
 
 func _update_power(delta: float) -> void:
 	if not _powered:
@@ -217,11 +230,14 @@ func _power_out() -> void:
 	Events.notify.emit("POWER_OUT", [])
 
 func _update_via(delta: float) -> void:
-	# Gentle regen when nothing is looming; faster as dawn (dương khí) returns.
+	if _via_drain_cd > 0.0:
+		_via_drain_cd = maxf(0.0, _via_drain_cd - delta)
 	var looming := director.threat_at_door(GameEnums.Side.LEFT) != null \
 		or director.threat_at_door(GameEnums.Side.RIGHT) != null
-	if not looming:
-		var regen := 1.4 + night_progress() * 2.0
+	# Regen only when nothing looms AND no drain happened very recently, so active
+	# meter pressure (cô hồn / ma da / oan hồn) is a genuine net loss, not cancelled.
+	if not looming and _via_drain_cd <= 0.0:
+		var regen := 1.0 + night_progress() * 1.8
 		via = minf(via_max, via + regen * delta)
 		Events.via_changed.emit(via, via_max)
 	if not _powered:
@@ -332,6 +348,7 @@ func _set_monitor(open: bool) -> void:
 
 func on_camera_changed(cam_id: String) -> void:
 	current_cam = cam_id
+	_agitation = minf(1.0, _agitation + 0.45)   # flipping channels fast = panic
 	director.broadcast_view(cam_id)
 	Events.camera_changed.emit(cam_id)
 
@@ -384,13 +401,22 @@ func _refresh_door_sprite(side: int) -> void:
 		return
 	var t := director.threat_at_door(side)
 	if t:
-		room.refresh_threat_visibility(side, true, t.current_texture())
+		room.refresh_threat_visibility(side, true, t.current_texture(), true)
 	else:
 		room.refresh_threat_visibility(side, false)
 
 # --- outcomes ---------------------------------------------------------------
 func _on_jumpscare(threat_id: String) -> void:
 	if _ending:
+		return
+	# Bùa thật / bánh chưng "save": spend a ward to survive the grab once.
+	if try_block_death(threat_id):
+		var t := director.get_threat(threat_id)
+		if t:
+			t.reset_to_spawn()
+			t.on_calm()   # also clears the meter that triggered the kill
+		via = maxf(via, via_max * 0.4)
+		Events.via_changed.emit(via, via_max)
 		return
 	_caught(threat_id)
 
@@ -437,15 +463,30 @@ func is_light_on(side: int) -> bool:
 func get_pan_speed() -> float:
 	return room.get_pan_speed()
 
+func is_monitor_open() -> bool:
+	return monitor_open
+
+func get_agitation() -> float:
+	return _agitation
+
+## Incense/calm effect: lower the appeasement meters of nearby meter-threats.
+func broadcast_calm() -> void:
+	director.broadcast_calm()
+
 func night_progress() -> float:
 	return clampf(game_minutes / NIGHT_MINUTES, 0.0, 1.0)
 
 func add_via(amount: float) -> void:
 	if amount < 0.0:
 		amount *= via_drain_mult
-		amount *= (1.0 - clampf(startle_resist, 0.0, 0.8)) if amount < 0.0 else 1.0
+		_via_drain_cd = 0.7
 	via = clampf(via + amount, 0.0, via_max)
 	Events.via_changed.emit(via, via_max)
+
+## Burst/startle vía hit. The mulberry bracelet (child_ward) reduces only these,
+## not the continuous meter drains.
+func add_startle(amount: float) -> void:
+	add_via(amount * (1.0 - clampf(startle_resist, 0.0, 0.8)))
 
 func add_power(amount: float) -> void:
 	power = clampf(power + amount, 0.0, 100.0)

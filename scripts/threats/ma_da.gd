@@ -68,5 +68,8 @@ func _on_action(action: String) -> void:
 func on_offering(_location: String) -> void:
 	flood = maxf(0.0, flood - 22.0)
 
+func on_calm() -> void:
+	flood = maxf(0.0, flood - 30.0)   # incense at the pond shrine
+
 func current_texture() -> Texture2D:
 	return tex_move if flood > 50.0 else tex_idle

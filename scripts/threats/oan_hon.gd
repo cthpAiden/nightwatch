@@ -24,7 +24,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 		agro += (3.2 + lvl * 0.4) * delta      # watched too long
 	else:
 		agro += (0.9 + lvl * 0.12) * delta      # ignored too long (slower)
-	agro = clampf(agro, 0.0, 100.0)
+	agro = clampf(agro - 0.6 * delta, 0.0, 100.0)  # slow settle if you neither stare nor neglect
 	# occasional drift for camera flavor
 	_move_accum += delta
 	if _move_accum >= move_interval:
@@ -49,6 +49,9 @@ func on_view(is_viewing_my_cam: bool) -> void:
 
 func on_offering(_location: String) -> void:
 	agro = maxf(0.0, agro - 45.0)
+
+func on_calm() -> void:
+	agro = maxf(0.0, agro - 40.0)   # incense pacifies her zone short-term
 
 func current_texture() -> Texture2D:
 	return tex_move if agro > 55.0 else tex_idle

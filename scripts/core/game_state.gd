@@ -59,7 +59,13 @@ func _build_config(n: int, levels: Dictionary, vendor: bool, spd: float) -> Nigh
 	cfg.night_index = n
 	cfg.seconds_per_hour = spd
 	cfg.vendor_enabled = vendor
-	cfg.offerings_start = 1 if n >= 2 else 0
+	# Offerings scale with how many appeasement threats are active tonight, so the
+	# cô hồn / oan hồn / ma da economy is sustainable (not a one-shot).
+	var meter := 0
+	for mid in ["co_hon", "ma_da", "oan_hon"]:
+		if levels.has(mid):
+			meter += 1
+	cfg.offerings_start = 0 if meter == 0 else meter + 2
 	cfg.has_tape = not is_custom
 	# Apply difficulty scaling to AI levels and pacing.
 	var lvl_scale := _difficulty_level_scale()

@@ -10,7 +10,10 @@ func _ready() -> void:
 		return
 	var inst = load(scene_path).instantiate()
 	get_tree().root.add_child.call_deferred(inst)
-	await get_tree().create_timer(1.6).timeout
+	var delay := 1.6
+	if OS.has_environment("NW_SHOT_DELAY"):
+		delay = float(OS.get_environment("NW_SHOT_DELAY"))
+	await get_tree().create_timer(delay).timeout
 	var img := get_viewport().get_texture().get_image()
 	img.save_png(out_path)
 	await get_tree().process_frame
