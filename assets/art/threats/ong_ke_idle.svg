@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="idleHaze" cx="50%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.16"/>
+      <stop offset="55%" stop-color="#6f9bb3" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="idleBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#141b26" stop-opacity="0.92"/>
+      <stop offset="60%" stop-color="#0d121b" stop-opacity="0.82"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.35"/>
+    </linearGradient>
+    <radialGradient id="idleEye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#9fb6ad" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#9fb6ad" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="idleFloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e14" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="360" rx="180" ry="320" fill="url(#idleHaze)"/>
+
+  <ellipse cx="256" cy="690" rx="70" ry="40" fill="url(#idleFloor)"/>
+  <ellipse cx="256" cy="686" rx="40" ry="12" fill="#0a0e14" fill-opacity="0.4"/>
+
+  <path d="M256 300 C247 300 240 312 238 332 C232 430 232 560 240 668 C244 680 250 686 256 686 C262 686 268 680 272 668 C280 560 280 430 274 332 C272 312 265 300 256 300 Z" fill="url(#idleBody)"/>
+
+  <path d="M256 304 C238 304 226 322 224 348 C222 372 224 392 230 404 L282 404 C288 392 290 372 288 348 C286 322 274 304 256 304 Z" fill="#11161f" fill-opacity="0.88"/>
+
+  <ellipse cx="256" cy="300" rx="30" ry="34" fill="#0d121b" fill-opacity="0.9"/>
+
+  <path d="M214 296 C214 296 232 290 256 290 C280 290 298 296 298 296 C298 290 280 286 256 286 C232 286 214 290 214 296 Z" fill="#0a0e14" fill-opacity="0.85"/>
+  <path d="M196 296 C196 296 222 286 256 286 C290 286 316 296 316 296 C316 300 290 308 256 308 C222 308 196 300 196 296 Z" fill="#0a0e14" fill-opacity="0.8"/>
+  <path d="M204 282 C204 264 226 252 256 252 C286 252 308 264 308 282 C308 282 286 274 256 274 C226 274 204 282 204 282 Z" fill="#0a0e14" fill-opacity="0.85"/>
+
+  <ellipse cx="246" cy="298" rx="9" ry="11" fill="url(#idleEye)"/>
+  <ellipse cx="266" cy="298" rx="9" ry="11" fill="url(#idleEye)"/>
+  <circle cx="246" cy="298" r="2.2" fill="#cdd6d0" fill-opacity="0.8"/>
+  <circle cx="266" cy="298" r="2.2" fill="#cdd6d0" fill-opacity="0.8"/>
+</svg>

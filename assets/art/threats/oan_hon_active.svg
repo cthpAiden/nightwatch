@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="actAura" cx="50%" cy="40%" r="52%">
+      <stop offset="0%" stop-color="#dfe6e1" stop-opacity="0.55"/>
+      <stop offset="48%" stop-color="#cdd6d0" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="actDress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2f3e6"/>
+      <stop offset="45%" stop-color="#d6ded8"/>
+      <stop offset="100%" stop-color="#9fb0ac"/>
+    </linearGradient>
+    <linearGradient id="actHair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#181d26"/>
+      <stop offset="100%" stop-color="#0a0e14"/>
+    </linearGradient>
+    <radialGradient id="actFaceLight" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#f2f3e6" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#e8ead0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="256" cy="320" rx="244" ry="330" fill="url(#actAura)"/>
+
+  <ellipse cx="256" cy="744" rx="150" ry="22" fill="#0a0e14" fill-opacity="0.5"/>
+
+  <!-- áo dài, facing forward, two long front panels -->
+  <path d="M256 252 C228 252 206 270 200 304 C188 410 170 560 158 706 C156 726 164 736 186 736 L252 736 C254 660 254 470 254 360 C254 308 254 270 256 252 Z" fill="url(#actDress)"/>
+  <path d="M256 252 C284 252 306 270 312 304 C324 410 342 560 354 706 C356 726 348 736 326 736 L260 736 C258 660 258 470 258 360 C258 308 258 270 256 252 Z" fill="url(#actDress)"/>
+  <path d="M256 252 C284 252 306 270 312 304 C324 410 342 560 354 706 C356 726 348 736 326 736 L290 736 C292 600 290 440 286 330 C282 296 270 264 256 252 Z" fill="#1e2a3d" fill-opacity="0.16"/>
+
+  <!-- center seam + panel slit -->
+  <path d="M256 300 L256 736" stroke="#9fb0ac" stroke-width="2.5" stroke-opacity="0.6" fill="none"/>
+  <path d="M214 350 C208 480 202 600 196 706" stroke="#f2f3e6" stroke-width="2" stroke-opacity="0.45" fill="none"/>
+  <path d="M298 350 C304 480 312 600 318 706" stroke="#9fb0ac" stroke-width="2" stroke-opacity="0.5" fill="none"/>
+
+  <!-- hem folds -->
+  <path d="M168 704 C202 692 234 692 252 702 L250 728 C222 718 196 720 172 728 Z" fill="#1e2a3d" fill-opacity="0.24"/>
+  <path d="M260 702 C292 692 326 694 348 704 L344 728 C320 718 292 716 262 724 Z" fill="#1e2a3d" fill-opacity="0.2"/>
+
+  <!-- mandarin collar -->
+  <path d="M230 250 C238 240 274 240 282 250 C282 262 272 268 256 268 C240 268 230 262 230 250 Z" fill="#f2f3e6"/>
+  <path d="M256 244 L256 268 C240 268 230 262 230 250 C238 242 256 244 256 244 Z" fill="#d6ded8"/>
+
+  <!-- both arms reaching gently forward and outward, palms open -->
+  <path d="M236 268 C206 282 178 320 158 372 C150 392 154 408 172 410 C182 386 200 352 222 320 C236 300 246 282 250 272 C250 266 244 264 236 268 Z" fill="#d6ded8"/>
+  <path d="M236 268 C206 282 178 320 158 372 C152 388 154 402 166 408 C176 384 196 350 218 318 C232 298 244 280 248 270 Z" fill="#1e2a3d" fill-opacity="0.12"/>
+  <path d="M276 268 C306 282 334 320 354 372 C362 392 358 408 340 410 C330 386 312 352 290 320 C276 300 266 282 262 272 C262 266 268 264 276 268 Z" fill="#cdd6d0"/>
+
+  <!-- pale open hands reaching, fingers gently spread -->
+  <ellipse cx="166" cy="418" rx="16" ry="19" fill="#eef0e4"/>
+  <path d="M156 408 C150 414 148 424 152 432" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M162 404 C158 412 158 424 160 434" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M170 404 C170 412 170 424 170 434" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M178 408 C180 414 180 424 178 432" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <ellipse cx="346" cy="418" rx="16" ry="19" fill="#eef0e4"/>
+  <path d="M356 408 C362 414 364 424 360 432" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M350 404 C354 412 354 424 352 434" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M342 404 C342 412 342 424 342 434" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M334 408 C332 414 332 424 334 432" stroke="#b6c1bb" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- neck -->
+  <path d="M242 232 L242 252 C242 258 270 258 270 252 L270 232 Z" fill="#dfe6e1"/>
+  <path d="M242 240 C250 250 262 250 270 240 L270 252 C262 258 250 258 242 252 Z" fill="#1e2a3d" fill-opacity="0.12"/>
+
+  <!-- head facing forward -->
+  <ellipse cx="256" cy="186" rx="50" ry="56" fill="#e8ead0"/>
+  <ellipse cx="256" cy="178" rx="42" ry="44" fill="url(#actFaceLight)"/>
+
+  <!-- hair parted in the center, framing the face, long down the sides -->
+  <path d="M206 150 C206 104 228 80 256 80 C284 80 306 104 306 152 C308 220 310 320 304 430 C300 452 290 462 278 460 C282 350 280 250 274 184 C268 174 260 168 256 168 C256 158 256 150 256 142 C256 158 254 168 248 176 C242 184 240 200 238 230 C234 340 232 420 228 460 C216 460 208 448 206 428 C200 320 202 220 206 150 Z" fill="url(#actHair)"/>
+
+  <!-- the parting: a soft gap revealing forehead, with two framing locks -->
+  <path d="M256 110 C250 130 246 150 244 170 C250 162 254 156 256 150 C258 156 262 162 268 170 C266 150 262 130 256 110 Z" fill="#e8ead0"/>
+  <path d="M256 110 C254 128 252 146 252 162" stroke="#0a0e14" stroke-width="2" stroke-opacity="0.4" fill="none"/>
+
+  <!-- ONE sorrowful eye visible where hair parts; the other side veiled by a lock -->
+  <ellipse cx="272" cy="184" rx="11" ry="7" fill="#f2f3e6"/>
+  <ellipse cx="273" cy="185" rx="6.5" ry="6.5" fill="#3a4a52"/>
+  <ellipse cx="273" cy="185" rx="3.4" ry="3.4" fill="#0a0e14"/>
+  <ellipse cx="270.5" cy="182.5" rx="1.6" ry="1.6" fill="#dfe6e1"/>
+  <!-- gentle downcast upper lid -->
+  <path d="M261 180 C266 176 278 176 283 181" stroke="#1e2a3d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M260 174 C266 170 278 170 284 175" stroke="#2a2f3a" stroke-width="2" stroke-opacity="0.7" fill="none" stroke-linecap="round"/>
+
+  <!-- a single dark tear tracing down the cheek -->
+  <path d="M273 192 C271 206 270 222 272 238 C274 246 280 246 280 238 C280 224 278 206 277 194 C276 190 274 188 273 192 Z" fill="#6f9bb3" fill-opacity="0.5"/>
+  <ellipse cx="276" cy="240" rx="3.4" ry="4.6" fill="#6f9bb3"/>
+  <ellipse cx="275" cy="238.5" rx="1.2" ry="1.6" fill="#cdd6d0"/>
+
+  <!-- veiling lock falling across the other eye -->
+  <path d="M236 150 C232 176 232 200 234 224 C240 218 244 204 244 186 C244 172 242 158 240 150 C240 148 236 148 236 150 Z" fill="#0f131b"/>
+  <path d="M236 156 C234 178 234 198 236 216" stroke="#1e2a3d" stroke-width="1.6" stroke-opacity="0.5" fill="none"/>
+
+  <!-- faint, sorrowful mouth -->
+  <path d="M248 214 C253 218 261 218 266 213" stroke="#9a7a72" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+
+  <!-- side hair strands -->
+  <path d="M222 160 C218 260 218 360 222 440" stroke="#1e2a3d" stroke-width="2" stroke-opacity="0.5" fill="none"/>
+  <path d="M290 160 C294 260 294 360 290 440" stroke="#1e2a3d" stroke-width="2" stroke-opacity="0.5" fill="none"/>
+</svg>

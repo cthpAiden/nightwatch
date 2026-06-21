@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="sceneGlow" cx="0.5" cy="0.45" r="0.55">
+      <stop offset="0" stop-color="#7fe6d6" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#3a6a78" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#bdfff0" stop-opacity="0.70"/>
+      <stop offset="0.4" stop-color="#6fd6c8" stop-opacity="0.34"/>
+      <stop offset="0.75" stop-color="#3a7a86" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="flameBody" cx="0.5" cy="0.62" r="0.55">
+      <stop offset="0" stop-color="#f2fffb" stop-opacity="1"/>
+      <stop offset="0.28" stop-color="#cdfff0" stop-opacity="0.97"/>
+      <stop offset="0.62" stop-color="#7fe6d6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#4aa8b3" stop-opacity="0.45"/>
+    </radialGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="0.5" stop-color="#e6fff8" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#9fe6d6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="wisp" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#aef2e6" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#4a9aa8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ember" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#dcfff4" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#6fb3b3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="256" cy="372" rx="252" ry="300" fill="url(#sceneGlow)"/>
+
+  <ellipse cx="206" cy="430" rx="58" ry="78" fill="url(#wisp)"/>
+  <ellipse cx="318" cy="300" rx="40" ry="66" fill="url(#wisp)"/>
+  <ellipse cx="300" cy="520" rx="36" ry="58" fill="url(#wisp)"/>
+
+  <g>
+    <ellipse cx="206" cy="358" rx="112" ry="126" fill="url(#halo)"/>
+    <path d="M206 250
+             C246 296 264 338 264 384
+             C264 442 238 488 206 500
+             C174 488 148 442 148 384
+             C148 338 166 296 206 250 Z"
+          fill="url(#flameBody)"/>
+    <ellipse cx="206" cy="398" rx="50" ry="66" fill="url(#core)"/>
+    <ellipse cx="206" cy="402" rx="17" ry="24" fill="#ffffff" fill-opacity="0.96"/>
+  </g>
+
+  <g>
+    <ellipse cx="334" cy="250" rx="80" ry="92" fill="url(#halo)"/>
+    <path d="M334 176
+             C362 208 376 238 376 270
+             C376 312 358 344 334 354
+             C310 344 292 312 292 270
+             C292 238 306 208 334 176 Z"
+          fill="url(#flameBody)"/>
+    <ellipse cx="334" cy="282" rx="34" ry="46" fill="url(#core)"/>
+    <ellipse cx="334" cy="286" rx="12" ry="17" fill="#ffffff" fill-opacity="0.95"/>
+  </g>
+
+  <g>
+    <ellipse cx="328" cy="476" rx="74" ry="86" fill="url(#halo)"/>
+    <path d="M328 408
+             C354 438 366 466 366 496
+             C366 534 350 564 328 574
+             C306 564 290 534 290 496
+             C290 466 302 438 328 408 Z"
+          fill="url(#flameBody)"/>
+    <ellipse cx="328" cy="506" rx="31" ry="42" fill="url(#core)"/>
+    <ellipse cx="328" cy="510" rx="11" ry="15" fill="#ffffff" fill-opacity="0.95"/>
+  </g>
+
+  <g>
+    <ellipse cx="150" cy="540" rx="56" ry="66" fill="url(#halo)"/>
+    <path d="M150 488
+             C172 512 182 534 182 558
+             C182 588 168 612 150 620
+             C132 612 118 588 118 558
+             C118 534 128 512 150 488 Z"
+          fill="url(#flameBody)"/>
+    <ellipse cx="150" cy="566" rx="24" ry="32" fill="url(#core)"/>
+    <ellipse cx="150" cy="570" rx="8" ry="11" fill="#ffffff" fill-opacity="0.94"/>
+  </g>
+
+  <circle cx="206" cy="228" r="13" fill="url(#ember)"/>
+  <circle cx="334" cy="150" r="10" fill="url(#ember)"/>
+  <circle cx="262" cy="350" r="7" fill="url(#ember)"/>
+  <circle cx="356" cy="430" r="6" fill="url(#ember)"/>
+  <circle cx="150" cy="464" r="7" fill="url(#ember)"/>
+  <circle cx="244" cy="600" r="6" fill="url(#ember)"/>
+  <circle cx="296" cy="232" r="5" fill="url(#ember)"/>
+</svg>

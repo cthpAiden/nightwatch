@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="incenseGlowL" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0.85"/>
+      <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="incenseGlowR" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0.8"/>
+      <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="floorShadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#0a0e14" stop-opacity="0.9"/>
+      <stop offset="0.7" stop-color="#0a0e14" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheetShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cdd6d0"/>
+      <stop offset="0.5" stop-color="#e8ead0"/>
+      <stop offset="1" stop-color="#9aa69c"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="690" rx="220" ry="56" fill="url(#floorShadow)"/>
+
+  <g>
+    <polygon points="128,560 384,560 366,690 146,690" fill="#141a22"/>
+    <polygon points="128,560 384,560 376,576 136,576" fill="#1e2a3d"/>
+    <polygon points="146,690 366,690 360,700 152,700" fill="#0a0e14"/>
+  </g>
+
+  <g>
+    <polygon points="148,300 364,300 384,565 128,565" fill="url(#sheetShade)"/>
+    <path d="M256 248 C214 248 178 274 168 312 L156 360 L356 360 L344 312 C334 274 298 248 256 248 Z" fill="#e8ead0"/>
+    <path d="M256 252 C226 252 198 270 184 300 C212 286 300 286 328 300 C314 270 286 252 256 252 Z" fill="#f2f3df"/>
+    <path d="M168 312 L156 360 L356 360 L344 312 C300 340 212 340 168 312 Z" fill="#cdd6d0" opacity="0.55"/>
+    <polygon points="148,300 200,300 192,565 128,565" fill="#9aa69c" opacity="0.5"/>
+    <polygon points="320,300 364,300 384,565 348,565" fill="#7e8a80" opacity="0.55"/>
+    <path d="M180 360 L172 565 L184 565 L196 360 Z" fill="#aeb8ae" opacity="0.5"/>
+    <path d="M256 360 L256 565 L268 565 L262 360 Z" fill="#b9c2b8" opacity="0.4"/>
+    <path d="M328 360 L344 565 L332 565 L316 360 Z" fill="#8c988d" opacity="0.5"/>
+    <path d="M148 300 L364 300 L368 352 L144 352 Z" fill="#0a0e14" opacity="0.12"/>
+  </g>
+
+  <g>
+    <circle cx="96" cy="520" r="46" fill="url(#incenseGlowL)"/>
+    <rect x="78" y="500" width="36" height="58" rx="3" fill="#1e2a3d"/>
+    <rect x="78" y="500" width="36" height="10" rx="3" fill="#2b3a36"/>
+    <line x1="92" y1="500" x2="92" y2="466" stroke="#3a4a44" stroke-width="2"/>
+    <line x1="100" y1="500" x2="100" y2="470" stroke="#3a4a44" stroke-width="2"/>
+    <circle cx="92" cy="464" r="3" fill="#f0b65a"/>
+    <circle cx="100" cy="468" r="2.5" fill="#e8a33d"/>
+  </g>
+
+  <g>
+    <circle cx="420" cy="528" r="42" fill="url(#incenseGlowR)"/>
+    <rect x="404" y="510" width="32" height="52" rx="3" fill="#1e2a3d"/>
+    <rect x="404" y="510" width="32" height="9" rx="3" fill="#2b3a36"/>
+    <line x1="416" y1="510" x2="416" y2="480" stroke="#3a4a44" stroke-width="2"/>
+    <line x1="424" y1="510" x2="424" y2="484" stroke="#3a4a44" stroke-width="2"/>
+    <circle cx="416" cy="478" r="2.8" fill="#f0b65a"/>
+    <circle cx="424" cy="482" r="2.2" fill="#e8a33d"/>
+  </g>
+
+  <ellipse cx="256" cy="266" rx="60" ry="14" fill="#0a0e14" opacity="0.15"/>
+</svg>

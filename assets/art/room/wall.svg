@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- base teal-green plaster -->
+  <rect x="0" y="0" width="512" height="512" fill="#2b3a36"/>
+  <!-- broad tonal variation patches -->
+  <rect x="0" y="0" width="256" height="256" fill="#30403a" fill-opacity="0.5"/>
+  <rect x="256" y="256" width="256" height="256" fill="#26332f" fill-opacity="0.5"/>
+  <rect x="120" y="40" width="180" height="220" fill="#36473f" fill-opacity="0.35"/>
+  <rect x="300" y="180" width="160" height="200" fill="#243029" fill-opacity="0.4"/>
+  <!-- faint water stains (soft radial) -->
+  <radialGradient id="stain1" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#1c2622" stop-opacity="0.55"/>
+    <stop offset="0.6" stop-color="#202b26" stop-opacity="0.25"/>
+    <stop offset="1" stop-color="#2b3a36" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="stain2" cx="0.5" cy="0.3" r="0.6">
+    <stop offset="0" stop-color="#19231f" stop-opacity="0.5"/>
+    <stop offset="1" stop-color="#2b3a36" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="150" cy="120" rx="110" ry="140" fill="url(#stain1)"/>
+  <ellipse cx="400" cy="360" rx="130" ry="120" fill="url(#stain2)"/>
+  <ellipse cx="360" cy="90" rx="70" ry="100" fill="url(#stain1)"/>
+  <!-- vertical drip streaks from top -->
+  <path d="M148 0 L152 0 L156 180 L150 180 Z" fill="#1d2723" fill-opacity="0.4"/>
+  <path d="M168 0 L172 0 L170 140 L166 140 Z" fill="#1d2723" fill-opacity="0.3"/>
+  <path d="M372 0 L378 0 L380 120 L374 120 Z" fill="#1d2723" fill-opacity="0.35"/>
+  <!-- peeling plaster chunks: exposed darker undercoat -->
+  <path d="M60 300 L120 290 L140 330 L110 380 L70 370 L50 340 Z" fill="#1e2a25" fill-opacity="0.85"/>
+  <path d="M64 304 L116 296 L132 328 L108 372 L74 364 L56 340 Z" fill="#222f29" fill-opacity="0.7"/>
+  <path d="M420 60 L470 70 L480 110 L450 140 L412 120 Z" fill="#1e2a25" fill-opacity="0.8"/>
+  <path d="M300 420 L360 410 L380 450 L340 490 L296 470 Z" fill="#1d2823" fill-opacity="0.8"/>
+  <!-- small peel flakes -->
+  <polygon points="200,200 230,195 240,225 210,235" fill="#202c27" fill-opacity="0.6"/>
+  <polygon points="470,300 500,310 495,345 465,335" fill="#202c27" fill-opacity="0.55"/>
+  <polygon points="40,140 70,150 60,185 35,175" fill="#202c27" fill-opacity="0.55"/>
+  <!-- hairline cracks -->
+  <polyline points="0,250 80,255 130,300 160,290" fill="none" stroke="#161f1b" stroke-width="2" stroke-opacity="0.6"/>
+  <polyline points="512,180 440,200 410,250 430,300" fill="none" stroke="#161f1b" stroke-width="2" stroke-opacity="0.5"/>
+  <polyline points="250,512 260,440 240,400 270,360" fill="none" stroke="#161f1b" stroke-width="1.5" stroke-opacity="0.5"/>
+  <!-- speckle grime -->
+  <circle cx="90" cy="90" r="3" fill="#1a231f" fill-opacity="0.5"/>
+  <circle cx="330" cy="220" r="2.5" fill="#1a231f" fill-opacity="0.5"/>
+  <circle cx="220" cy="420" r="3" fill="#1a231f" fill-opacity="0.5"/>
+  <circle cx="160" cy="330" r="2" fill="#1a231f" fill-opacity="0.5"/>
+  <circle cx="440" cy="440" r="2.5" fill="#1a231f" fill-opacity="0.5"/>
+  <!-- subtle top-down vignette for grime in corners -->
+  <radialGradient id="wallvig" cx="0.5" cy="0.5" r="0.75">
+    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.45"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#wallvig)"/>
+</svg>

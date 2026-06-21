@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- dark frame backing -->
+  <rect x="0" y="0" width="512" height="512" fill="#121a2b"/>
+  <!-- outer steel frame -->
+  <rect x="16" y="16" width="480" height="480" fill="#2a323d"/>
+  <rect x="16" y="16" width="480" height="480" fill="none" stroke="#0a0e14" stroke-width="6"/>
+  <!-- inner shutter recess -->
+  <rect x="44" y="44" width="424" height="424" fill="#1c232e"/>
+  <!-- horizontal roller-shutter slats -->
+  <g>
+    <rect x="44" y="50" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="76" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="80" width="424" height="26" fill="#2c343f"/>
+    <rect x="44" y="106" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="110" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="136" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="140" width="424" height="26" fill="#2c343f"/>
+    <rect x="44" y="166" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="170" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="196" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="200" width="424" height="26" fill="#2c343f"/>
+    <rect x="44" y="226" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="230" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="256" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="260" width="424" height="26" fill="#2c343f"/>
+    <rect x="44" y="286" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="290" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="316" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="320" width="424" height="26" fill="#2c343f"/>
+    <rect x="44" y="346" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="350" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="376" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="380" width="424" height="26" fill="#2c343f"/>
+    <rect x="44" y="406" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="410" width="424" height="26" fill="#323b47"/>
+    <rect x="44" y="436" width="424" height="4" fill="#0d1219"/>
+    <rect x="44" y="440" width="424" height="22" fill="#2c343f"/>
+  </g>
+  <!-- vertical guide rails left/right -->
+  <rect x="44" y="44" width="20" height="424" fill="#222a34" fill-opacity="0.7"/>
+  <rect x="448" y="44" width="20" height="424" fill="#222a34" fill-opacity="0.7"/>
+  <rect x="44" y="44" width="20" height="424" fill="none" stroke="#0a0e14" stroke-width="3"/>
+  <rect x="448" y="44" width="20" height="424" fill="none" stroke="#0a0e14" stroke-width="3"/>
+  <!-- center handle / lock bar -->
+  <rect x="226" y="380" width="60" height="40" rx="4" fill="#1a212b"/>
+  <rect x="226" y="380" width="60" height="40" rx="4" fill="none" stroke="#3a4350" stroke-width="3"/>
+  <circle cx="256" cy="400" r="8" fill="#0a0e14"/>
+  <!-- bottom floor contact strip -->
+  <rect x="44" y="462" width="424" height="6" fill="#070a0f"/>
+  <!-- rust / grime streaks -->
+  <radialGradient id="rust" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#5a3318" stop-opacity="0.4"/>
+    <stop offset="1" stop-color="#5a3318" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="90" cy="220" rx="40" ry="120" fill="url(#rust)"/>
+  <ellipse cx="420" cy="320" rx="36" ry="100" fill="url(#rust)"/>
+  <path d="M120 46 L126 46 L130 200 L122 200 Z" fill="#3a2a14" fill-opacity="0.35"/>
+  <path d="M380 46 L386 46 L382 240 L376 240 Z" fill="#3a2a14" fill-opacity="0.3"/>
+  <!-- corner screws on frame -->
+  <circle cx="30" cy="30" r="6" fill="#0a0e14"/>
+  <circle cx="482" cy="30" r="6" fill="#0a0e14"/>
+  <circle cx="30" cy="482" r="6" fill="#0a0e14"/>
+  <circle cx="482" cy="482" r="6" fill="#0a0e14"/>
+  <!-- vignette -->
+  <radialGradient id="doorvig" cx="0.5" cy="0.5" r="0.78">
+    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.5"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#doorvig)"/>
+</svg>

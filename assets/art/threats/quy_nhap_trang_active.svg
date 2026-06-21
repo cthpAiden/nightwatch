@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="incenseGlowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0.7"/>
+      <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="floorShadowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#0a0e14" stop-opacity="0.9"/>
+      <stop offset="0.7" stop-color="#0a0e14" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheetUpright" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9aa69c"/>
+      <stop offset="0.45" stop-color="#e8ead0"/>
+      <stop offset="1" stop-color="#7e8a80"/>
+    </linearGradient>
+    <radialGradient id="redAura" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#b3282d" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#b3282d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="256" cy="710" rx="210" ry="48" fill="url(#floorShadowA)"/>
+  <ellipse cx="256" cy="300" rx="200" ry="240" fill="url(#redAura)"/>
+
+  <g>
+    <polygon points="120,640 392,640 374,712 138,712" fill="#141a22"/>
+    <polygon points="120,640 392,640 384,654 128,654" fill="#1e2a3d"/>
+  </g>
+
+  <g>
+    <path d="M150 656 L150 360 C150 300 196 256 256 256 C316 256 362 300 362 360 L362 656 Z" fill="url(#sheetUpright)"/>
+    <path d="M256 96 C198 96 160 142 160 206 L160 360 C160 326 196 300 256 300 C316 300 352 326 352 360 L352 206 C352 142 314 96 256 96 Z" fill="#e8ead0"/>
+    <path d="M256 100 C214 100 178 134 172 192 C200 168 312 168 340 192 C334 134 298 100 256 100 Z" fill="#f2f3df"/>
+    <path d="M210 158 C210 138 232 122 256 122 C280 122 302 138 302 158 C290 176 222 176 210 158 Z" fill="#0a0e14" opacity="0.16"/>
+
+    <polygon points="150,360 196,360 196,656 150,656" fill="#9aa69c" opacity="0.5"/>
+    <polygon points="318,360 362,360 362,656 318,656" fill="#73807a" opacity="0.55"/>
+    <path d="M176 360 L172 656 L186 656 L196 360 Z" fill="#aeb8ae" opacity="0.45"/>
+    <path d="M256 320 L256 656 L270 656 L264 320 Z" fill="#b9c2b8" opacity="0.4"/>
+    <path d="M330 360 L344 656 L330 656 L316 360 Z" fill="#8c988d" opacity="0.5"/>
+    <path d="M160 240 L352 240 L352 264 L160 264 Z" fill="#0a0e14" opacity="0.1"/>
+
+    <path d="M200 188 C188 182 178 188 176 200 C182 206 196 204 204 198 Z" fill="#0a0e14" opacity="0.22"/>
+    <path d="M312 188 C324 182 334 188 336 200 C330 206 316 204 308 198 Z" fill="#0a0e14" opacity="0.22"/>
+  </g>
+
+  <g>
+    <path d="M348 430 C374 418 404 410 426 420 C432 422 432 430 426 434 C404 444 384 452 370 470 C362 460 352 444 348 430 Z" fill="#cdd6d0"/>
+    <path d="M392 422 C402 416 412 416 420 422 C414 432 408 438 404 448 C400 440 394 430 392 422 Z" fill="#e8ead0"/>
+    <path d="M408 424 C414 420 420 420 424 424 M404 432 C410 428 416 428 420 432 M400 440 C406 437 411 437 415 441" stroke="#9aa69c" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M388 420 C386 410 388 402 394 398" stroke="#cdd6d0" stroke-width="9" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <circle cx="88" cy="560" r="34" fill="url(#incenseGlowA)"/>
+    <rect x="74" y="544" width="28" height="44" rx="3" fill="#1e2a3d"/>
+    <line x1="84" y1="544" x2="84" y2="518" stroke="#3a4a44" stroke-width="2"/>
+    <line x1="92" y1="544" x2="92" y2="522" stroke="#3a4a44" stroke-width="2"/>
+    <circle cx="84" cy="516" r="2.6" fill="#f0b65a"/>
+  </g>
+
+  <ellipse cx="256" cy="120" rx="52" ry="12" fill="#0a0e14" opacity="0.12"/>
+</svg>

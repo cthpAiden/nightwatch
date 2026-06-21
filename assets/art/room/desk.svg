@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- worn wood base -->
+  <rect x="0" y="0" width="512" height="512" fill="#3a2a1c"/>
+  <rect x="0" y="0" width="512" height="512" fill="#33251a" fill-opacity="0.4"/>
+  <!-- plank seams (3 horizontal boards) -->
+  <line x1="0" y1="170" x2="512" y2="170" stroke="#1c140d" stroke-width="4" stroke-opacity="0.8"/>
+  <line x1="0" y1="342" x2="512" y2="342" stroke="#1c140d" stroke-width="4" stroke-opacity="0.8"/>
+  <!-- board tone variance -->
+  <rect x="0" y="0" width="512" height="170" fill="#41301f" fill-opacity="0.4"/>
+  <rect x="0" y="342" width="512" height="170" fill="#2f2216" fill-opacity="0.4"/>
+  <!-- top-down woodgrain: long wavy strokes per board -->
+  <g fill="none" stroke="#2a1d12" stroke-width="2" stroke-opacity="0.55">
+    <path d="M0,40 C120,32 240,52 360,42 C420,37 470,46 512,40"/>
+    <path d="M0,70 C140,64 260,80 380,70 C440,65 480,74 512,68"/>
+    <path d="M0,100 C100,94 220,108 340,98 C420,92 470,102 512,96"/>
+    <path d="M0,130 C130,124 250,138 370,128 C440,123 490,130 512,126"/>
+    <path d="M0,210 C120,204 240,220 360,210 C430,205 480,214 512,208"/>
+    <path d="M0,245 C140,238 260,254 380,244 C450,239 490,248 512,242"/>
+    <path d="M0,280 C110,274 230,288 350,278 C420,273 480,282 512,276"/>
+    <path d="M0,315 C130,308 250,322 370,312 C440,307 490,316 512,310"/>
+    <path d="M0,385 C120,378 240,392 360,382 C430,377 480,386 512,380"/>
+    <path d="M0,420 C140,414 260,428 380,418 C450,413 490,422 512,416"/>
+    <path d="M0,455 C110,448 230,462 350,452 C420,447 480,456 512,450"/>
+    <path d="M0,490 C130,484 250,498 370,488 C440,483 490,492 512,486"/>
+  </g>
+  <!-- darker grain accents -->
+  <g fill="none" stroke="#1f1610" stroke-width="3" stroke-opacity="0.4">
+    <path d="M0,55 C150,48 300,62 460,52 C480,51 500,53 512,52"/>
+    <path d="M0,225 C160,218 320,232 480,222 C490,221 505,223 512,222"/>
+    <path d="M0,400 C150,393 300,407 460,397 C485,395 505,398 512,397"/>
+  </g>
+  <!-- knot in wood -->
+  <ellipse cx="180" cy="100" rx="16" ry="10" fill="#1c140d" fill-opacity="0.7"/>
+  <ellipse cx="180" cy="100" rx="8" ry="5" fill="#120c08" fill-opacity="0.8"/>
+  <ellipse cx="400" cy="410" rx="14" ry="9" fill="#1c140d" fill-opacity="0.65"/>
+  <ellipse cx="400" cy="410" rx="7" ry="4" fill="#120c08" fill-opacity="0.8"/>
+  <!-- coffee ring stains -->
+  <circle cx="120" cy="380" r="34" fill="none" stroke="#1a120a" stroke-width="5" stroke-opacity="0.45"/>
+  <circle cx="340" cy="120" r="28" fill="none" stroke="#1a120a" stroke-width="4" stroke-opacity="0.4"/>
+  <!-- scratches and gouges -->
+  <line x1="200" y1="250" x2="320" y2="270" stroke="#1a120a" stroke-width="2" stroke-opacity="0.5"/>
+  <line x1="60" y1="300" x2="160" y2="290" stroke="#1a120a" stroke-width="1.5" stroke-opacity="0.5"/>
+  <line x1="380" y1="320" x2="470" y2="335" stroke="#1a120a" stroke-width="2" stroke-opacity="0.45"/>
+  <!-- grime vignette + warm lamp pool top-left -->
+  <radialGradient id="desklamp" cx="0.28" cy="0.3" r="0.5">
+    <stop offset="0" stop-color="#e8a33d" stop-opacity="0.16"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#desklamp)"/>
+  <radialGradient id="deskvig" cx="0.5" cy="0.5" r="0.75">
+    <stop offset="0.5" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.5"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#deskvig)"/>
+</svg>

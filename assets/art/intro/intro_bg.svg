@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="skyI" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0e14"/>
+      <stop offset="0.7" stop-color="#0a0e14"/>
+      <stop offset="1" stop-color="#121a2b"/>
+    </linearGradient>
+    <radialGradient id="lampGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0.85"/>
+      <stop offset="0.35" stop-color="#e8a33d" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lampCone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="mistI" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2a3d" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1e2a3d" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" fill="url(#skyI)"/>
+
+  <!-- a few faint stars -->
+  <circle cx="200" cy="80" r="1.6" fill="#cdd6d0" fill-opacity="0.5"/>
+  <circle cx="520" cy="60" r="1.4" fill="#cdd6d0" fill-opacity="0.45"/>
+  <circle cx="1040" cy="90" r="1.6" fill="#cdd6d0" fill-opacity="0.5"/>
+  <circle cx="1180" cy="160" r="1.4" fill="#cdd6d0" fill-opacity="0.4"/>
+
+  <!-- dark school wall behind the gate -->
+  <rect x="0" y="300" width="1280" height="320" fill="#121a2b"/>
+  <rect x="0" y="292" width="1280" height="10" fill="#1e2a3d"/>
+  <!-- a few cold dark windows -->
+  <rect x="120" y="340" width="44" height="60" fill="#1e2a3d"/>
+  <rect x="220" y="340" width="44" height="60" fill="#1e2a3d"/>
+  <rect x="1020" y="340" width="44" height="60" fill="#1e2a3d"/>
+  <rect x="1120" y="340" width="44" height="60" fill="#1e2a3d"/>
+
+  <!-- masonry gate pillars -->
+  <rect x="430" y="250" width="46" height="370" fill="#0a0e14"/>
+  <rect x="804" y="250" width="46" height="370" fill="#0a0e14"/>
+  <rect x="420" y="238" width="66" height="20" fill="#1e2a3d"/>
+  <rect x="794" y="238" width="66" height="20" fill="#1e2a3d"/>
+  <!-- arched gate top connecting pillars -->
+  <path d="M476 280 Q640 220 804 280 L804 300 Q640 244 476 300 Z" fill="#0a0e14"/>
+
+  <!-- iron gate bars (closed) -->
+  <rect x="486" y="300" width="318" height="6" fill="#0a0e14"/>
+  <line x1="520" y1="306" x2="520" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <line x1="560" y1="306" x2="560" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <line x1="600" y1="306" x2="600" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <line x1="640" y1="306" x2="640" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <line x1="680" y1="306" x2="680" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <line x1="720" y1="306" x2="720" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <line x1="760" y1="306" x2="760" y2="610" stroke="#0a0e14" stroke-width="6"/>
+  <rect x="486" y="450" width="318" height="6" fill="#0a0e14"/>
+
+  <!-- single street lamp on left, the lonely light -->
+  <line x1="245" y1="610" x2="245" y2="250" stroke="#0a0e14" stroke-width="9"/>
+  <path d="M245 250 q0 -26 34 -26 l24 0" fill="none" stroke="#0a0e14" stroke-width="8"/>
+  <!-- lamp light cone + glow -->
+  <polygon points="303,232 233,470 373,470" fill="url(#lampCone)"/>
+  <circle cx="303" cy="232" r="120" fill="url(#lampGlow)"/>
+  <ellipse cx="303" cy="232" rx="15" ry="20" fill="#f0b65a"/>
+  <polygon points="288,214 318,214 326,236 280,236" fill="#0a0e14"/>
+
+  <!-- warm pool on the ground under lamp -->
+  <ellipse cx="303" cy="612" rx="150" ry="26" fill="#e8a33d" fill-opacity="0.18"/>
+
+  <!-- parked bicycle, leaning by the gate pillar, lit warmly -->
+  <g>
+    <circle cx="560" cy="585" r="34" fill="none" stroke="#0a0e14" stroke-width="5"/>
+    <circle cx="650" cy="585" r="34" fill="none" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="560" y1="585" x2="610" y2="540" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="610" y1="540" x2="650" y2="585" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="560" y1="585" x2="650" y2="585" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="610" y1="540" x2="600" y2="585" stroke="#0a0e14" stroke-width="5"/>
+    <!-- seat + handlebar post -->
+    <line x1="610" y1="540" x2="600" y2="515" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="588" y1="513" x2="612" y2="513" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="650" y1="585" x2="668" y2="520" stroke="#0a0e14" stroke-width="5"/>
+    <line x1="656" y1="518" x2="682" y2="522" stroke="#0a0e14" stroke-width="5"/>
+    <!-- front basket -->
+    <path d="M662 524 l22 0 l-3 22 l-16 0 z" fill="none" stroke="#0a0e14" stroke-width="4"/>
+  </g>
+
+  <!-- ground -->
+  <rect x="0" y="610" width="1280" height="110" fill="#0a0e14"/>
+
+  <!-- mist -->
+  <rect x="0" y="560" width="1280" height="160" fill="url(#mistI)"/>
+  <ellipse cx="900" cy="650" rx="420" ry="40" fill="#1e2a3d" fill-opacity="0.4"/>
+  <ellipse cx="500" cy="685" rx="560" ry="42" fill="#1e2a3d" fill-opacity="0.45"/>
+</svg>

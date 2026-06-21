@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- dim terrazzo base -->
+  <rect x="0" y="0" width="512" height="512" fill="#1e2a3d"/>
+  <rect x="0" y="0" width="512" height="512" fill="#1a2433" fill-opacity="0.4"/>
+  <!-- tile grid: 4x4 large tiles with dark grout lines -->
+  <g stroke="#0a0e14" stroke-width="4" stroke-opacity="0.8">
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+  </g>
+  <!-- per-tile faint tone variance -->
+  <rect x="4" y="4" width="120" height="120" fill="#22304a" fill-opacity="0.3"/>
+  <rect x="260" y="4" width="120" height="120" fill="#16202f" fill-opacity="0.4"/>
+  <rect x="132" y="132" width="120" height="120" fill="#22304a" fill-opacity="0.25"/>
+  <rect x="388" y="132" width="120" height="120" fill="#16202f" fill-opacity="0.4"/>
+  <rect x="4" y="260" width="120" height="120" fill="#16202f" fill-opacity="0.35"/>
+  <rect x="260" y="260" width="120" height="120" fill="#22304a" fill-opacity="0.3"/>
+  <rect x="132" y="388" width="120" height="120" fill="#16202f" fill-opacity="0.4"/>
+  <rect x="388" y="388" width="120" height="120" fill="#22304a" fill-opacity="0.25"/>
+  <!-- terrazzo speckle chips scattered -->
+  <g fill="#3a4a63" fill-opacity="0.5">
+    <circle cx="40" cy="60" r="3"/><circle cx="90" cy="100" r="2"/><circle cx="180" cy="40" r="2.5"/>
+    <circle cx="300" cy="70" r="3"/><circle cx="360" cy="110" r="2"/><circle cx="450" cy="50" r="2.5"/>
+    <circle cx="60" cy="200" r="2.5"/><circle cx="150" cy="230" r="3"/><circle cx="220" cy="180" r="2"/>
+    <circle cx="320" cy="220" r="2.5"/><circle cx="420" cy="200" r="3"/><circle cx="480" cy="240" r="2"/>
+    <circle cx="40" cy="360" r="3"/><circle cx="110" cy="320" r="2"/><circle cx="200" cy="350" r="2.5"/>
+    <circle cx="300" cy="380" r="2"/><circle cx="380" cy="330" r="3"/><circle cx="470" cy="360" r="2.5"/>
+    <circle cx="70" cy="470" r="2.5"/><circle cx="170" cy="440" r="3"/><circle cx="270" cy="480" r="2"/>
+    <circle cx="350" cy="450" r="2.5"/><circle cx="440" cy="470" r="3"/>
+  </g>
+  <g fill="#0d141f" fill-opacity="0.6">
+    <circle cx="70" cy="80" r="2"/><circle cx="200" cy="90" r="2.5"/><circle cx="330" cy="40" r="2"/>
+    <circle cx="100" cy="180" r="2.5"/><circle cx="260" cy="210" r="2"/><circle cx="400" cy="170" r="2.5"/>
+    <circle cx="80" cy="330" r="2"/><circle cx="240" cy="370" r="2.5"/><circle cx="410" cy="390" r="2"/>
+    <circle cx="130" cy="470" r="2.5"/><circle cx="320" cy="440" r="2"/><circle cx="470" cy="430" r="2.5"/>
+  </g>
+  <!-- worn scuff smudges -->
+  <radialGradient id="scuff" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#0a0e14" stop-opacity="0.5"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="190" cy="300" rx="120" ry="70" fill="url(#scuff)"/>
+  <ellipse cx="380" cy="120" rx="90" ry="60" fill="url(#scuff)"/>
+  <!-- corner vignette, dim room -->
+  <radialGradient id="floorvig" cx="0.5" cy="0.5" r="0.72">
+    <stop offset="0.5" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.55"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#floorvig)"/>
+</svg>

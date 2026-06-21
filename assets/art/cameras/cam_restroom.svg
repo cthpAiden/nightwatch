@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <!-- ===== COLD-BLUE RESTROOM: water-ghost area ===== -->
+
+  <!-- base darkness -->
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+
+  <!-- back wall (cold tiled) -->
+  <rect x="0" y="0" width="1280" height="540" fill="#121a2b"/>
+  <!-- floor -->
+  <rect x="0" y="520" width="1280" height="200" fill="#0a0e14"/>
+  <!-- floor/wall skirting -->
+  <rect x="0" y="514" width="1280" height="10" fill="#1e2a3d"/>
+
+  <!-- faint cold tile grid on back wall (vertical) -->
+  <line x1="160" y1="40" x2="160" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="320" y1="40" x2="320" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="480" y1="40" x2="480" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="640" y1="40" x2="640" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="800" y1="40" x2="800" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="960" y1="40" x2="960" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="1120" y1="40" x2="1120" y2="514" stroke="#1e2a3d" stroke-width="2"/>
+  <!-- tile grid (horizontal) -->
+  <line x1="0" y1="120" x2="1280" y2="120" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="0" y1="220" x2="1280" y2="220" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="0" y1="320" x2="1280" y2="320" stroke="#1e2a3d" stroke-width="2"/>
+  <line x1="0" y1="420" x2="1280" y2="420" stroke="#1e2a3d" stroke-width="2"/>
+
+  <!-- cold ceiling shadow -->
+  <rect x="0" y="0" width="1280" height="70" fill="#0a0e14"/>
+
+  <!-- ===== ROW OF STALLS (right side) ===== -->
+  <!-- stall block backing -->
+  <rect x="690" y="150" width="560" height="370" fill="#1e2a3d"/>
+  <!-- stall dividers -->
+  <rect x="690" y="150" width="14" height="370" fill="#121a2b"/>
+  <rect x="828" y="150" width="14" height="370" fill="#121a2b"/>
+  <rect x="966" y="150" width="14" height="370" fill="#121a2b"/>
+  <rect x="1104" y="150" width="14" height="370" fill="#121a2b"/>
+  <rect x="1242" y="150" width="8" height="370" fill="#121a2b"/>
+  <!-- top rail of stalls -->
+  <rect x="690" y="150" width="560" height="16" fill="#36473f"/>
+
+  <!-- stall doors (closed ones slightly lighter, dark gaps) -->
+  <rect x="710" y="172" width="114" height="332" fill="#1e2a3d"/>
+  <rect x="848" y="172" width="114" height="332" fill="#1e2a3d"/>
+  <!-- third stall door AJAR — dark void inside (ominous) -->
+  <rect x="986" y="172" width="114" height="332" fill="#1e2a3d"/>
+  <rect x="986" y="172" width="64" height="332" fill="#0a0e14"/>
+  <polygon points="1050,172 1100,180 1100,496 1050,504" fill="#121a2b"/>
+  <!-- fourth stall door -->
+  <rect x="1124" y="172" width="110" height="332" fill="#1e2a3d"/>
+
+  <!-- door seams / handles -->
+  <line x1="710" y1="172" x2="710" y2="504" stroke="#0a0e14" stroke-width="3"/>
+  <line x1="848" y1="172" x2="848" y2="504" stroke="#0a0e14" stroke-width="3"/>
+  <line x1="1124" y1="172" x2="1124" y2="504" stroke="#0a0e14" stroke-width="3"/>
+  <circle cx="800" cy="340" r="5" fill="#36473f"/>
+  <circle cx="938" cy="340" r="5" fill="#36473f"/>
+  <circle cx="1210" cy="340" r="5" fill="#36473f"/>
+  <!-- gap-at-floor under stalls -->
+  <rect x="710" y="498" width="524" height="22" fill="#0a0e14" fill-opacity="0.6"/>
+
+  <!-- ===== SINK COUNTER + CRACKED MIRROR (left side) ===== -->
+  <!-- mirror frame -->
+  <rect x="80" y="110" width="360" height="230" fill="#121a2b"/>
+  <rect x="92" y="122" width="336" height="206" fill="#1e2a3d"/>
+  <!-- mirror surface, faint cold reflection sheen -->
+  <rect x="100" y="130" width="320" height="190" fill="#243246"/>
+  <polygon points="100,130 250,130 140,320 100,320" fill="#2b3a4f" fill-opacity="0.5"/>
+  <!-- crack lines radiating -->
+  <polyline points="230,150 250,210 215,250 260,300" fill="none" stroke="#0a0e14" stroke-width="2"/>
+  <polyline points="250,210 320,200 360,250" fill="none" stroke="#0a0e14" stroke-width="2"/>
+  <polyline points="250,210 200,260 150,255" fill="none" stroke="#0a0e14" stroke-width="2"/>
+  <polyline points="215,250 180,310" fill="none" stroke="#0a0e14" stroke-width="2"/>
+  <polyline points="260,300 300,315" fill="none" stroke="#0a0e14" stroke-width="2"/>
+  <!-- pale ghostly smudge faintly in the mirror -->
+  <ellipse cx="300" cy="220" rx="34" ry="52" fill="#cdd6d0" fill-opacity="0.06"/>
+
+  <!-- sink counter slab -->
+  <rect x="60" y="360" width="400" height="40" fill="#36473f"/>
+  <rect x="60" y="400" width="400" height="14" fill="#1e2a3d"/>
+  <!-- counter front panel -->
+  <rect x="80" y="414" width="360" height="106" fill="#121a2b"/>
+  <!-- two basins -->
+  <ellipse cx="170" cy="382" rx="60" ry="16" fill="#1e2a3d"/>
+  <ellipse cx="170" cy="382" rx="48" ry="11" fill="#0a0e14"/>
+  <ellipse cx="340" cy="382" rx="60" ry="16" fill="#1e2a3d"/>
+  <ellipse cx="340" cy="382" rx="48" ry="11" fill="#0a0e14"/>
+
+  <!-- ===== DRIPPING TAP ===== -->
+  <!-- faucet over second basin -->
+  <rect x="334" y="332" width="12" height="34" fill="#2b3a36"/>
+  <path d="M334 332 q6 -22 26 -18 l0 12 q-14 -2 -16 8 Z" fill="#36473f"/>
+  <!-- the falling drip -->
+  <ellipse cx="356" cy="372" rx="3" ry="6" fill="#7fa8c9" fill-opacity="0.85"/>
+  <ellipse cx="356" cy="358" rx="2" ry="4" fill="#7fa8c9" fill-opacity="0.5"/>
+
+  <!-- ===== PUDDLE ON FLOOR reflecting faint cold light ===== -->
+  <!-- main puddle, lower-center but offset to keep center clear-ish -->
+  <ellipse cx="430" cy="630" rx="240" ry="56" fill="#0d1626"/>
+  <ellipse cx="430" cy="628" rx="210" ry="46" fill="#162338"/>
+  <!-- cold light reflection in puddle -->
+  <ellipse cx="400" cy="624" rx="120" ry="22" fill="#2f4a66" fill-opacity="0.55"/>
+  <ellipse cx="380" cy="620" rx="70" ry="11" fill="#5d86a8" fill-opacity="0.4"/>
+  <!-- small trailing puddle toward stalls -->
+  <ellipse cx="700" cy="650" rx="90" ry="22" fill="#0d1626"/>
+  <ellipse cx="700" cy="648" rx="70" ry="15" fill="#1a2940" fill-opacity="0.8"/>
+  <!-- a few stray water specks -->
+  <ellipse cx="560" cy="600" rx="14" ry="5" fill="#1a2940"/>
+  <ellipse cx="620" cy="612" rx="9" ry="3" fill="#1a2940"/>
+
+  <!-- ===== single cold light source (overhead, sickly) ===== -->
+  <radialGradient id="coldLamp" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#8fb6d6" stop-opacity="0.5"/>
+    <stop offset="45%" stop-color="#3a5a78" stop-opacity="0.22"/>
+    <stop offset="100%" stop-color="#3a5a78" stop-opacity="0"/>
+  </radialGradient>
+  <!-- ceiling fixture -->
+  <rect x="380" y="0" width="160" height="20" fill="#1e2a3d"/>
+  <rect x="396" y="18" width="128" height="8" fill="#6f96b6" fill-opacity="0.6"/>
+  <!-- cold glow pool from fixture -->
+  <ellipse cx="460" cy="120" rx="360" ry="300" fill="url(#coldLamp)"/>
+  <!-- secondary faint reflection glow on puddle -->
+  <radialGradient id="puddleGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#5d86a8" stop-opacity="0.35"/>
+    <stop offset="100%" stop-color="#5d86a8" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="400" cy="624" rx="180" ry="40" fill="url(#puddleGlow)"/>
+
+  <!-- ===== heavy vignette (oppressive corners) ===== -->
+  <radialGradient id="vig" cx="50%" cy="52%" r="62%">
+    <stop offset="55%" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.9"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vig)"/>
+  <!-- corner darkening blocks -->
+  <rect x="0" y="0" width="1280" height="60" fill="#0a0e14" fill-opacity="0.55"/>
+  <rect x="0" y="660" width="1280" height="60" fill="#0a0e14" fill-opacity="0.55"/>
+</svg>

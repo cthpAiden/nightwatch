@@ -1,0 +1,201 @@
+keys,vi,en
+GAME_TITLE,Bảo Vệ Đêm,Night Guard
+GAME_SUBTITLE,Một đêm trực ở trường,A night shift at school
+MENU_NEW_GAME,Đêm Mới,New Game
+MENU_CONTINUE,Tiếp Tục,Continue
+MENU_NIGHTS,Chọn Đêm,Select Night
+MENU_CUSTOM_NIGHT,Đêm Tùy Chỉnh,Custom Night
+MENU_SETTINGS,Cài Đặt,Settings
+MENU_EXTRAS,Thêm,Extras
+MENU_CREDITS,Đội Ngũ,Credits
+MENU_QUIT,Thoát,Quit
+MENU_LOCKED,Còn khóa,Locked
+SET_TITLE,Cài Đặt,Settings
+SET_LANGUAGE,Ngôn Ngữ,Language
+SET_AUDIO,Âm Thanh,Audio
+SET_MASTER_VOLUME,Âm Lượng Tổng,Master Volume
+SET_MUSIC_VOLUME,Nhạc Nền,Music
+SET_SFX_VOLUME,Hiệu Ứng,Sound FX
+SET_FULLSCREEN,Toàn Màn Hình,Fullscreen
+SET_BRIGHTNESS,Độ Sáng,Brightness
+SET_SCARE_INTENSITY,Độ Hù,Scare Intensity
+SET_SCARE_FULL,Đầy đủ,Full
+SET_SCARE_REDUCED,Giảm bớt,Reduced
+SET_SCARE_OFF,Tắt hù,No jumpscares
+SET_DIFFICULTY,Độ Khó,Difficulty
+SET_BACK,Quay Lại,Back
+SET_APPLY,Áp Dụng,Apply
+SET_RESET,Mặc Định,Reset
+LANG_VI,Tiếng Việt,Vietnamese
+LANG_EN,English,English
+DIFF_EASY,Dễ,Easy
+DIFF_NORMAL,Thường,Normal
+DIFF_HARD,Khó,Hard
+DIFF_NIGHTMARE,Ác Mộng,Nightmare
+BTN_CONTINUE,Tiếp tục,Continue
+BTN_RETRY,Thử lại,Retry
+BTN_QUIT,Thoát,Quit
+BTN_RESUME,Tiếp tục,Resume
+BTN_YES,Có,Yes
+BTN_NO,Không,No
+BTN_OK,Được,OK
+BTN_CANCEL,Hủy,Cancel
+BTN_SKIP,Bỏ qua,Skip
+BTN_CLOSE,Đóng,Close
+BTN_START,Bắt đầu,Start
+HUD_POWER,Điện,Power
+HUD_VIA,Vía,Spirit
+HUD_TIME,Giờ,Time
+HUD_NIGHT,Đêm,Night
+HUD_USAGE,Mức dùng,Usage
+HUD_CAM,CAM,CAM
+HUD_OFFERINGS,Đồ cúng,Offerings
+HUD_ITEM,Vật phẩm,Item
+PAUSE_TITLE,Tạm Dừng,Paused
+PAUSE_RESUME,Tiếp tục,Resume
+PAUSE_SETTINGS,Cài đặt,Settings
+PAUSE_MENU,Về Menu Chính,Main Menu
+PAUSE_CONFIRM_QUIT,Bỏ đêm nay và về menu?,Abandon this night and return to menu?
+NIGHT_LABEL,Đêm {0},Night {0}
+NIGHT_INTRO_TIME,12:00 KHUYA,12:00 AM
+NIGHT_BEGIN,Bắt đầu ca trực...,Beginning the shift...
+CLOCK_AM,SÁNG,AM
+WIN_TITLE,6:00 SÁNG,6:00 AM
+WIN_SURVIVED,Anh sống sót.,You survived.
+WIN_THANKS,Cảm ơn anh đã bảo vệ trường.,Thank you for guarding the school.
+WIN_SIGN,— Ban Giám Hiệu,— The School Board
+WIN_AGAIN,...Thử đêm khó hơn không?,...Try a harder night?
+WIN_NEXT_NIGHT,Đêm Tiếp Theo,Next Night
+WIN_ALL_DONE,Anh đã qua hết các đêm. Anh là bảo vệ thật sự.,You cleared every night. You are a true guard.
+GO_TITLE,ĐÊM NAY KHÔNG QUA ĐƯỢC,YOU DIDN'T MAKE IT
+GO_RETRY,Thử Lại,Try Again
+GO_MENU,Về Menu,Main Menu
+GO_CAUGHT_BY,Bị bắt bởi: {0},Caught by: {0}
+CAM1_NAME,Cổng Trường,School Gate
+CAM2_NAME,Hành Lang Trái,Left Corridor
+CAM3_NAME,Hành Lang Phải,Right Corridor
+CAM4_NAME,Nhà Vệ Sinh,Restroom
+CAM5_NAME,Lớp Học Cũ,Old Classroom
+CAM6_NAME,Sân Sau,Back Courtyard
+CAM_SIGNAL_LOST,MẤT TÍN HIỆU,SIGNAL LOST
+CAM_OFFLINE,CAMERA HỎNG,CAMERA DOWN
+CAM_HINT,Bấm [C] hoặc nút CAM để xem,Press [C] or the CAM button to watch
+DOOR_LEFT,Cửa Trái,Left Door
+DOOR_RIGHT,Cửa Phải,Right Door
+LIGHT_LEFT,Đèn Trái,Left Light
+LIGHT_RIGHT,Đèn Phải,Right Light
+SHOP_TITLE,Bà Hàng Rong,The Street Vendor
+SHOP_PROMPT,Mua không em?,"Buy something, dear?"
+SHOP_INVITE,Mời Vào,Invite In
+SHOP_TAKE,Lấy món này,Take this
+SHOP_PICK_ONE,Chọn một món thôi,Pick just one
+SHOP_LEAVE,Thôi khỏi,No thanks
+SHOP_TIMER,Bà đợi: {0}s,She waits: {0}s
+OFFERING_PROMPT,Đặt mâm cúng,Place an offering
+OFFERING_DONE,Đã cúng. Mong các vong yên nghỉ.,Offering placed. May the souls rest.
+OFFERING_NONE,Hết đồ cúng rồi,No offerings left
+TAPE_TITLE,Băng Ghi Âm,Cassette Tape
+TAPE_PLAY,Nghe băng,Play tape
+TAPE_STOP,Tắt,Stop
+TAPE_FROM,Từ người bảo vệ cũ,From the previous guard
+TAPE_NIGHT,Băng đêm {0},Tape — Night {0}
+POWER_OUT,MẤT ĐIỆN,POWER OUT
+WARNING_LOW_POWER,Sắp hết điện!,Power running low!
+WARNING_LOW_VIA,Vía yếu... đừng nhìn lâu.,Your spirit is weak... don't stare too long.
+WARNING_DOOR_STUCK,Cửa kẹt rồi!,The door is stuck!
+HINT_CLOSE_DOOR,Đóng cửa để chặn,Close the door to block it
+HINT_USE_LIGHT,Bật đèn để kiểm tra hành lang,Use the light to check the corridor
+HINT_SAVE_POWER,Giữ điện — đừng đóng cửa quá lâu,Save power — don't hold doors too long
+LOADING,Đang tải...,Loading...
+EXTRAS_TAPES,Kho Băng,Tape Archive
+EXTRAS_BESTIARY,Hồ Sơ Ma,Bestiary
+EXTRAS_STATS,Thống Kê,Statistics
+BESTIARY_UNKNOWN,???,???
+BESTIARY_LOCKED,Chưa gặp,Not yet encountered
+CREDITS_MADE_BY,Thực hiện bởi,Made by
+CREDITS_BUILT_WITH,Làm bằng Godot + Claude Code,Built with Godot + Claude Code
+PROMPT_ANY_KEY,Nhấn phím bất kỳ để tiếp tục,Press any key to continue
+PROMPT_CLICK,Nhấn để tiếp tục,Click to continue
+ITEM_GOT,Nhận: {0},Got: {0}
+ITEM_USED,Dùng: {0},Used: {0}
+WARD_SAVED,Bùa đã cứu anh!,The amulet saved you!
+VENDOR_HOSTILE,"Đóng cửa trái! Cái đó không phải bà ấy!","Close the left door! That isn't her!"
+VENDOR_LEFT,Nó bỏ đi rồi.,It slipped away.
+VENDOR_FAKE_TELL,"Tiếng rao... sai sai. Đừng mở cửa sổ.","That street-cry... is wrong. Don't open the window."
+ACTION_CLOSE_DRAIN,Khóa cống,Shut the drain
+ACTION_ANSWER,Trả lời?,Answer?
+MADA_LURE,"Cứu... cứu tôi với...","Help... please, help me..."
+MADA_RESIST,"Kệ tiếng dưới nước. Đừng trả lời.","Ignore the voice in the water. Don't answer."
+MATROI_RULE,"Thấy đốm xanh thì đi chậm. Đừng chạy.","See the blue flame? Walk slow. Don't run."
+CAT_WARN,Con Mun nhảy qua rồi! Coi chừng!,Mun jumped over it! Watch out!
+DAWN_GREET,"6 giờ. Trời sáng rồi. Mình qua được rồi.","6 o'clock. Dawn. We made it."
+TABOO_NO_NAME,Đừng gọi tên ai sau nửa đêm.,Don't call anyone's name after midnight.
+INCENSE_RULE,"Thắp nhang lẻ — một, ba, năm. Đừng bốn.","Light odd incense — one, three, five. Never four."
+INTRO_L1,Trường THCS Minh Phúc. 11 giờ 45 khuya.,Minh Phuc Secondary School. 11:45 PM.
+INTRO_L2,Công việc đơn giản: trực bảo vệ tới sáng.,A simple job — guard the place till morning.
+INTRO_L3,"Không ai nói gì về... những thứ kia.","Nobody mentioned... those things."
+INTRO_L4,Nhấn phím bất kỳ để bắt đầu ca trực.,Press any key to begin the shift.
+THREAT_ONG_KE,Ông kẹ,Ông kẹ (the Bogeyman)
+THREAT_MA_DA,Ma da,Ma da (Water Ghost)
+THREAT_CO_HON,Cô hồn,Cô hồn (Wandering Souls)
+THREAT_QUY,Quỷ nhập tràng,Quỷ nhập tràng (Risen Corpse)
+THREAT_MA_TROI,Ma trơi,Ma trơi (Will-o'-the-wisp)
+THREAT_OAN_HON,Oan hồn,Oan hồn (The Wronged)
+THREAT_BA_GIA,Kẻ giả dạng,The Impostor
+TAG_DOCUMENTED,Văn hóa dân gian,Documented folklore
+TAG_URBAN,Truyền thuyết đô thị,Urban legend
+TAG_FOLK_THIN,Hư cấu dân gian,Folk-thin (creator's license)
+TAG_SHARED,Tín ngưỡng chung khu vực,Shared regional belief
+BEST_ONG_KE,"Nỗi sợ tuổi thơ: 'không ngoan là ông kẹ bắt'. Đóng cửa, hoặc ngoan ngồi yên.","A childhood fear: 'behave or the bogeyman takes you.' Shut the door, or just behave."
+BEST_MA_DA,"Hồn người chết đuối đi tìm người thế thân. Đừng trả lời tiếng kêu dưới nước.",A drowned soul seeking a replacement. Never answer the cry from the water.
+BEST_CO_HON,"Những vong hồn đói lạnh tháng Bảy. Đừng sợ — hãy cúng cho họ.",Hungry souls of the seventh month. Don't fear them — make them an offering.
+BEST_QUY,Xác chưa chôn bật dậy khi mèo nhảy qua. Giữ con mèo tránh xa.,A corpse rises if a cat leaps over it. Keep the cat away.
+BEST_MA_TROI,"Đốm lửa ma trên đồng cũ. Thấy thì đi chậm, đừng chạy.","Ghost-flames over the old field. Walk slow, never run."
+BEST_OAN_HON,"Một nữ sinh chết oan đi tìm lẽ công bằng. Hãy thương, đừng nhìn lâu.","A schoolgirl who died wronged, seeking justice. Pity her; don't stare too long."
+BEST_BA_GIA,Thứ đội lốt bà hàng rong. Bà thật không bao giờ hại ai.,Something wearing the vendor's shape. The real grandmother never harms anyone.
+ITEM_NHANG,Cây nhang,Incense
+ITEM_NHANG_F,Thắp số lẻ để trấn an một vùng.,Light an odd number to calm a place.
+ITEM_MUOI_GAO,Muối gạo,Salt & rice
+ITEM_MUOI_GAO_F,Rải ra ngoài để trừ tà.,Scatter outward to ward off spirits.
+ITEM_BUA_THAT,Bùa thật,Real amulet
+ITEM_BUA_THAT_F,Lá bùa xin từ chùa. Cứu một lần.,A charm from the temple. Saves you once.
+ITEM_NUOC_PHEP,Nước phép,Blessed water
+ITEM_NUOC_PHEP_F,Rưới lên để gột rửa điều xấu.,Sprinkle to wash away a taint.
+ITEM_VONG,Vòng dâu tằm,Mulberry bracelet
+ITEM_VONG_F,Bảo vệ khỏi những trò hù dọa.,Guards against startling scares.
+ITEM_TOI,Tỏi,Garlic
+ITEM_TOI_F,Mùi hăng khiến vong yếu lùi lại.,Its sharp smell makes weak spirits recoil.
+ITEM_BANH_CHUNG,Bánh chưng,Sticky-rice cake
+ITEM_BANH_CHUNG_F,Dâng tổ tiên để được chở che.,Offer to the ancestors for protection.
+ITEM_CANH_GAI,Cành gai,Thorny branch
+ITEM_CANH_GAI_F,Chặn lối đi của thứ đang rình rập.,Blocks a lurking thing's path.
+ITEM_BANH_LA,Bánh lạ,Strange pastry
+ITEM_BANH_LA_F,Trông ngon. Ai cho vậy ta?,Looks tasty. Who left this, though?
+ITEM_BUA_ROM,Bùa rởm,Counterfeit charm
+ITEM_BUA_ROM_F,Trông y như thật...,Looks just like the real thing...
+ITEM_TIEN_ROI,Tiền rơi,Dropped money
+ITEM_TIEN_ROI_F,Tiền ai đánh rơi ngoài cổng?,Whose money is this by the gate?
+ITEM_CHAI_LA,Chai nước lạ,Unlabeled bottle
+ITEM_CHAI_LA_F,Không nhãn. Nước phép hay nước lã?,No label. Blessed water, or plain?
+ITEM_NUOC_MAM,Nước mắm,Fish sauce
+ITEM_NUOC_MAM_F,Vũ khí tối thượng của người Việt.,The ultimate Vietnamese weapon.
+ITEM_DEN_SAO,Đèn ông sao,Star lantern
+ITEM_DEN_SAO_F,Sáng ấm — nhưng ai cũng thấy anh.,A warm light — but everyone sees you too.
+TAPE_N1_L1,"Chào người mới. Quy tắc số một: thắp nhang lẻ — một, ba, hoặc năm. Đừng bao giờ bốn.","Hello, new guy. Rule one: light odd incense — one, three, or five. Never four."
+TAPE_N1_L2,"Và đừng gọi tên ai sau nửa đêm. Nghe gọi sau lưng cũng đừng quay lại.","And don't call anyone's name after midnight. If something calls behind you, don't turn."
+TAPE_N1_L3,À, con mèo tên Mun. Nó dễ thương lắm. Đừng tin nó.,"Oh, the cat's name is Mun. She's adorable. Don't trust her."
+TAPE_N2_L1,Nếu nghe tiếng kêu cứu từ chỗ có nước... kệ nó.,If you hear a cry for help from anywhere with water... ignore it.
+TAPE_N2_L2,Tao xin lỗi đứa nhỏ dưới ao mỗi đêm. Mày cũng nên xin lỗi.,I apologize to the child in the pond every night. You should too.
+TAPE_N2_L3,Đừng trả lời cái loa. Dưới nước không có ai gọi mày đâu.,Don't answer the intercom. No one in the water is calling you.
+TAPE_N3_L1,Tháng Bảy rồi. Cô hồn về. Giữ mâm cúng ngoài cổng cho đầy.,It's the seventh month. The wandering souls return. Keep the offering tray at the gate full.
+TAPE_N3_L2,"Đồ cúng phải thanh đạm: cháo loãng, muối gạo. Rải muối ra NGOÀI, nghe chưa.","Offerings must be humble: thin porridge, salt and rice. Scatter the salt OUTWARD, hear me?"
+TAPE_N3_L3,Mà coi chừng có bà hàng rong giả. Tiếng rao nó nghe... sai sai.,And beware a fake vendor. Her street-cry sounds... wrong.
+TAPE_N4_L1,Trong kho có cái mền đậy... thứ đó. Đừng giở ra.,In the storeroom there's a sheet over... that thing. Don't lift it.
+TAPE_N4_L2,Việc của mày đêm nay: giữ con Mun tránh xa cái mền. Đóng cửa phải để chặn.,Tonight's job — keep Mun away from the sheet. Close the right door to block her.
+TAPE_N4_L3,Đừng cười tao. Tao biết nghe vô lý. Nhưng đừng để con mèo nhảy qua.,Don't laugh at me. I know it sounds absurd. But don't let the cat leap over it.
+TAPE_N5_L1,"Ngoài sân sau, đồng cũ, có đốm lửa xanh. Ma trơi đó.","Out back, the old field, there are blue flames. That's ma trơi."
+TAPE_N5_L2,"Thấy nó thì đi CHẬM. Tao nói thiệt, đừng chạy.","If you see it, walk SLOW. I mean it — don't run."
+TAPE_N5_L3,(tiếng thở dốc) ...khoan... đừng... AAAA— (băng đứt),(panting) ...wait... don't... AAAH— (tape cuts)
+TAPE_N6_L1,Con bé áo dài trắng... nó không tìm tao. Nó tìm người khác.,The girl in the white áo dài... she isn't looking for me. She's looking for someone else.
+TAPE_N6_L2,Có chuyện oan ức năm xưa chưa ai trả lại cho nó. Tao tìm hoài chưa xong.,An old wrong was never set right for her. I searched for years and never finished.
+TAPE_N6_L3,"Nếu mày còn nghe được... làm ơn, làm nốt giùm tao. Cho nó yên nghỉ.","If you can still hear this... please, finish it for me. Let her rest."

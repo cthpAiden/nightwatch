@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- wall surround -->
+  <rect x="0" y="0" width="512" height="512" fill="#2b3a36"/>
+  <rect x="0" y="0" width="512" height="512" fill="#26332f" fill-opacity="0.4"/>
+  <!-- window frame -->
+  <rect x="56" y="56" width="400" height="400" fill="#1a221d"/>
+  <rect x="56" y="56" width="400" height="400" fill="none" stroke="#10160f" stroke-width="6"/>
+  <!-- night-black glass -->
+  <rect x="76" y="76" width="360" height="360" fill="#070a10"/>
+  <!-- faint moon glow in upper area of glass -->
+  <radialGradient id="moonglow" cx="0.62" cy="0.32" r="0.5">
+    <stop offset="0" stop-color="#cdd6d0" stop-opacity="0.5"/>
+    <stop offset="0.35" stop-color="#5a6b6a" stop-opacity="0.2"/>
+    <stop offset="1" stop-color="#070a10" stop-opacity="0"/>
+  </radialGradient>
+  <rect x="76" y="76" width="360" height="360" fill="url(#moonglow)"/>
+  <!-- the moon disc -->
+  <circle cx="300" cy="180" r="34" fill="#e8ead0" fill-opacity="0.85"/>
+  <circle cx="300" cy="180" r="34" fill="url(#moonglow)"/>
+  <circle cx="290" cy="172" r="8" fill="#cdd6d0" fill-opacity="0.4"/>
+  <circle cx="312" cy="190" r="6" fill="#cdd6d0" fill-opacity="0.35"/>
+  <!-- faint distant tree-line silhouette at bottom of glass -->
+  <path d="M76 436 L76 400 L100 410 L120 380 L140 405 L165 370 L190 408 L215 385 L245 412 L275 388 L305 410 L335 382 L360 408 L390 392 L420 410 L436 398 L436 436 Z" fill="#040609" fill-opacity="0.9"/>
+  <!-- vertical security bars -->
+  <g fill="#0d1310">
+    <rect x="118" y="76" width="16" height="360"/>
+    <rect x="174" y="76" width="16" height="360"/>
+    <rect x="230" y="76" width="16" height="360"/>
+    <rect x="286" y="76" width="16" height="360"/>
+    <rect x="342" y="76" width="16" height="360"/>
+    <rect x="398" y="76" width="16" height="360"/>
+  </g>
+  <!-- bar highlights (moonlit edge) -->
+  <g fill="#3a4540" fill-opacity="0.5">
+    <rect x="118" y="76" width="3" height="360"/>
+    <rect x="174" y="76" width="3" height="360"/>
+    <rect x="230" y="76" width="3" height="360"/>
+    <rect x="286" y="76" width="3" height="360"/>
+    <rect x="342" y="76" width="3" height="360"/>
+    <rect x="398" y="76" width="3" height="360"/>
+  </g>
+  <!-- horizontal cross bar -->
+  <rect x="76" y="248" width="360" height="14" fill="#0d1310"/>
+  <rect x="76" y="248" width="360" height="3" fill="#3a4540" fill-opacity="0.5"/>
+  <!-- frame screws -->
+  <circle cx="70" cy="70" r="5" fill="#0a0e14"/>
+  <circle cx="442" cy="70" r="5" fill="#0a0e14"/>
+  <circle cx="70" cy="442" r="5" fill="#0a0e14"/>
+  <circle cx="442" cy="442" r="5" fill="#0a0e14"/>
+  <!-- peeling paint on surround -->
+  <polygon points="20,200 50,195 56,240 24,250" fill="#1e2a25" fill-opacity="0.7"/>
+  <polygon points="470,300 500,310 495,350 466,340" fill="#1e2a25" fill-opacity="0.65"/>
+  <!-- vignette -->
+  <radialGradient id="winvig" cx="0.5" cy="0.5" r="0.78">
+    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.5"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#winvig)"/>
+</svg>

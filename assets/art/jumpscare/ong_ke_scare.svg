@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <radialGradient id="scareRim" cx="0.5" cy="0.5" r="0.62">
+      <stop offset="0%" stop-color="#b3282d" stop-opacity="0"/>
+      <stop offset="62%" stop-color="#b3282d" stop-opacity="0"/>
+      <stop offset="82%" stop-color="#b3282d" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#b3282d" stop-opacity="0.7"/>
+    </radialGradient>
+    <radialGradient id="scareEye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f4f6e4" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#e8ead0" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#cdd6d0" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#9fb6ad" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="scareMouth" cx="50%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="1"/>
+      <stop offset="70%" stop-color="#05080c" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.9"/>
+    </radialGradient>
+    <radialGradient id="scareFace" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0%" stop-color="#161e2b" stop-opacity="1"/>
+      <stop offset="70%" stop-color="#0a0e14" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#05080c" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" fill="#05080c"/>
+
+  <path d="M640 -40 C400 -40 250 150 250 430 C250 620 420 760 640 760 C860 760 1030 620 1030 430 C1030 150 880 -40 640 -40 Z" fill="url(#scareFace)"/>
+
+  <path d="M120 70 C120 70 380 20 640 20 C900 20 1160 70 1160 70 C1160 30 900 -40 640 -40 C380 -40 120 30 120 70 Z" fill="#05080c"/>
+  <path d="M40 90 C40 90 340 -10 640 -10 C940 -10 1240 90 1240 90 C1240 150 940 250 640 250 C340 250 40 150 40 90 Z" fill="#05080c"/>
+  <path d="M40 90 C40 90 340 0 640 0 C940 0 1240 90 1240 90 C1240 130 940 210 640 210 C340 210 40 130 40 90 Z" fill="#0d121b"/>
+  <path d="M40 90 L40 60 C40 60 340 -30 640 -30 C940 -30 1240 60 1240 60 L1240 90 Z" fill="#05080c"/>
+
+  <path d="M430 250 C430 250 540 210 640 210 C740 210 850 250 850 250 C850 220 740 190 640 190 C540 190 430 220 430 250 Z" fill="#0a0e14"/>
+
+  <ellipse cx="490" cy="330" rx="120" ry="95" fill="url(#scareEye)"/>
+  <ellipse cx="790" cy="330" rx="120" ry="95" fill="url(#scareEye)"/>
+  <ellipse cx="496" cy="338" rx="34" ry="40" fill="#0a0e14"/>
+  <ellipse cx="784" cy="338" rx="34" ry="40" fill="#0a0e14"/>
+  <circle cx="496" cy="334" r="13" fill="#b3282d"/>
+  <circle cx="784" cy="334" r="13" fill="#b3282d"/>
+
+  <path d="M380 268 L590 300" stroke="#05080c" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M900 268 L690 300" stroke="#05080c" stroke-width="14" fill="none" stroke-linecap="round"/>
+
+  <path d="M520 480 C560 466 720 466 760 480 C800 496 800 640 700 700 C660 720 620 720 580 700 C480 640 480 496 520 480 Z" fill="url(#scareMouth)"/>
+  <path d="M520 482 C560 470 720 470 760 482 C740 478 700 476 640 476 C580 476 540 478 520 482 Z" fill="#b3282d" fill-opacity="0.35"/>
+
+  <path d="M540 488 L548 524 M572 484 L578 530 M608 482 L612 534 M644 481 L644 536 M680 482 L676 534 M716 484 L710 530 M748 488 L740 524" stroke="#cdd6d0" stroke-width="6" stroke-linecap="round" stroke-opacity="0.85"/>
+  <path d="M556 700 L562 666 M600 712 L604 668 M644 716 L644 670 M688 712 L684 668 M732 700 L726 666" stroke="#cdd6d0" stroke-width="6" stroke-linecap="round" stroke-opacity="0.7"/>
+
+  <rect x="0" y="0" width="1280" height="720" fill="url(#scareRim)"/>
+</svg>

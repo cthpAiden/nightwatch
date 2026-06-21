@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <!-- ===== SKY / DARKNESS BEYOND ===== -->
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+  <rect x="0" y="0" width="1280" height="430" fill="#121a2b"/>
+  <!-- faint moon glow upper-left -->
+  <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#e8ead0" stop-opacity="0.18"/>
+    <stop offset="60%" stop-color="#e8ead0" stop-opacity="0.05"/>
+    <stop offset="100%" stop-color="#e8ead0" stop-opacity="0"/>
+  </radialGradient>
+  <circle cx="180" cy="120" r="200" fill="url(#moonGlow)"/>
+  <circle cx="170" cy="110" r="34" fill="#e8ead0" fill-opacity="0.5"/>
+  <circle cx="170" cy="110" r="30" fill="#e8ead0" fill-opacity="0.35"/>
+
+  <!-- distant tree/building silhouettes beyond the gate -->
+  <path d="M0 430 L0 360 L60 360 L80 330 L120 360 L180 340 L220 360 L260 345 L300 365 L300 430 Z" fill="#0a0e14" fill-opacity="0.9"/>
+  <path d="M980 430 L980 350 L1030 350 L1060 320 L1100 350 L1160 335 L1210 360 L1280 345 L1280 430 Z" fill="#0a0e14" fill-opacity="0.9"/>
+  <rect x="430" y="300" width="120" height="130" fill="#0a0e14" fill-opacity="0.85"/>
+  <rect x="720" y="290" width="140" height="140" fill="#0a0e14" fill-opacity="0.85"/>
+
+  <!-- ===== GROUND ===== -->
+  <rect x="0" y="430" width="1280" height="290" fill="#1e2a3d"/>
+  <rect x="0" y="430" width="1280" height="290" fill="#0a0e14" fill-opacity="0.35"/>
+  <!-- pavement seam lines -->
+  <line x1="0" y1="540" x2="1280" y2="540" stroke="#0a0e14" stroke-width="3" stroke-opacity="0.5"/>
+  <line x1="640" y1="430" x2="640" y2="720" stroke="#0a0e14" stroke-width="2" stroke-opacity="0.3"/>
+
+  <!-- ===== WARM POOL OF LIGHT from street lamp (right side) ===== -->
+  <radialGradient id="lampPool" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#f0b65a" stop-opacity="0.55"/>
+    <stop offset="40%" stop-color="#e8a33d" stop-opacity="0.28"/>
+    <stop offset="100%" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="1015" cy="560" rx="330" ry="200" fill="url(#lampPool)"/>
+
+  <!-- ===== IRON GATE (two leaves, center-spanning, lower area kept clearish) ===== -->
+  <!-- gate base wall / plinth -->
+  <rect x="80" y="470" width="1120" height="26" fill="#1e2a3d"/>
+  <rect x="80" y="470" width="1120" height="26" fill="#0a0e14" fill-opacity="0.4"/>
+
+  <!-- LEFT brick pillar -->
+  <rect x="86" y="250" width="70" height="260" fill="#1e2a3d"/>
+  <rect x="86" y="250" width="70" height="260" fill="#0a0e14" fill-opacity="0.45"/>
+  <rect x="80" y="238" width="82" height="20" fill="#243349"/>
+  <polygon points="80,238 121,214 162,238" fill="#243349"/>
+  <circle cx="121" cy="208" r="9" fill="#36473f" fill-opacity="0.6"/>
+
+  <!-- RIGHT brick pillar -->
+  <rect x="1124" y="250" width="70" height="260" fill="#1e2a3d"/>
+  <rect x="1124" y="250" width="70" height="260" fill="#0a0e14" fill-opacity="0.45"/>
+  <rect x="1118" y="238" width="82" height="20" fill="#243349"/>
+  <polygon points="1118,238 1159,214 1200,238" fill="#243349"/>
+  <circle cx="1159" cy="208" r="9" fill="#36473f" fill-opacity="0.6"/>
+
+  <!-- gate iron color group: vertical bars + frames -->
+  <g fill="#0a0e14">
+    <!-- top & bottom rails, left leaf -->
+    <rect x="156" y="300" width="464" height="14"/>
+    <rect x="156" y="494" width="464" height="14"/>
+    <rect x="156" y="392" width="464" height="9"/>
+    <!-- top & bottom rails, right leaf -->
+    <rect x="660" y="300" width="464" height="14"/>
+    <rect x="660" y="494" width="464" height="14"/>
+    <rect x="660" y="392" width="464" height="9"/>
+  </g>
+
+  <!-- vertical bars (thin) -->
+  <g fill="#0a0e14">
+    <rect x="172" y="300" width="8" height="208"/>
+    <rect x="212" y="300" width="8" height="208"/>
+    <rect x="252" y="300" width="8" height="208"/>
+    <rect x="292" y="300" width="8" height="208"/>
+    <rect x="332" y="300" width="8" height="208"/>
+    <rect x="372" y="300" width="8" height="208"/>
+    <rect x="412" y="300" width="8" height="208"/>
+    <rect x="452" y="300" width="8" height="208"/>
+    <rect x="492" y="300" width="8" height="208"/>
+    <rect x="532" y="300" width="8" height="208"/>
+    <rect x="572" y="300" width="8" height="208"/>
+    <rect x="606" y="296" width="10" height="216"/>
+    <!-- right leaf -->
+    <rect x="666" y="296" width="10" height="216"/>
+    <rect x="708" y="300" width="8" height="208"/>
+    <rect x="748" y="300" width="8" height="208"/>
+    <rect x="788" y="300" width="8" height="208"/>
+    <rect x="828" y="300" width="8" height="208"/>
+    <rect x="868" y="300" width="8" height="208"/>
+    <rect x="908" y="300" width="8" height="208"/>
+    <rect x="948" y="300" width="8" height="208"/>
+    <rect x="988" y="300" width="8" height="208"/>
+    <rect x="1028" y="300" width="8" height="208"/>
+    <rect x="1068" y="300" width="8" height="208"/>
+    <rect x="1108" y="300" width="8" height="208"/>
+  </g>
+
+  <!-- spear tips on top of bars -->
+  <g fill="#0a0e14">
+    <polygon points="172,300 176,288 180,300"/>
+    <polygon points="252,300 256,288 260,300"/>
+    <polygon points="332,300 336,288 340,300"/>
+    <polygon points="412,300 416,288 420,300"/>
+    <polygon points="492,300 496,288 500,300"/>
+    <polygon points="572,300 576,288 580,300"/>
+    <polygon points="708,300 712,288 716,300"/>
+    <polygon points="788,300 792,288 796,300"/>
+    <polygon points="868,300 872,288 876,300"/>
+    <polygon points="948,300 952,288 956,300"/>
+    <polygon points="1028,300 1032,288 1036,300"/>
+    <polygon points="1108,300 1112,288 1116,300"/>
+  </g>
+
+  <!-- decorative arch scroll between leaves top -->
+  <path d="M156 300 Q400 268 620 296" stroke="#0a0e14" stroke-width="7" fill="none"/>
+  <path d="M660 296 Q880 268 1124 300" stroke="#0a0e14" stroke-width="7" fill="none"/>
+
+  <!-- warm rim-light catching right gate bars (lit by lamp) -->
+  <g fill="#e8a33d" fill-opacity="0.22">
+    <rect x="988" y="300" width="3" height="208"/>
+    <rect x="1028" y="300" width="3" height="208"/>
+    <rect x="1068" y="300" width="3" height="208"/>
+    <rect x="1108" y="300" width="3" height="208"/>
+    <rect x="948" y="300" width="3" height="208"/>
+  </g>
+
+  <!-- ===== STREET LAMP (right) casting the pool ===== -->
+  <!-- pole -->
+  <rect x="1150" y="150" width="14" height="380" fill="#0a0e14"/>
+  <rect x="1150" y="150" width="4" height="380" fill="#1e2a3d"/>
+  <!-- cross arm -->
+  <path d="M1157 168 Q1090 150 1050 170" stroke="#0a0e14" stroke-width="11" fill="none"/>
+  <!-- lamp head -->
+  <polygon points="1028,168 1072,168 1062,200 1038,200" fill="#0a0e14"/>
+  <rect x="1036" y="176" width="28" height="18" fill="#f0b65a" fill-opacity="0.9"/>
+  <!-- bright bulb glow -->
+  <radialGradient id="bulbGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#f0b65a" stop-opacity="0.95"/>
+    <stop offset="35%" stop-color="#e8a33d" stop-opacity="0.5"/>
+    <stop offset="100%" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <circle cx="1050" cy="186" r="70" fill="url(#bulbGlow)"/>
+  <!-- light cone down to ground -->
+  <polygon points="1030,196 1070,196 1180,560 920,560" fill="#e8a33d" fill-opacity="0.10"/>
+
+  <!-- ===== BLANK SIGN BOARD (left, on a post) ===== -->
+  <rect x="262" y="372" width="14" height="150" fill="#0a0e14"/>
+  <rect x="338" y="372" width="14" height="150" fill="#0a0e14"/>
+  <rect x="240" y="300" width="134" height="86" fill="#243349"/>
+  <rect x="240" y="300" width="134" height="86" fill="#0a0e14" fill-opacity="0.25"/>
+  <rect x="248" y="308" width="118" height="70" fill="#2b3a36"/>
+  <rect x="248" y="308" width="118" height="70" fill="#0a0e14" fill-opacity="0.2"/>
+  <!-- sign frame highlight -->
+  <rect x="240" y="300" width="134" height="5" fill="#36473f" fill-opacity="0.6"/>
+
+  <!-- ===== ATMOSPHERE: vignette + grain overlay ===== -->
+  <radialGradient id="vignette" cx="50%" cy="46%" r="62%">
+    <stop offset="55%" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.82"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vignette)"/>
+
+  <!-- subtle grain specks -->
+  <g fill="#cdd6d0" fill-opacity="0.05">
+    <rect x="120" y="120" width="2" height="2"/>
+    <rect x="360" y="80" width="2" height="2"/>
+    <rect x="600" y="160" width="2" height="2"/>
+    <rect x="900" y="100" width="2" height="2"/>
+    <rect x="1100" y="240" width="2" height="2"/>
+    <rect x="220" y="600" width="2" height="2"/>
+    <rect x="520" y="650" width="2" height="2"/>
+    <rect x="780" y="610" width="2" height="2"/>
+    <rect x="1020" y="660" width="2" height="2"/>
+    <rect x="180" y="420" width="2" height="2"/>
+    <rect x="700" y="470" width="2" height="2"/>
+    <rect x="980" y="430" width="2" height="2"/>
+    <rect x="440" y="220" width="2" height="2"/>
+    <rect x="840" y="350" width="2" height="2"/>
+    <rect x="60" y="300" width="2" height="2"/>
+  </g>
+
+  <!-- CCTV scanlines (sparse horizontal) -->
+  <g stroke="#0a0e14" stroke-opacity="0.10" stroke-width="1">
+    <line x1="0" y1="60" x2="1280" y2="60"/>
+    <line x1="0" y1="180" x2="1280" y2="180"/>
+    <line x1="0" y1="300" x2="1280" y2="300"/>
+    <line x1="0" y1="420" x2="1280" y2="420"/>
+    <line x1="0" y1="540" x2="1280" y2="540"/>
+    <line x1="0" y1="660" x2="1280" y2="660"/>
+  </g>
+</svg>

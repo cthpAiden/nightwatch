@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="actAura" cx="50%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.4"/>
+      <stop offset="55%" stop-color="#3a6f6a" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#1e2a3d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="actBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2c3f3a"/>
+      <stop offset="60%" stop-color="#1a2c2a"/>
+      <stop offset="100%" stop-color="#0e1a1a"/>
+    </linearGradient>
+    <linearGradient id="actArm" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#33473f"/>
+      <stop offset="100%" stop-color="#172826"/>
+    </linearGradient>
+    <linearGradient id="actSheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="actEye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a0e14" stop-opacity="1"/>
+      <stop offset="62%" stop-color="#0a0e14" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="actEyeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="actDrip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="380" rx="262" ry="360" fill="url(#actAura)"/>
+
+  <!-- torso, risen higher than idle -->
+  <path d="M256 196
+           C222 196 204 220 198 250
+           C166 264 136 300 120 372
+           C108 430 100 540 96 700
+           L416 700
+           C414 560 410 452 400 392
+           C392 348 372 312 348 292
+           C338 256 290 196 256 196 Z" fill="url(#actBody)"/>
+
+  <!-- wet sheen on torso -->
+  <path d="M214 252 C194 276 172 322 158 392 C148 452 142 580 140 696 L168 696 C170 584 176 460 188 400 C200 334 218 282 234 258 Z" fill="url(#actSheen)" fill-opacity="0.5"/>
+
+  <!-- one dripping hand/arm reaching forward toward the viewer (right side) -->
+  <path d="M330 320
+           C372 318 420 326 456 348
+           C484 366 500 388 498 408
+           C496 424 480 430 462 424
+           C470 436 470 452 458 458
+           C470 470 466 486 452 488
+           C460 502 450 514 436 510
+           C440 522 428 530 416 524
+           C404 518 388 504 372 486
+           C352 462 336 430 326 396
+           C320 360 322 336 330 320 Z" fill="url(#actArm)"/>
+  <!-- forearm sheen -->
+  <path d="M340 336 C376 332 418 342 448 362 C432 356 396 350 366 354 C352 372 348 392 350 414 C342 392 338 362 340 336 Z" fill="url(#actSheen)" fill-opacity="0.45"/>
+  <!-- splayed dripping fingers -->
+  <path d="M468 414 C486 406 502 404 510 410 C504 420 488 426 470 424 Z" fill="#33473f"/>
+  <path d="M462 448 C480 444 496 446 504 454 C496 462 480 462 462 458 Z" fill="#2c3f3a"/>
+  <path d="M452 480 C470 478 484 482 490 490 C482 496 466 494 450 488 Z" fill="#2c3f3a"/>
+  <path d="M434 506 C450 506 462 512 466 520 C458 524 444 520 430 512 Z" fill="#283a35"/>
+  <!-- knuckle highlights -->
+  <path d="M474 416 C480 414 486 414 490 416" stroke="#6f9bb3" stroke-width="2" fill="none" stroke-opacity="0.4" stroke-linecap="round"/>
+  <path d="M468 450 C474 448 480 448 484 450" stroke="#6f9bb3" stroke-width="2" fill="none" stroke-opacity="0.35" stroke-linecap="round"/>
+
+  <!-- drips falling off the reaching hand -->
+  <path d="M498 412 C500 432 500 452 498 472" stroke="url(#actDrip)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M460 460 C462 478 462 496 460 514" stroke="url(#actDrip)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="498" cy="478" rx="4" ry="7" fill="#6f9bb3" fill-opacity="0.4"/>
+  <ellipse cx="460" cy="520" rx="3.5" ry="6" fill="#6f9bb3" fill-opacity="0.35"/>
+
+  <!-- head, lifted; hair parting to reveal hollow eyes -->
+  <g transform="rotate(-3 250 188)">
+    <ellipse cx="250" cy="190" rx="54" ry="60" fill="url(#actBody)"/>
+
+    <!-- hollow eyes, now visible through parted hair -->
+    <ellipse cx="228" cy="190" rx="15" ry="18" fill="url(#actEyeGlow)"/>
+    <ellipse cx="272" cy="188" rx="15" ry="18" fill="url(#actEyeGlow)"/>
+    <ellipse cx="228" cy="190" rx="11" ry="15" fill="url(#actEye)"/>
+    <ellipse cx="272" cy="188" rx="11" ry="15" fill="url(#actEye)"/>
+    <ellipse cx="228" cy="190" rx="5" ry="7" fill="#05080a"/>
+    <ellipse cx="272" cy="188" rx="5" ry="7" fill="#05080a"/>
+
+    <!-- gaunt mouth, slightly open -->
+    <path d="M236 224 C244 234 256 234 264 224 C258 240 242 240 236 224 Z" fill="#05080a"/>
+
+    <!-- hair parted to either side, framing the face -->
+    <path d="M196 168 C196 138 202 120 214 112
+             C210 150 206 210 200 300
+             C196 360 192 430 190 510 L168 510
+             C170 426 176 350 182 286
+             C176 312 174 360 170 430 L150 430
+             C156 320 168 220 196 168 Z" fill="#080d10"/>
+    <path d="M304 168 C304 138 298 120 286 112
+             C290 150 294 210 300 300
+             C304 360 308 430 310 510 L332 510
+             C330 426 324 350 318 286
+             C324 312 326 360 330 430 L350 430
+             C344 320 332 220 304 168 Z" fill="#080d10"/>
+    <!-- crown of hair, parted in the middle -->
+    <path d="M214 130 C214 122 228 116 250 116 C272 116 286 122 286 130 C286 130 280 138 250 142 C238 138 226 138 214 144 Z" fill="#101820"/>
+    <!-- thin wet strands crossing the brow -->
+    <path d="M214 150 C228 158 240 168 248 178" stroke="#080d10" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M286 150 C272 158 260 168 252 178" stroke="#080d10" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- drips off the hair tips and shoulders -->
+  <path d="M168 510 C166 532 164 552 166 572" stroke="url(#actDrip)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M332 510 C334 532 336 552 334 574" stroke="url(#actDrip)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="166" cy="578" rx="4" ry="7" fill="#6f9bb3" fill-opacity="0.38"/>
+  <ellipse cx="334" cy="580" rx="4" ry="7" fill="#6f9bb3" fill-opacity="0.38"/>
+
+  <!-- pooling water / shadow at the base -->
+  <ellipse cx="256" cy="708" rx="170" ry="26" fill="#0a0e14" fill-opacity="0.6"/>
+  <path d="M110 706 C160 702 200 710 256 706 C312 702 352 710 402 706" stroke="#6f9bb3" stroke-width="2.5" fill="none" stroke-opacity="0.32"/>
+  <path d="M140 726 C190 722 222 730 256 726 C290 722 322 730 372 726" stroke="#6f9bb3" stroke-width="2" fill="none" stroke-opacity="0.2"/>
+</svg>

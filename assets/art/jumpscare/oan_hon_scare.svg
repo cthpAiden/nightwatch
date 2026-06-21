@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <radialGradient id="scBg" cx="50%" cy="46%" r="62%">
+      <stop offset="0%" stop-color="#1e2a3d"/>
+      <stop offset="55%" stop-color="#0e131c"/>
+      <stop offset="100%" stop-color="#0a0e14"/>
+    </radialGradient>
+    <radialGradient id="scFaceGlow" cx="50%" cy="44%" r="46%">
+      <stop offset="0%" stop-color="#f2f3e6" stop-opacity="0.6"/>
+      <stop offset="55%" stop-color="#cdd6d0" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="scFace" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#f2f3e6"/>
+      <stop offset="70%" stop-color="#dfe6e1"/>
+      <stop offset="100%" stop-color="#b9c4be"/>
+    </radialGradient>
+    <linearGradient id="scHair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#161b24"/>
+      <stop offset="100%" stop-color="#0a0e14"/>
+    </linearGradient>
+    <radialGradient id="scVignette" cx="50%" cy="50%" r="62%">
+      <stop offset="0%" stop-color="#0a0e14" stop-opacity="0"/>
+      <stop offset="78%" stop-color="#0a0e14" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.92"/>
+    </radialGradient>
+  </defs>
+
+  <!-- full-bleed dark backdrop -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#scBg)"/>
+  <ellipse cx="640" cy="330" rx="540" ry="470" fill="url(#scFaceGlow)"/>
+
+  <!-- curtain of long black hair framing the whole face, falling off-frame -->
+  <path d="M300 720 C268 520 264 320 300 150 C340 -20 540 -40 640 -40 C740 -40 940 -20 980 150 C1016 320 1012 520 980 720 L860 720 C896 520 900 330 868 190 C852 120 760 86 640 86 C520 86 428 120 412 190 C380 330 384 520 420 720 Z" fill="url(#scHair)"/>
+
+  <!-- hair strand detailing -->
+  <path d="M360 720 C330 520 330 320 372 170" stroke="#1e2a3d" stroke-width="3" stroke-opacity="0.5" fill="none"/>
+  <path d="M470 720 C446 520 448 320 472 150" stroke="#1e2a3d" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
+  <path d="M920 720 C950 520 950 320 908 170" stroke="#1e2a3d" stroke-width="3" stroke-opacity="0.5" fill="none"/>
+  <path d="M810 720 C834 520 832 320 808 150" stroke="#1e2a3d" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
+
+  <!-- the pale face, close and large -->
+  <ellipse cx="640" cy="380" rx="232" ry="288" fill="url(#scFace)"/>
+
+  <!-- soft cheek shading to keep it gentle, not ghoulish -->
+  <path d="M440 340 C432 420 444 510 488 580 C470 470 470 380 482 320 C470 318 452 326 440 340 Z" fill="#1e2a3d" fill-opacity="0.1"/>
+  <path d="M840 340 C848 420 836 510 792 580 C810 470 810 380 798 320 C810 318 828 326 840 340 Z" fill="#1e2a3d" fill-opacity="0.1"/>
+
+  <!-- central parting of the hair over the brow -->
+  <path d="M640 150 C620 210 610 270 606 320 C622 300 634 282 640 268 C646 282 658 300 674 320 C670 270 660 210 640 150 Z" fill="url(#scFace)"/>
+  <path d="M640 150 C634 210 630 270 632 312" stroke="#0a0e14" stroke-width="3" stroke-opacity="0.4" fill="none"/>
+
+  <!-- framing locks crossing onto the face -->
+  <path d="M470 160 C452 280 452 410 470 540 C500 470 512 360 510 250 C508 210 500 178 488 160 C484 156 472 156 470 160 Z" fill="#0f141d"/>
+  <path d="M810 160 C828 280 828 410 810 540 C780 470 768 360 770 250 C772 210 780 178 792 160 C796 156 808 156 810 160 Z" fill="#0f141d"/>
+
+  <!-- veiling lock falling across her right eye (screen-left) -->
+  <path d="M560 230 C544 320 546 410 562 490 C588 430 596 350 594 280 C593 250 586 234 576 226 C570 224 562 226 560 230 Z" fill="#0a0e14"/>
+  <path d="M564 250 C552 330 554 410 568 480" stroke="#1e2a3d" stroke-width="2" stroke-opacity="0.5" fill="none"/>
+
+  <!-- ONE large sorrowful weeping eye (screen-right), the other veiled -->
+  <ellipse cx="724" cy="368" rx="46" ry="30" fill="#f6f7ec"/>
+  <path d="M680 360 C696 344 752 344 768 362" stroke="#1e2a3d" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="726" cy="372" rx="27" ry="27" fill="#46606b"/>
+  <ellipse cx="726" cy="372" rx="22" ry="22" fill="#2c4049"/>
+  <ellipse cx="726" cy="372" rx="13" ry="13" fill="#0a0e14"/>
+  <ellipse cx="719" cy="365" rx="5.5" ry="5.5" fill="#eef0e4"/>
+  <ellipse cx="734" cy="380" rx="2.6" ry="2.6" fill="#cdd6d0" fill-opacity="0.7"/>
+  <!-- lower lid, brimming -->
+  <path d="M682 386 C700 398 750 398 766 384" stroke="#9fb0ac" stroke-width="3" stroke-opacity="0.7" fill="none" stroke-linecap="round"/>
+  <!-- gentle downcast brow -->
+  <path d="M676 332 C700 322 752 324 772 338" stroke="#2a2f3a" stroke-width="4" stroke-opacity="0.6" fill="none" stroke-linecap="round"/>
+
+  <!-- the weeping: a tear welling and a long trail down the cheek -->
+  <ellipse cx="730" cy="398" rx="9" ry="12" fill="#6f9bb3"/>
+  <ellipse cx="727" cy="394" rx="3" ry="4" fill="#dfe6e1"/>
+  <path d="M730 408 C726 470 722 540 728 600 C732 628 748 628 748 600 C748 540 742 470 738 412 C736 404 732 402 730 408 Z" fill="#6f9bb3" fill-opacity="0.45"/>
+  <ellipse cx="742" cy="604" rx="8" ry="12" fill="#6f9bb3"/>
+  <ellipse cx="739" cy="600" rx="2.6" ry="3.6" fill="#cdd6d0"/>
+  <!-- a second faint trail -->
+  <path d="M724 404 C720 460 718 520 720 560" stroke="#6f9bb3" stroke-width="3" stroke-opacity="0.3" fill="none"/>
+
+  <!-- nose, simple and soft -->
+  <path d="M636 392 C630 430 624 462 636 478 C648 470 652 452 648 430" stroke="#b9c4be" stroke-width="3.5" stroke-opacity="0.7" fill="none" stroke-linecap="round"/>
+  <ellipse cx="628" cy="476" rx="4" ry="3" fill="#b9c4be" fill-opacity="0.5"/>
+  <ellipse cx="648" cy="476" rx="4" ry="3" fill="#b9c4be" fill-opacity="0.5"/>
+
+  <!-- mournful, parted lips — sorrowful, not snarling -->
+  <path d="M598 528 C620 520 660 520 682 528 C660 540 620 540 598 528 Z" fill="#9a7a72"/>
+  <path d="M598 528 C620 522 660 522 682 528" stroke="#7a5a52" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M604 538 C622 548 658 548 676 538" stroke="#8a6a62" stroke-width="2.5" stroke-opacity="0.7" fill="none" stroke-linecap="round"/>
+  <path d="M620 524 C620 532 620 534 620 536 M644 524 C644 532 644 534 644 536" stroke="#7a5a52" stroke-width="1.6" stroke-opacity="0.5" fill="none"/>
+
+  <!-- vignette to press the dark in around her -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#scVignette)"/>
+</svg>

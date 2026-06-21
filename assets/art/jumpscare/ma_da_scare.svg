@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <radialGradient id="scBack" cx="50%" cy="46%" r="62%">
+      <stop offset="0%" stop-color="#16313b" stop-opacity="1"/>
+      <stop offset="55%" stop-color="#0b1820" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#05080a" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="scAura" cx="50%" cy="44%" r="50%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#3a6f6a" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a534c"/>
+      <stop offset="50%" stop-color="#24382f"/>
+      <stop offset="100%" stop-color="#10201c"/>
+    </linearGradient>
+    <linearGradient id="scSheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9fc4d6" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="scEye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#05080a" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#05080a" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#05080a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="scEyeRim" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0"/>
+      <stop offset="62%" stop-color="#6f9bb3" stop-opacity="0"/>
+      <stop offset="80%" stop-color="#9fc4d6" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a3a44"/>
+      <stop offset="45%" stop-color="#0d1f27"/>
+      <stop offset="100%" stop-color="#05080a"/>
+    </linearGradient>
+    <linearGradient id="scStream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9fc4d6" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- full-bleed dark background -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#scBack)"/>
+  <ellipse cx="640" cy="320" rx="640" ry="420" fill="url(#scAura)"/>
+
+  <!-- the face surging up: broad neck/shoulders rising from below -->
+  <path d="M360 720
+           C380 560 440 470 520 430
+           C540 360 580 300 640 300
+           C700 300 740 360 760 430
+           C840 470 900 560 920 720 Z" fill="url(#scFace)"/>
+
+  <!-- streaming-wet face mass -->
+  <path d="M640 150
+           C520 150 452 250 452 380
+           C452 470 492 552 560 600
+           C592 622 616 632 640 632
+           C664 632 688 622 720 600
+           C788 552 828 470 828 380
+           C828 250 760 150 640 150 Z" fill="url(#scFace)"/>
+
+  <!-- wet vertical sheen streaming down the face -->
+  <path d="M512 250 C496 320 492 420 504 510 C510 552 522 588 540 612 C520 560 514 470 516 392 C518 330 522 286 530 256 Z" fill="url(#scSheen)" fill-opacity="0.5"/>
+  <path d="M600 210 C590 320 590 470 600 600 L612 600 C606 470 606 320 612 212 Z" fill="url(#scSheen)" fill-opacity="0.4"/>
+  <path d="M690 214 C700 330 700 480 690 604 L702 604 C710 480 710 330 702 216 Z" fill="url(#scSheen)" fill-opacity="0.35"/>
+
+  <!-- hollow eyes, large and dark with a cold rim -->
+  <ellipse cx="566" cy="372" rx="74" ry="84" fill="url(#scEyeRim)"/>
+  <ellipse cx="714" cy="372" rx="74" ry="84" fill="url(#scEyeRim)"/>
+  <ellipse cx="566" cy="372" rx="52" ry="64" fill="url(#scEye)"/>
+  <ellipse cx="714" cy="372" rx="52" ry="64" fill="url(#scEye)"/>
+  <ellipse cx="566" cy="376" rx="30" ry="40" fill="#05080a"/>
+  <ellipse cx="714" cy="376" rx="30" ry="40" fill="#05080a"/>
+  <!-- faint cold catch-light deep in each socket -->
+  <ellipse cx="556" cy="356" rx="7" ry="10" fill="#9fc4d6" fill-opacity="0.5"/>
+  <ellipse cx="704" cy="356" rx="7" ry="10" fill="#9fc4d6" fill-opacity="0.5"/>
+
+  <!-- gaunt nose hollow -->
+  <path d="M640 410 C632 446 624 472 632 492 C636 502 644 502 648 492 C656 472 648 446 640 410 Z" fill="#0a1614" fill-opacity="0.7"/>
+
+  <!-- open, gasping mouth, dark -->
+  <path d="M584 540
+           C600 524 680 524 696 540
+           C708 556 700 588 668 602
+           C652 608 628 608 612 602
+           C580 588 572 556 584 540 Z" fill="#05080a"/>
+  <path d="M598 546 C620 538 660 538 682 546 C666 552 614 552 598 546 Z" fill="#16313b" fill-opacity="0.6"/>
+
+  <!-- long wet black hair streaming down both sides, parted off the face -->
+  <path d="M452 300
+           C440 240 452 196 480 172
+           C470 260 466 380 470 500
+           C472 580 470 660 470 720 L300 720
+           C312 600 332 460 356 360
+           C368 300 384 250 412 220
+           C396 250 388 320 384 420
+           C380 520 380 620 382 720 L348 720
+           C346 620 348 520 352 440
+           C338 500 332 600 330 700 L300 700
+           C320 540 380 360 452 300 Z" fill="#070c0f"/>
+  <path d="M828 300
+           C840 240 828 196 800 172
+           C810 260 814 380 810 500
+           C808 580 810 660 810 720 L980 720
+           C968 600 948 460 924 360
+           C912 300 896 250 868 220
+           C884 250 892 320 896 420
+           C900 520 900 620 898 720 L932 720
+           C934 620 932 520 928 440
+           C942 500 948 600 950 700 L980 700
+           C960 540 900 360 828 300 Z" fill="#070c0f"/>
+
+  <!-- crown of soaked hair, center-parted -->
+  <path d="M480 200 C480 180 540 168 640 168 C740 168 800 180 800 200 C800 200 770 220 640 230 C600 220 540 220 480 232 Z" fill="#0e1a20"/>
+  <!-- a few wet strands crossing the brow between the eyes -->
+  <path d="M520 250 C560 280 600 300 632 320" stroke="#070c0f" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M760 250 C720 280 680 300 648 320" stroke="#070c0f" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M640 232 C636 270 636 300 640 330" stroke="#0e1a20" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- water streaming off the chin and hair tips -->
+  <path d="M640 632 C636 660 634 686 638 712" stroke="url(#scStream)" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M470 500 C466 540 466 580 470 620" stroke="url(#scStream)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M810 500 C814 540 814 580 810 620" stroke="url(#scStream)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M560 600 C558 632 558 660 562 690" stroke="url(#scStream)" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M720 600 C722 632 722 660 718 690" stroke="url(#scStream)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- the black water surface the face is surging through -->
+  <path d="M0 624
+           C140 600 280 656 420 632
+           C520 614 560 596 640 596
+           C720 596 760 614 860 632
+           C1000 656 1140 600 1280 624
+           L1280 720 L0 720 Z" fill="url(#scWater)"/>
+  <path d="M0 624 C140 600 280 656 420 632 C520 614 560 596 640 596 C720 596 760 614 860 632 C1000 656 1140 600 1280 624
+           L1280 644 C1140 622 1000 674 860 652 C760 634 720 618 640 618 C560 618 520 634 420 652 C280 674 140 622 0 644 Z" fill="#0a0e14" fill-opacity="0.7"/>
+  <!-- splash ridges thrown up where the figure breaks the surface -->
+  <path d="M470 600 C500 580 540 572 560 588" stroke="#9fc4d6" stroke-width="4" fill="none" stroke-opacity="0.5" stroke-linecap="round"/>
+  <path d="M810 600 C780 580 740 572 720 588" stroke="#9fc4d6" stroke-width="4" fill="none" stroke-opacity="0.5" stroke-linecap="round"/>
+  <ellipse cx="500" cy="600" rx="6" ry="10" fill="#9fc4d6" fill-opacity="0.45"/>
+  <ellipse cx="780" cy="600" rx="6" ry="10" fill="#9fc4d6" fill-opacity="0.45"/>
+  <ellipse cx="540" cy="592" rx="4" ry="7" fill="#9fc4d6" fill-opacity="0.4"/>
+  <ellipse cx="742" cy="592" rx="4" ry="7" fill="#9fc4d6" fill-opacity="0.4"/>
+
+  <!-- surface ripple lines spreading outward -->
+  <path d="M260 648 C400 632 520 660 640 648 C760 636 880 664 1020 648" stroke="#6f9bb3" stroke-width="3" fill="none" stroke-opacity="0.3"/>
+  <path d="M200 680 C380 666 520 692 640 680 C760 668 900 694 1080 680" stroke="#6f9bb3" stroke-width="2.5" fill="none" stroke-opacity="0.18"/>
+
+  <!-- corner vignette to keep it CCTV-creepy -->
+  <path d="M0 0 L300 0 C180 60 80 180 0 320 Z" fill="#05080a" fill-opacity="0.55"/>
+  <path d="M1280 0 L980 0 C1100 60 1200 180 1280 320 Z" fill="#05080a" fill-opacity="0.55"/>
+  <path d="M0 720 L0 460 C80 560 180 660 320 720 Z" fill="#05080a" fill-opacity="0.5"/>
+  <path d="M1280 720 L1280 460 C1200 560 1100 660 960 720 Z" fill="#05080a" fill-opacity="0.5"/>
+</svg>

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="idleAura" cx="50%" cy="46%" r="50%">
+      <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.42"/>
+      <stop offset="50%" stop-color="#cdd6d0" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="idleDress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8ead0"/>
+      <stop offset="45%" stop-color="#cdd6d0"/>
+      <stop offset="100%" stop-color="#9fb0ac"/>
+    </linearGradient>
+    <linearGradient id="idleDressShade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1e2a3d" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#1e2a3d" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="idleHair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#161a22"/>
+      <stop offset="100%" stop-color="#0a0e14"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="360" rx="232" ry="320" fill="url(#idleAura)"/>
+
+  <ellipse cx="262" cy="742" rx="138" ry="22" fill="#0a0e14" fill-opacity="0.5"/>
+
+  <!-- áo dài long flowing panels, body turned slightly to her right -->
+  <path d="M238 250 C214 250 196 266 192 296 C182 392 168 540 158 690 C156 712 162 726 184 730 L246 730 C252 690 252 540 250 420 C249 360 250 300 250 270 C250 256 246 250 238 250 Z" fill="url(#idleDress)"/>
+  <path d="M260 252 C284 252 304 268 310 300 C322 404 338 552 350 700 C352 720 346 730 326 732 L256 732 C254 690 256 540 258 420 C259 358 258 300 258 270 C258 258 254 252 260 252 Z" fill="url(#idleDress)"/>
+  <path d="M260 252 C284 252 304 268 310 300 C322 404 338 552 350 700 C352 720 346 730 326 732 L268 732 C272 600 274 440 270 320 C268 286 264 262 260 252 Z" fill="url(#idleDressShade)"/>
+
+  <!-- front slit and panel seam -->
+  <path d="M256 300 C256 440 256 600 258 730" stroke="#9fb0ac" stroke-width="2.5" stroke-opacity="0.55" fill="none"/>
+  <path d="M214 360 C210 480 206 600 200 700" stroke="#e8ead0" stroke-width="2" stroke-opacity="0.4" fill="none"/>
+  <path d="M300 380 C306 500 314 600 322 700" stroke="#9fb0ac" stroke-width="2" stroke-opacity="0.45" fill="none"/>
+
+  <!-- soft hem fold shadows -->
+  <path d="M170 690 C200 678 230 676 248 686 L246 718 C220 710 196 712 174 720 Z" fill="#1e2a3d" fill-opacity="0.25"/>
+  <path d="M262 688 C292 678 322 680 344 692 L340 720 C318 710 292 708 264 716 Z" fill="#1e2a3d" fill-opacity="0.2"/>
+
+  <!-- mandarin collar -->
+  <path d="M232 250 C238 240 274 240 282 250 C282 260 274 266 256 266 C238 266 232 260 232 250 Z" fill="#e8ead0"/>
+  <path d="M232 250 C238 240 256 240 256 240 L256 266 C238 266 232 260 232 250 Z" fill="#cdd6d0"/>
+
+  <!-- arm nearest us, lowered, holding a small pencil close to body -->
+  <path d="M240 268 C224 280 214 320 212 372 C211 404 218 430 232 446 C240 440 244 420 244 392 C244 340 248 296 250 274 C250 268 246 264 240 268 Z" fill="#cdd6d0"/>
+  <path d="M240 268 C224 280 214 320 212 372 C211 404 218 430 232 446 C236 440 238 424 238 400 C238 348 240 300 242 276 Z" fill="#1e2a3d" fill-opacity="0.18"/>
+
+  <!-- far arm, lowered behind -->
+  <path d="M276 270 C292 282 302 318 304 366 C305 396 300 420 290 436 C286 430 284 414 284 390 C284 340 280 298 278 276 C278 270 272 266 276 270 Z" fill="#b9c4be"/>
+
+  <!-- pale hand cupping a pencil -->
+  <ellipse cx="230" cy="452" rx="14" ry="17" fill="#dfe6e1"/>
+  <path d="M222 446 C220 452 220 460 224 466" stroke="#aeb9b4" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M230 444 C229 452 229 462 232 470" stroke="#aeb9b4" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M238 446 C238 454 238 462 240 468" stroke="#aeb9b4" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- small pencil -->
+  <path d="M236 408 L248 414 L228 470 L218 466 Z" fill="#e8a33d"/>
+  <path d="M236 408 L242 411 L222 467 L218 466 Z" fill="#f0b65a"/>
+  <path d="M236 408 L248 414 L242 400 Z" fill="#cdd6d0"/>
+  <path d="M242 400 L246 406 L248 414 L242 400 Z" fill="#1e2a3d"/>
+  <path d="M222 462 L228 470 L216 472 Z" fill="#3a2c1c"/>
+
+  <!-- head, downcast and turned away -->
+  <ellipse cx="256" cy="200" rx="48" ry="54" fill="#e8ead0"/>
+  <path d="M214 196 C212 168 224 138 254 134 C246 150 240 176 240 200 C240 220 236 234 230 240 C220 232 214 216 214 196 Z" fill="#dfe6e1"/>
+
+  <!-- the visible cheek/jaw, face mostly hidden by hair -->
+  <path d="M286 178 C294 196 294 220 284 238 C276 230 272 212 272 194 C272 184 280 174 286 178 Z" fill="#dfe6e1"/>
+
+  <!-- long straight black hair, draping forward over the downcast face -->
+  <path d="M210 150 C210 110 230 86 256 86 C282 86 304 110 304 152 C306 210 308 280 304 360 C302 380 294 392 282 392 C284 320 282 250 276 200 C272 200 268 214 264 244 C262 264 256 274 250 274 C250 220 244 196 238 196 C232 200 230 230 228 270 C226 360 226 430 222 470 C214 470 208 458 208 438 C204 340 206 230 210 150 Z" fill="url(#idleHair)"/>
+  <!-- hair strands over face -->
+  <path d="M236 110 C232 170 230 250 230 330" stroke="#1e2a3d" stroke-width="2" stroke-opacity="0.5" fill="none"/>
+  <path d="M262 108 C266 180 268 260 272 340" stroke="#1e2a3d" stroke-width="2" stroke-opacity="0.5" fill="none"/>
+  <path d="M250 100 C250 160 250 230 250 270" stroke="#1e2a3d" stroke-width="1.5" stroke-opacity="0.4" fill="none"/>
+  <!-- top crown highlight -->
+  <path d="M224 130 C232 110 252 100 272 104 C258 108 244 118 236 134 C232 134 226 132 224 130 Z" fill="#2a2f3a" fill-opacity="0.7"/>
+  <!-- back hank of hair behind shoulder -->
+  <path d="M298 150 C312 220 316 320 310 400 C304 396 298 384 296 366 C300 290 300 220 294 168 C294 158 296 150 298 150 Z" fill="#0a0e14"/>
+</svg>

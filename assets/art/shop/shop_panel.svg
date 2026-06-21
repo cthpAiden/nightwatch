@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 640">
+  <defs>
+    <radialGradient id="panelGlow" cx="50%" cy="22%" r="62%">
+      <stop offset="0%" stop-color="#f0b65a" stop-opacity="0.55"/>
+      <stop offset="45%" stop-color="#e8a33d" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panelWood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a4d2a"/>
+      <stop offset="100%" stop-color="#3f2e19"/>
+    </linearGradient>
+    <linearGradient id="panelTray" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a4326"/>
+      <stop offset="100%" stop-color="#41301b"/>
+    </linearGradient>
+    <linearGradient id="panelSlot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a1f11"/>
+      <stop offset="100%" stop-color="#3a2c19"/>
+    </linearGradient>
+    <radialGradient id="lantL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f0b65a" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#e8a33d" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="640" fill="#121a2b"/>
+  <rect x="0" y="0" width="1024" height="640" fill="#0a0e14" fill-opacity="0.45"/>
+  <ellipse cx="512" cy="150" rx="620" ry="360" fill="url(#panelGlow)"/>
+
+  <rect x="118" y="44" width="9" height="120" fill="#3f2e19"/>
+  <path d="M96 162 C96 130 104 112 122 112 C140 112 148 130 148 162 C148 184 134 196 122 196 C110 196 96 184 96 162 Z" fill="#b3282d"/>
+  <path d="M100 160 C100 134 108 120 122 120 C136 120 144 134 144 160 C144 180 134 190 122 190 C110 190 100 180 100 160 Z" fill="#e8a33d"/>
+  <ellipse cx="122" cy="160" rx="80" ry="90" fill="url(#lantL)"/>
+  <rect x="112" y="106" width="20" height="10" rx="3" fill="#3f2e19"/>
+  <rect x="114" y="194" width="16" height="9" rx="3" fill="#3f2e19"/>
+
+  <rect x="906" y="44" width="9" height="120" fill="#3f2e19"/>
+  <path d="M884 162 C884 130 892 112 910 112 C928 112 936 130 936 162 C936 184 922 196 910 196 C898 196 884 184 884 162 Z" fill="#b3282d"/>
+  <path d="M888 160 C888 134 896 120 910 120 C924 120 932 134 932 160 C932 180 922 190 910 190 C898 190 888 180 888 160 Z" fill="#e8a33d"/>
+  <ellipse cx="910" cy="160" rx="80" ry="90" fill="url(#lantL)"/>
+  <rect x="900" y="106" width="20" height="10" rx="3" fill="#3f2e19"/>
+  <rect x="902" y="194" width="16" height="9" rx="3" fill="#3f2e19"/>
+
+  <rect x="40" y="150" width="944" height="450" rx="20" fill="url(#panelWood)"/>
+  <rect x="40" y="150" width="944" height="450" rx="20" fill="#0a0e14" fill-opacity="0.12"/>
+  <rect x="58" y="168" width="908" height="414" rx="14" fill="url(#panelTray)"/>
+
+  <rect x="58" y="168" width="908" height="14" rx="7" fill="#7a5c34" fill-opacity="0.6"/>
+  <rect x="58" y="568" width="908" height="14" rx="7" fill="#1a130a" fill-opacity="0.6"/>
+
+  <line x1="120" y1="200" x2="120" y2="552" stroke="#2a1f11" stroke-width="2" stroke-opacity="0.5"/>
+  <line x1="512" y1="200" x2="512" y2="552" stroke="#2a1f11" stroke-width="2" stroke-opacity="0.5"/>
+  <line x1="904" y1="200" x2="904" y2="552" stroke="#2a1f11" stroke-width="2" stroke-opacity="0.5"/>
+  <line x1="320" y1="206" x2="320" y2="546" stroke="#7a5c34" stroke-width="1.5" stroke-opacity="0.3"/>
+  <line x1="704" y1="206" x2="704" y2="546" stroke="#7a5c34" stroke-width="1.5" stroke-opacity="0.3"/>
+
+  <rect x="108" y="232" width="240" height="290" rx="12" fill="#1a130a" fill-opacity="0.55"/>
+  <rect x="116" y="240" width="240" height="290" rx="12" fill="url(#panelSlot)"/>
+  <rect x="116" y="240" width="240" height="290" rx="12" fill="none" stroke="#7a5c34" stroke-width="2" stroke-opacity="0.55"/>
+  <rect x="124" y="248" width="224" height="22" rx="8" fill="#0a0e14" fill-opacity="0.4"/>
+  <ellipse cx="236" cy="385" rx="70" ry="80" fill="#e8a33d" fill-opacity="0.06"/>
+
+  <rect x="384" y="232" width="240" height="290" rx="12" fill="#1a130a" fill-opacity="0.55"/>
+  <rect x="392" y="240" width="240" height="290" rx="12" fill="url(#panelSlot)"/>
+  <rect x="392" y="240" width="240" height="290" rx="12" fill="none" stroke="#7a5c34" stroke-width="2" stroke-opacity="0.55"/>
+  <rect x="400" y="248" width="224" height="22" rx="8" fill="#0a0e14" fill-opacity="0.4"/>
+  <ellipse cx="512" cy="385" rx="70" ry="80" fill="#e8a33d" fill-opacity="0.06"/>
+
+  <rect x="660" y="232" width="240" height="290" rx="12" fill="#1a130a" fill-opacity="0.55"/>
+  <rect x="668" y="240" width="240" height="290" rx="12" fill="url(#panelSlot)"/>
+  <rect x="668" y="240" width="240" height="290" rx="12" fill="none" stroke="#7a5c34" stroke-width="2" stroke-opacity="0.55"/>
+  <rect x="676" y="248" width="224" height="22" rx="8" fill="#0a0e14" fill-opacity="0.4"/>
+  <ellipse cx="788" cy="385" rx="70" ry="80" fill="#e8a33d" fill-opacity="0.06"/>
+
+  <rect x="40" y="150" width="944" height="450" rx="20" fill="none" stroke="#1a130a" stroke-width="3" stroke-opacity="0.6"/>
+  <rect x="44" y="154" width="936" height="442" rx="18" fill="none" stroke="#8a6326" stroke-width="1.5" stroke-opacity="0.3"/>
+</svg>

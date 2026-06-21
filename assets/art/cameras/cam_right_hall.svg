@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+
+  <rect x="100" y="0" width="1180" height="720" fill="#121a2b"/>
+  <polygon points="1280,0 100,300 100,420 1280,720" fill="#1e2a3d"/>
+  <polygon points="1280,720 100,420 100,300 100,720" fill="#0a0e14"/>
+
+  <polygon points="1280,0 100,300 100,238 1280,0" fill="#0a0e14"/>
+  <polygon points="1280,0 100,238 100,300 1280,0" fill="#121a2b" fill-opacity="0.5"/>
+
+  <polygon points="100,300 0,330 0,400 100,420" fill="#05080d"/>
+  <rect x="0" y="300" width="100" height="120" fill="#05080d"/>
+  <ellipse cx="50" cy="360" rx="60" ry="80" fill="#03050a"/>
+
+  <polygon points="1280,0 100,238 100,300 1280,0" fill="#2b3a36" fill-opacity="0.25"/>
+
+  <g fill="#2b3a36">
+    <polygon points="1030,300 1160,300 1200,520 1045,520"/>
+    <polygon points="755,322 850,322 865,470 762,470"/>
+    <polygon points="575,338 640,338 648,432 579,432"/>
+    <polygon points="458,348 505,348 510,408 460,408"/>
+    <polygon points="380,355 415,355 418,393 381,393"/>
+  </g>
+
+  <g fill="#1a2420">
+    <polygon points="1030,300 1160,300 1200,520 1045,520"/>
+    <polygon points="755,322 850,322 865,470 762,470"/>
+    <polygon points="575,338 640,338 648,432 579,432"/>
+    <polygon points="458,348 505,348 510,408 460,408"/>
+    <polygon points="380,355 415,355 418,393 381,393"/>
+  </g>
+
+  <g fill="#36473f">
+    <polygon points="1036,308 1152,308 1188,512 1050,512"/>
+    <polygon points="760,328 844,328 858,464 767,464"/>
+    <polygon points="579,343 635,343 642,427 583,427"/>
+    <polygon points="462,352 501,352 506,404 465,404"/>
+  </g>
+
+  <g fill="#121a2b">
+    <polygon points="1044,318 1142,318 1176,500 1056,500"/>
+    <polygon points="766,334 838,334 850,458 772,458"/>
+    <polygon points="584,347 631,347 636,422 587,422"/>
+    <polygon points="466,355 498,355 501,400 468,400"/>
+  </g>
+
+  <g fill="#0e1622">
+    <rect x="1045" y="402" width="9" height="20"/>
+    <rect x="769" y="392" width="7" height="16"/>
+    <rect x="587" y="382" width="5" height="12"/>
+    <rect x="468" y="375" width="4" height="10"/>
+  </g>
+
+  <polygon points="1280,512 1200,512 1188,308 1142,318 1142,720 1280,720" fill="#0a0e14" fill-opacity="0.45"/>
+
+  <g fill="#1a2735">
+    <polygon points="960,310 870,316 875,300 962,295"/>
+    <polygon points="720,328 648,334 651,322 722,316"/>
+  </g>
+
+  <radialGradient id="lampR1" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#f0b65a" stop-opacity="0.9"/>
+    <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.5"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="lampR2" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#f0b65a" stop-opacity="0.8"/>
+    <stop offset="0.45" stop-color="#e8a33d" stop-opacity="0.35"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="lampR3" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#f0b65a" stop-opacity="0.8"/>
+    <stop offset="0.45" stop-color="#e8a33d" stop-opacity="0.35"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+
+  <ellipse cx="1100" cy="118" rx="220" ry="120" fill="url(#lampR1)"/>
+  <ellipse cx="460" cy="218" rx="95" ry="55" fill="url(#lampR3)"/>
+  <ellipse cx="305" cy="248" rx="55" ry="32" fill="url(#lampR3)"/>
+
+  <g fill="#f0b65a">
+    <rect x="1040" y="96" width="120" height="9" rx="3"/>
+    <rect x="463" y="208" width="42" height="4"/>
+    <rect x="312" y="240" width="26" height="3"/>
+  </g>
+  <g fill="#e8a33d">
+    <rect x="1040" y="105" width="120" height="4"/>
+  </g>
+
+  <rect x="720" y="166" width="70" height="6" rx="2" fill="#2b3a36"/>
+  <rect x="720" y="172" width="70" height="3" fill="#1e2a3d"/>
+  <rect x="731" y="160" width="6" height="6" fill="#3a4a55"/>
+
+  <radialGradient id="deadR" cx="0.5" cy="0.4" r="0.55">
+    <stop offset="0" stop-color="#3a4a55" stop-opacity="0.35"/>
+    <stop offset="1" stop-color="#3a4a55" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="755" cy="178" rx="70" ry="40" fill="url(#deadR)"/>
+
+  <g fill="#e8a33d" fill-opacity="0.16">
+    <polygon points="1040,105 1160,105 1200,300 1050,300"/>
+  </g>
+
+  <polygon points="1280,512 1142,318 838,334 680,520 680,720 1280,720" fill="#e8a33d" fill-opacity="0.05"/>
+
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14" fill-opacity="0.18"/>
+  <radialGradient id="vignR" cx="0.5" cy="0.55" r="0.75">
+    <stop offset="0" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="0.7" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.7"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vignR)"/>
+
+  <g fill="#cdd6d0" fill-opacity="0.03">
+    <rect x="0" y="60" width="1280" height="2"/>
+    <rect x="0" y="220" width="1280" height="2"/>
+    <rect x="0" y="380" width="1280" height="2"/>
+    <rect x="0" y="540" width="1280" height="2"/>
+  </g>
+</svg>

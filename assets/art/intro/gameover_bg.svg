@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <radialGradient id="redGlow" cx="0.5" cy="0.52" r="0.55">
+      <stop offset="0" stop-color="#b3282d" stop-opacity="0.34"/>
+      <stop offset="0.45" stop-color="#b3282d" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#b3282d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.7">
+      <stop offset="0" stop-color="#0a0e14" stop-opacity="0"/>
+      <stop offset="0.6" stop-color="#0a0e14" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0.95"/>
+    </radialGradient>
+    <linearGradient id="doorLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b3282d" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#b3282d" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- near-black base -->
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+
+  <!-- faint red glow behind the doorway -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#redGlow)"/>
+
+  <!-- suggestion of a doorway: a dim ajar door with red light spilling out -->
+  <rect x="560" y="170" width="160" height="430" fill="#121a2b"/>
+  <!-- door frame edge -->
+  <rect x="556" y="166" width="168" height="8" fill="#1e2a3d"/>
+  <rect x="556" y="166" width="6" height="438" fill="#1e2a3d"/>
+  <rect x="718" y="166" width="6" height="438" fill="#1e2a3d"/>
+  <!-- the gap of the open door, red light within -->
+  <polygon points="640,174 712,174 712,600 640,600" fill="url(#doorLight)"/>
+  <polygon points="648,182 700,182 700,592 648,592" fill="#b3282d" fill-opacity="0.22"/>
+  <!-- the door panel pushed open, darker -->
+  <polygon points="562,174 642,188 642,588 562,600" fill="#0a0e14"/>
+  <line x1="628" y1="360" x2="636" y2="360" stroke="#1e2a3d" stroke-width="4"/>
+
+  <!-- a barely-there silhouette standing in the gap -->
+  <ellipse cx="676" cy="300" rx="20" ry="26" fill="#0a0e14"/>
+  <rect x="660" y="320" width="32" height="180" fill="#0a0e14"/>
+  <path d="M660 322 q16 -10 32 0 l0 16 q-16 -8 -32 0 z" fill="#0a0e14"/>
+
+  <!-- two faint red eyes -->
+  <circle cx="669" cy="296" r="3.4" fill="#b3282d"/>
+  <circle cx="683" cy="296" r="3.4" fill="#b3282d"/>
+
+  <!-- dim floor line -->
+  <rect x="0" y="600" width="1280" height="3" fill="#121a2b"/>
+  <polygon points="560,600 720,600 800,640 480,640" fill="#121a2b" fill-opacity="0.5"/>
+
+  <!-- heavy vignette to keep it pure dread -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vignette)"/>
+</svg>

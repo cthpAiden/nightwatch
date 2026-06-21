@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="honGlow" cx="50%" cy="42%" r="52%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#6f9bb3" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="honEyeL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#6f9bb3" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="honBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#243142"/>
+      <stop offset="100%" stop-color="#11161f"/>
+    </linearGradient>
+    <linearGradient id="honBelly" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b3a36"/>
+      <stop offset="100%" stop-color="#161e1c"/>
+    </linearGradient>
+    <linearGradient id="honSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#9faea6"/>
+      <stop offset="100%" stop-color="#6f7d77"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="430" rx="240" ry="320" fill="url(#honGlow)"/>
+
+  <ellipse cx="252" cy="726" rx="118" ry="22" fill="#0a0e14" fill-opacity="0.55"/>
+
+  <!-- thin ragged legs -->
+  <path d="M236 612 C232 660 226 696 222 724 L210 724 C210 724 206 680 208 640 C209 624 212 612 212 612 Z" fill="#161e1c"/>
+  <path d="M272 612 C276 658 282 694 288 724 L300 724 C300 724 302 678 298 638 C296 622 292 612 292 612 Z" fill="#11161f"/>
+  <path d="M204 722 C204 722 210 716 222 716 C230 716 232 724 232 724 Z" fill="#0a0e14"/>
+  <path d="M308 722 C308 722 300 716 290 716 C282 716 284 724 284 724 Z" fill="#0a0e14"/>
+
+  <!-- huge hollow belly (nga quy) under a thin chest -->
+  <path d="M196 470 C176 510 178 560 200 596 C224 636 296 636 318 594 C338 556 338 508 318 470 C300 436 214 436 196 470 Z" fill="url(#honBelly)"/>
+  <!-- distended belly shading, hollow ribs above -->
+  <ellipse cx="256" cy="540" rx="54" ry="58" fill="#0a0e14" fill-opacity="0.35"/>
+  <path d="M228 472 C236 476 276 476 286 472" stroke="#0a0e14" stroke-width="3" stroke-opacity="0.45" fill="none" stroke-linecap="round"/>
+  <path d="M222 490 C234 496 280 496 292 490" stroke="#0a0e14" stroke-width="3" stroke-opacity="0.4" fill="none" stroke-linecap="round"/>
+
+  <!-- gaunt narrow torso / sunken chest -->
+  <path d="M226 372 C214 400 212 440 224 474 L290 474 C302 440 300 400 288 372 C280 352 234 352 226 372 Z" fill="url(#honBody)"/>
+  <path d="M256 380 L256 470" stroke="#0a0e14" stroke-width="3" stroke-opacity="0.4"/>
+  <path d="M236 392 C242 402 248 406 256 408 C264 406 270 402 276 392" stroke="#0a0e14" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
+  <path d="M232 414 C240 424 248 428 256 430 C264 428 272 424 280 414" stroke="#0a0e14" stroke-width="2.5" stroke-opacity="0.4" fill="none"/>
+
+  <!-- ragged hanging cloth at belly hem -->
+  <path d="M198 588 C210 612 224 600 234 620 C242 604 252 624 262 606 C272 626 284 606 296 622 C306 602 314 612 320 590 C300 626 220 628 198 588 Z" fill="#11161f"/>
+
+  <!-- left arm hanging thin -->
+  <path d="M226 386 C198 410 176 470 168 520 C166 532 178 534 182 522 C192 478 210 426 234 404 Z" fill="url(#honBody)"/>
+  <path d="M170 518 C166 534 162 552 162 564 C162 570 172 570 174 564 C178 550 182 532 184 522 Z" fill="#1a232d"/>
+  <ellipse cx="168" cy="572" rx="11" ry="15" fill="#6f7d77"/>
+  <path d="M160 576 L158 596 M167 578 L167 600 M174 576 L177 596" stroke="#6f7d77" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- right arm reaching gently out, open palm cupped for food -->
+  <path d="M288 388 C320 398 360 410 392 408 C404 408 404 396 392 394 C362 390 326 380 296 374 Z" fill="url(#honBody)"/>
+  <ellipse cx="404" cy="406" rx="16" ry="19" fill="#7a8a83"/>
+  <ellipse cx="404" cy="402" rx="13" ry="13" fill="#0a0e14" fill-opacity="0.3"/>
+  <path d="M392 392 C390 384 392 380 396 380 M400 388 C400 380 402 376 406 378 M410 390 C412 382 416 380 418 384 M418 396 C422 390 426 392 426 396" stroke="#7a8a83" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+  <!-- very thin neck -->
+  <path d="M246 318 C244 338 244 356 248 372 L264 372 C268 356 268 338 266 318 Z" fill="#6f7d77"/>
+  <path d="M256 322 L256 370" stroke="#0a0e14" stroke-width="2" stroke-opacity="0.35"/>
+
+  <!-- gaunt skull-like head -->
+  <path d="M222 268 C222 232 236 210 256 210 C276 210 290 232 290 268 C290 300 278 322 256 322 C234 322 222 300 222 268 Z" fill="#7a8a83"/>
+  <path d="M222 268 C222 232 236 210 256 210 C266 210 274 218 280 232 C268 224 240 226 232 244 C226 256 224 280 230 298 C224 290 222 280 222 268 Z" fill="#8a9a93" fill-opacity="0.5"/>
+  <!-- sunken hollow cheeks -->
+  <path d="M226 280 C232 296 238 304 244 308 C236 308 228 298 226 286 Z" fill="#0a0e14" fill-opacity="0.4"/>
+  <path d="M286 280 C280 296 274 304 268 308 C276 308 284 298 286 286 Z" fill="#0a0e14" fill-opacity="0.4"/>
+
+  <!-- big hollow sunken eyes (glow), sad -->
+  <ellipse cx="240" cy="266" rx="15" ry="17" fill="#0a0e14"/>
+  <ellipse cx="272" cy="266" rx="15" ry="17" fill="#0a0e14"/>
+  <ellipse cx="240" cy="266" rx="13" ry="15" fill="url(#honEyeL)"/>
+  <ellipse cx="272" cy="266" rx="13" ry="15" fill="url(#honEyeL)"/>
+  <circle cx="240" cy="268" r="4" fill="#cdd6d0"/>
+  <circle cx="272" cy="268" r="4" fill="#cdd6d0"/>
+  <!-- mournful drooping brow -->
+  <path d="M226 250 C232 244 244 244 252 250" stroke="#566059" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M260 250 C268 244 280 244 286 250" stroke="#566059" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- gaunt nose hollow + small open mouth (hunger, not snarl) -->
+  <path d="M254 276 C250 286 250 292 256 296 C262 292 262 286 258 276 Z" fill="#0a0e14" fill-opacity="0.4"/>
+  <ellipse cx="256" cy="306" rx="7" ry="9" fill="#0a0e14"/>
+  <ellipse cx="256" cy="304" rx="5" ry="5" fill="#1a232d"/>
+
+  <!-- thin wisps of hair -->
+  <path d="M232 214 C226 200 224 188 228 176 M244 210 C242 196 242 184 246 174 M268 210 C270 196 270 184 266 174 M280 214 C286 200 288 188 284 178" stroke="#3a4640" stroke-width="3" stroke-linecap="round" fill="none"/>
+</svg>

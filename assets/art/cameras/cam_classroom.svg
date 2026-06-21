@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <!-- ===== ABANDONED CLASSROOM: moonlit ===== -->
+
+  <!-- base darkness -->
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+
+  <!-- back wall (muted teal) -->
+  <rect x="0" y="0" width="1280" height="500" fill="#2b3a36"/>
+  <!-- wall lower shadow band -->
+  <rect x="0" y="380" width="1280" height="120" fill="#243430" fill-opacity="0.7"/>
+  <!-- floor (dark wood) -->
+  <rect x="0" y="486" width="1280" height="234" fill="#121a2b"/>
+  <rect x="0" y="480" width="1280" height="10" fill="#1e2a3d"/>
+  <!-- floorboard lines -->
+  <line x1="0" y1="540" x2="1280" y2="540" stroke="#0a0e14" stroke-width="2"/>
+  <line x1="0" y1="600" x2="1280" y2="600" stroke="#0a0e14" stroke-width="2"/>
+  <line x1="0" y1="660" x2="1280" y2="660" stroke="#0a0e14" stroke-width="2"/>
+
+  <!-- ceiling shadow -->
+  <rect x="0" y="0" width="1280" height="60" fill="#0a0e14" fill-opacity="0.6"/>
+
+  <!-- ===== BARRED WINDOWS (right wall) with moonlight ===== -->
+  <!-- window 1 frame -->
+  <rect x="820" y="70" width="180" height="260" fill="#1e2a3d"/>
+  <rect x="832" y="82" width="156" height="236" fill="#0a0e14"/>
+  <!-- night sky / moon glow inside window -->
+  <radialGradient id="moonSky1" cx="60%" cy="35%" r="70%">
+    <stop offset="0%" stop-color="#e8ead0" stop-opacity="0.85"/>
+    <stop offset="30%" stop-color="#5b6f7e" stop-opacity="0.4"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+  </radialGradient>
+  <rect x="832" y="82" width="156" height="236" fill="url(#moonSky1)"/>
+  <circle cx="940" cy="150" r="26" fill="#e8ead0"/>
+  <circle cx="932" cy="144" r="26" fill="#0a0e14" fill-opacity="0.18"/>
+  <!-- window 2 frame -->
+  <rect x="1040" y="70" width="180" height="260" fill="#1e2a3d"/>
+  <rect x="1052" y="82" width="156" height="236" fill="#0a0e14"/>
+  <radialGradient id="moonSky2" cx="40%" cy="60%" r="80%">
+    <stop offset="0%" stop-color="#9fb0bd" stop-opacity="0.5"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+  </radialGradient>
+  <rect x="1052" y="82" width="156" height="236" fill="url(#moonSky2)"/>
+
+  <!-- vertical bars across both windows -->
+  <rect x="862" y="82" width="6" height="236" fill="#0a0e14"/>
+  <rect x="908" y="82" width="6" height="236" fill="#0a0e14"/>
+  <rect x="954" y="82" width="6" height="236" fill="#0a0e14"/>
+  <rect x="1082" y="82" width="6" height="236" fill="#0a0e14"/>
+  <rect x="1128" y="82" width="6" height="236" fill="#0a0e14"/>
+  <rect x="1174" y="82" width="6" height="236" fill="#0a0e14"/>
+  <!-- horizontal sash bar -->
+  <rect x="832" y="196" width="156" height="6" fill="#0a0e14"/>
+  <rect x="1052" y="196" width="156" height="6" fill="#0a0e14"/>
+
+  <!-- ===== moonlight beams falling on floor (barred shadows) ===== -->
+  <radialGradient id="moonPool" cx="50%" cy="0%" r="100%">
+    <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.32"/>
+    <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+  </radialGradient>
+  <polygon points="832,330 1208,330 1270,720 700,720" fill="url(#moonPool)"/>
+  <!-- barred shadow stripes cast on floor -->
+  <polygon points="862,330 868,330 940,720 922,720" fill="#0a0e14" fill-opacity="0.45"/>
+  <polygon points="908,330 914,330 1010,720 992,720" fill="#0a0e14" fill-opacity="0.45"/>
+  <polygon points="1082,330 1088,330 1130,720 1108,720" fill="#0a0e14" fill-opacity="0.4"/>
+  <polygon points="1128,330 1134,330 1200,720 1178,720" fill="#0a0e14" fill-opacity="0.4"/>
+
+  <!-- ===== CHALKBOARD (back-left wall) ===== -->
+  <rect x="120" y="90" width="540" height="250" fill="#3a2f25"/>
+  <rect x="132" y="102" width="516" height="226" fill="#16201c"/>
+  <!-- faint chalk smears -->
+  <line x1="170" y1="150" x2="360" y2="150" stroke="#dfe6e1" stroke-width="3" stroke-opacity="0.18"/>
+  <line x1="170" y1="190" x2="300" y2="190" stroke="#dfe6e1" stroke-width="3" stroke-opacity="0.14"/>
+  <line x1="170" y1="230" x2="420" y2="230" stroke="#dfe6e1" stroke-width="3" stroke-opacity="0.1"/>
+  <path d="M430 140 q40 30 10 70 q-30 30 20 50" fill="none" stroke="#dfe6e1" stroke-width="3" stroke-opacity="0.16"/>
+  <!-- chalk tray -->
+  <rect x="120" y="340" width="540" height="14" fill="#3a2f25"/>
+  <rect x="500" y="346" width="40" height="6" fill="#dfe6e1" fill-opacity="0.5"/>
+
+  <!-- ===== TEACHER'S DESK (empty, front-left) ===== -->
+  <rect x="150" y="400" width="300" height="120" fill="#1e2a3d"/>
+  <rect x="150" y="400" width="300" height="22" fill="#2a3a52"/>
+  <!-- desk legs -->
+  <rect x="160" y="520" width="22" height="120" fill="#121a2b"/>
+  <rect x="418" y="520" width="22" height="120" fill="#121a2b"/>
+  <!-- drawer fronts -->
+  <rect x="320" y="430" width="120" height="40" fill="#16202e"/>
+  <rect x="320" y="476" width="120" height="40" fill="#16202e"/>
+  <circle cx="332" cy="450" r="4" fill="#36473f"/>
+  <circle cx="332" cy="496" r="4" fill="#36473f"/>
+  <!-- desk shadow on floor -->
+  <ellipse cx="300" cy="648" rx="180" ry="24" fill="#0a0e14" fill-opacity="0.6"/>
+
+  <!-- ===== ROWS OF SMALL WOODEN DESKS ===== -->
+  <!-- helper geometry repeated by hand (no <use>): each desk = slab + 2 legs + chair back -->
+
+  <!-- BACK ROW (smaller, dimmer) y~430 -->
+  <g fill-opacity="0.92">
+    <!-- desk A -->
+    <rect x="560" y="430" width="86" height="14" fill="#1e2a3d"/>
+    <rect x="566" y="444" width="8" height="44" fill="#16202e"/>
+    <rect x="632" y="444" width="8" height="44" fill="#16202e"/>
+    <rect x="560" y="408" width="14" height="24" fill="#1a2535"/>
+    <!-- desk B -->
+    <rect x="676" y="430" width="86" height="14" fill="#1e2a3d"/>
+    <rect x="682" y="444" width="8" height="44" fill="#16202e"/>
+    <rect x="748" y="444" width="8" height="44" fill="#16202e"/>
+    <rect x="676" y="408" width="14" height="24" fill="#1a2535"/>
+  </g>
+
+  <!-- MIDDLE ROW y~500 -->
+  <g>
+    <!-- desk C (left) -->
+    <rect x="120" y="500" width="120" height="20" fill="#243246"/>
+    <rect x="120" y="500" width="120" height="6" fill="#2f4258"/>
+    <rect x="130" y="520" width="12" height="70" fill="#121a2b"/>
+    <rect x="220" y="520" width="12" height="70" fill="#121a2b"/>
+    <rect x="120" y="466" width="20" height="36" fill="#1a2535"/>
+    <ellipse cx="180" cy="596" rx="78" ry="12" fill="#0a0e14" fill-opacity="0.5"/>
+    <!-- desk D -->
+    <rect x="290" y="500" width="120" height="20" fill="#243246"/>
+    <rect x="290" y="500" width="120" height="6" fill="#2f4258"/>
+    <rect x="300" y="520" width="12" height="70" fill="#121a2b"/>
+    <rect x="390" y="520" width="12" height="70" fill="#121a2b"/>
+    <rect x="290" y="466" width="20" height="36" fill="#1a2535"/>
+    <ellipse cx="350" cy="596" rx="78" ry="12" fill="#0a0e14" fill-opacity="0.5"/>
+    <!-- desk E (toppled — leg sticking up, off to side) -->
+    <rect x="470" y="556" width="120" height="20" fill="#243246"/>
+    <rect x="470" y="556" width="120" height="6" fill="#2f4258"/>
+    <rect x="566" y="520" width="12" height="40" fill="#121a2b"/>
+    <ellipse cx="530" cy="600" rx="80" ry="12" fill="#0a0e14" fill-opacity="0.5"/>
+  </g>
+
+  <!-- FRONT ROW y~580 (larger, closer) -->
+  <g>
+    <!-- desk F -->
+    <rect x="640" y="580" width="150" height="26" fill="#2a3a52"/>
+    <rect x="640" y="580" width="150" height="8" fill="#374d68"/>
+    <rect x="652" y="606" width="14" height="90" fill="#16202e"/>
+    <rect x="764" y="606" width="14" height="90" fill="#16202e"/>
+    <rect x="640" y="540" width="24" height="42" fill="#1a2535"/>
+    <ellipse cx="710" cy="700" rx="100" ry="14" fill="#0a0e14" fill-opacity="0.5"/>
+    <!-- desk G -->
+    <rect x="850" y="580" width="150" height="26" fill="#2a3a52"/>
+    <rect x="850" y="580" width="150" height="8" fill="#374d68"/>
+    <rect x="862" y="606" width="14" height="90" fill="#16202e"/>
+    <rect x="974" y="606" width="14" height="90" fill="#16202e"/>
+    <rect x="850" y="540" width="24" height="42" fill="#1a2535"/>
+    <ellipse cx="920" cy="700" rx="100" ry="14" fill="#0a0e14" fill-opacity="0.5"/>
+  </g>
+
+  <!-- ===== heavy vignette (oppressive corners) ===== -->
+  <radialGradient id="vigC" cx="50%" cy="50%" r="62%">
+    <stop offset="52%" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.92"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vigC)"/>
+  <rect x="0" y="0" width="1280" height="56" fill="#0a0e14" fill-opacity="0.55"/>
+  <rect x="0" y="666" width="1280" height="54" fill="#0a0e14" fill-opacity="0.5"/>
+</svg>

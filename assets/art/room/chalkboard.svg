@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- wooden frame backing -->
+  <rect x="0" y="0" width="512" height="512" fill="#3a2a1c"/>
+  <rect x="0" y="0" width="512" height="512" fill="#2f2216" fill-opacity="0.4"/>
+  <!-- frame grain hint -->
+  <g fill="none" stroke="#241910" stroke-width="2" stroke-opacity="0.4">
+    <path d="M0,20 C150,16 300,24 512,18"/>
+    <path d="M0,495 C150,491 300,499 512,493"/>
+  </g>
+  <!-- green chalkboard surface -->
+  <rect x="34" y="34" width="444" height="444" fill="#1f3a2c"/>
+  <rect x="34" y="34" width="444" height="444" fill="none" stroke="#160f08" stroke-width="3"/>
+  <!-- subtle surface tone variance -->
+  <rect x="34" y="34" width="220" height="220" fill="#234132" fill-opacity="0.5"/>
+  <rect x="258" y="258" width="220" height="220" fill="#1a3226" fill-opacity="0.5"/>
+  <!-- broad chalk wipe smudges (arcs of pale residue) -->
+  <g fill="none" stroke="#9fb0a6" stroke-opacity="0.16">
+    <path d="M70,120 C170,80 290,140 420,100" stroke-width="34"/>
+    <path d="M80,300 C200,260 330,330 440,290" stroke-width="40"/>
+    <path d="M60,400 C180,370 300,420 430,390" stroke-width="30"/>
+  </g>
+  <!-- lighter eraser streaks -->
+  <g fill="none" stroke="#c8d2ca" stroke-opacity="0.12">
+    <path d="M90,180 C200,150 320,200 430,170" stroke-width="22"/>
+    <path d="M70,240 C190,210 310,255 420,225" stroke-width="18"/>
+  </g>
+  <!-- faint ghost chalk scribbles (illegible loops, NOT letters) -->
+  <g fill="none" stroke="#dfe6e1" stroke-width="2.5" stroke-opacity="0.3">
+    <path d="M100,150 q15,-20 30,0 q15,20 30,0"/>
+    <path d="M180,160 q12,-18 24,0 q12,18 24,0 q12,-18 24,0"/>
+    <path d="M120,330 q20,-15 0,-30 q-20,-15 0,-30"/>
+    <ellipse cx="340" cy="200" rx="22" ry="12"/>
+    <path d="M300,360 q18,-22 36,0 q18,22 36,0"/>
+  </g>
+  <g fill="none" stroke="#b8c4bb" stroke-width="2" stroke-opacity="0.22">
+    <path d="M380,150 l-10,30 l20,-10 l-10,25"/>
+    <path d="M150,420 q14,-16 28,0 q14,16 28,0"/>
+    <line x1="70" y1="80" x2="130" y2="78"/>
+    <line x1="400" y1="430" x2="450" y2="425"/>
+  </g>
+  <!-- chalk dust speckle -->
+  <g fill="#dfe6e1" fill-opacity="0.25">
+    <circle cx="120" cy="110" r="2"/><circle cx="260" cy="140" r="1.5"/><circle cx="400" cy="120" r="2"/>
+    <circle cx="180" cy="250" r="1.5"/><circle cx="330" cy="280" r="2"/><circle cx="90" cy="350" r="1.5"/>
+    <circle cx="420" cy="360" r="2"/><circle cx="240" cy="400" r="1.5"/><circle cx="350" cy="440" r="2"/>
+  </g>
+  <!-- chalk tray at bottom of frame -->
+  <rect x="34" y="478" width="444" height="18" fill="#2a1d12"/>
+  <rect x="34" y="478" width="444" height="4" fill="#160f08"/>
+  <rect x="120" y="484" width="40" height="6" rx="3" fill="#dfe6e1" fill-opacity="0.55"/>
+  <rect x="300" y="484" width="28" height="6" rx="3" fill="#cdd6d0" fill-opacity="0.45"/>
+  <!-- frame corner pegs -->
+  <circle cx="18" cy="18" r="6" fill="#160f08"/>
+  <circle cx="494" cy="18" r="6" fill="#160f08"/>
+  <circle cx="18" cy="494" r="6" fill="#160f08"/>
+  <circle cx="494" cy="494" r="6" fill="#160f08"/>
+  <!-- vignette -->
+  <radialGradient id="cbvig" cx="0.5" cy="0.5" r="0.78">
+    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.5"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#cbvig)"/>
+</svg>

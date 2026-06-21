@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="dawnSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2a3d"/>
+      <stop offset="0.4" stop-color="#b3282d" stop-opacity="0.55"/>
+      <stop offset="0.7" stop-color="#e8a33d"/>
+      <stop offset="1" stop-color="#f0b65a"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mistW" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0b65a" stop-opacity="0"/>
+      <stop offset="1" stop-color="#f0b65a" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" fill="url(#dawnSky)"/>
+
+  <!-- sunrise glow + sun behind the school, center -->
+  <circle cx="640" cy="430" r="380" fill="url(#sunGlow)"/>
+  <circle cx="640" cy="430" r="150" fill="#f0b65a"/>
+  <circle cx="640" cy="430" r="120" fill="#e8ead0" fill-opacity="0.5"/>
+
+  <!-- warm light rays -->
+  <polygon points="640,430 540,40 600,40" fill="#f0b65a" fill-opacity="0.18"/>
+  <polygon points="640,430 700,40 760,40" fill="#f0b65a" fill-opacity="0.18"/>
+  <polygon points="640,430 300,120 360,90" fill="#f0b65a" fill-opacity="0.12"/>
+  <polygon points="640,430 980,90 1040,120" fill="#f0b65a" fill-opacity="0.12"/>
+
+  <!-- distant warm treeline -->
+  <path d="M0 520 L60 490 L120 512 L180 485 L240 508 L300 490 L300 540 L0 540 Z" fill="#b3282d" fill-opacity="0.45"/>
+  <path d="M980 520 L1040 492 L1100 514 L1160 488 L1220 510 L1280 492 L1280 540 L980 540 Z" fill="#b3282d" fill-opacity="0.45"/>
+
+  <!-- school building silhouette, same shape, warm-rimmed dark -->
+  <g>
+    <rect x="395" y="395" width="490" height="225" fill="#1e2a3d"/>
+    <polygon points="565,395 640,345 715,395" fill="#1e2a3d"/>
+    <rect x="600" y="368" width="80" height="30" fill="#1e2a3d"/>
+    <rect x="300" y="455" width="110" height="165" fill="#1e2a3d"/>
+    <rect x="870" y="455" width="110" height="165" fill="#1e2a3d"/>
+    <!-- warm rim light on eaves -->
+    <rect x="385" y="388" width="510" height="6" fill="#e8a33d"/>
+    <rect x="290" y="448" width="130" height="5" fill="#e8a33d"/>
+    <rect x="860" y="448" width="130" height="5" fill="#e8a33d"/>
+    <polygon points="565,395 640,348 715,395 705,395 640,360 575,395" fill="#e8a33d"/>
+
+    <!-- windows now reflecting warm dawn -->
+    <rect x="450" y="455" width="32" height="42" fill="#e8a33d" fill-opacity="0.5"/>
+    <rect x="540" y="455" width="30" height="42" fill="#e8a33d" fill-opacity="0.5"/>
+    <rect x="600" y="455" width="30" height="42" fill="#f0b65a" fill-opacity="0.6"/>
+    <rect x="650" y="455" width="30" height="42" fill="#f0b65a" fill-opacity="0.6"/>
+    <rect x="710" y="455" width="30" height="42" fill="#e8a33d" fill-opacity="0.5"/>
+    <rect x="780" y="455" width="30" height="42" fill="#e8a33d" fill-opacity="0.5"/>
+    <rect x="615" y="540" width="50" height="80" fill="#121a2b"/>
+    <rect x="330" y="500" width="26" height="36" fill="#e8a33d" fill-opacity="0.45"/>
+    <rect x="900" y="500" width="26" height="36" fill="#e8a33d" fill-opacity="0.45"/>
+  </g>
+
+  <!-- fence across foreground -->
+  <rect x="0" y="600" width="1280" height="5" fill="#121a2b"/>
+  <line x1="120" y1="585" x2="120" y2="605" stroke="#121a2b" stroke-width="5"/>
+  <line x1="180" y1="585" x2="180" y2="605" stroke="#121a2b" stroke-width="5"/>
+  <line x1="240" y1="585" x2="240" y2="605" stroke="#121a2b" stroke-width="5"/>
+  <line x1="1040" y1="585" x2="1040" y2="605" stroke="#121a2b" stroke-width="5"/>
+  <line x1="1100" y1="585" x2="1100" y2="605" stroke="#121a2b" stroke-width="5"/>
+  <line x1="1160" y1="585" x2="1160" y2="605" stroke="#121a2b" stroke-width="5"/>
+
+  <!-- rooster silhouette on the fence, right side -->
+  <g fill="#121a2b">
+    <!-- body -->
+    <path d="M980 585 q-8 -42 30 -48 q22 -4 30 12 q14 -6 20 6 q-6 10 -20 8 q4 18 -10 26 q6 8 -2 14 l-10 0 q-2 -8 2 -14 q-18 4 -30 -6 q-8 4 -10 -2 q4 -8 0 -16 z"/>
+    <!-- tail feathers -->
+    <path d="M1010 540 q34 -30 52 -8 q-18 2 -22 14 q18 -6 24 8 q-20 0 -28 12 q10 0 12 10 q-22 -2 -34 -18 z"/>
+    <!-- comb -->
+    <path d="M1006 532 q4 -12 12 -8 q2 -10 10 -6 q2 -8 10 -2 q4 8 -2 14 z"/>
+    <!-- beak -->
+    <path d="M1004 548 l-16 -3 l14 -7 z"/>
+    <!-- legs -->
+    <line x1="1018" y1="600" x2="1018" y2="585" stroke="#121a2b" stroke-width="4"/>
+    <line x1="1032" y1="600" x2="1032" y2="585" stroke="#121a2b" stroke-width="4"/>
+  </g>
+
+  <!-- ground -->
+  <rect x="0" y="600" width="1280" height="120" fill="#36473f"/>
+
+  <!-- clearing mist -->
+  <rect x="0" y="540" width="1280" height="180" fill="url(#mistW)"/>
+  <ellipse cx="380" cy="630" rx="360" ry="40" fill="#f0b65a" fill-opacity="0.3"/>
+  <ellipse cx="820" cy="650" rx="400" ry="42" fill="#f0b65a" fill-opacity="0.3"/>
+  <ellipse cx="640" cy="685" rx="560" ry="44" fill="#f0b65a" fill-opacity="0.35"/>
+</svg>

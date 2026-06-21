@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+
+  <rect x="0" y="0" width="1180" height="720" fill="#121a2b"/>
+  <polygon points="0,0 1180,300 1180,420 0,720" fill="#1e2a3d"/>
+  <polygon points="0,720 1180,420 1180,300 1180,720" fill="#0a0e14"/>
+
+  <polygon points="0,0 1180,300 1180,238 0,0" fill="#0a0e14"/>
+  <polygon points="0,0 1180,238 1180,300 0,0" fill="#121a2b" fill-opacity="0.5"/>
+
+  <polygon points="1180,300 1280,330 1280,400 1180,420" fill="#05080d"/>
+  <rect x="1180" y="300" width="100" height="120" fill="#05080d"/>
+  <ellipse cx="1230" cy="360" rx="60" ry="80" fill="#03050a"/>
+
+  <polygon points="0,0 1180,238 1180,300 0,0" fill="#2b3a36" fill-opacity="0.25"/>
+
+  <g fill="#2b3a36">
+    <polygon points="120,300 250,300 235,520 80,520"/>
+    <polygon points="430,322 525,322 518,470 415,470"/>
+    <polygon points="640,338 705,338 701,432 632,432"/>
+    <polygon points="775,348 822,348 820,408 770,408"/>
+    <polygon points="865,355 900,355 899,393 862,393"/>
+  </g>
+
+  <g fill="#1a2420">
+    <polygon points="120,300 250,300 235,520 80,520"/>
+    <polygon points="430,322 525,322 518,470 415,470"/>
+    <polygon points="640,338 705,338 701,432 632,432"/>
+    <polygon points="775,348 822,348 820,408 770,408"/>
+    <polygon points="865,355 900,355 899,393 862,393"/>
+  </g>
+
+  <g fill="#36473f">
+    <polygon points="128,308 244,308 230,512 92,512"/>
+    <polygon points="436,328 520,328 513,464 422,464"/>
+    <polygon points="645,343 701,343 697,427 638,427"/>
+    <polygon points="779,352 818,352 816,404 775,404"/>
+  </g>
+
+  <g fill="#121a2b">
+    <polygon points="138,318 236,318 224,500 104,500"/>
+    <polygon points="442,334 514,334 508,458 430,458"/>
+    <polygon points="649,347 696,347 693,422 644,422"/>
+    <polygon points="782,355 814,355 812,400 779,400"/>
+  </g>
+
+  <g fill="#0e1622">
+    <rect x="226" y="402" width="9" height="20"/>
+    <rect x="504" y="392" width="7" height="16"/>
+    <rect x="688" y="382" width="5" height="12"/>
+    <rect x="808" y="375" width="4" height="10"/>
+  </g>
+
+  <polygon points="0,512 80,512 92,308 138,318 138,720 0,720" fill="#0a0e14" fill-opacity="0.45"/>
+
+  <g fill="#1a2735">
+    <polygon points="320,310 410,316 405,300 318,295"/>
+    <polygon points="560,328 632,334 629,322 558,316"/>
+  </g>
+
+  <radialGradient id="lampL1" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#f0b65a" stop-opacity="0.9"/>
+    <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.5"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="lampL2" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#f0b65a" stop-opacity="0.85"/>
+    <stop offset="0.4" stop-color="#e8a33d" stop-opacity="0.45"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="lampL3" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#f0b65a" stop-opacity="0.8"/>
+    <stop offset="0.45" stop-color="#e8a33d" stop-opacity="0.35"/>
+    <stop offset="1" stop-color="#e8a33d" stop-opacity="0"/>
+  </radialGradient>
+
+  <ellipse cx="180" cy="118" rx="220" ry="120" fill="url(#lampL1)"/>
+  <ellipse cx="560" cy="178" rx="150" ry="85" fill="url(#lampL2)"/>
+  <ellipse cx="820" cy="218" rx="95" ry="55" fill="url(#lampL3)"/>
+  <ellipse cx="975" cy="248" rx="55" ry="32" fill="url(#lampL3)"/>
+
+  <g fill="#f0b65a">
+    <rect x="120" y="96" width="120" height="9" rx="3"/>
+    <rect x="490" y="166" width="70" height="6" rx="2"/>
+    <rect x="775" y="208" width="42" height="4"/>
+    <rect x="942" y="240" width="26" height="3"/>
+  </g>
+  <g fill="#e8a33d">
+    <rect x="120" y="105" width="120" height="4"/>
+    <rect x="490" y="172" width="70" height="3"/>
+  </g>
+
+  <g fill="#e8a33d" fill-opacity="0.16">
+    <polygon points="120,105 240,105 290,300 80,300"/>
+    <polygon points="490,172 560,172 590,322 470,322"/>
+  </g>
+
+  <polygon points="0,512 138,318 442,334 600,520 600,720 0,720" fill="#e8a33d" fill-opacity="0.05"/>
+
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14" fill-opacity="0.18"/>
+  <radialGradient id="vignL" cx="0.5" cy="0.55" r="0.75">
+    <stop offset="0" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="0.7" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.7"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vignL)"/>
+
+  <g fill="#cdd6d0" fill-opacity="0.03">
+    <rect x="0" y="60" width="1280" height="2"/>
+    <rect x="0" y="220" width="1280" height="2"/>
+    <rect x="0" y="380" width="1280" height="2"/>
+    <rect x="0" y="540" width="1280" height="2"/>
+  </g>
+</svg>

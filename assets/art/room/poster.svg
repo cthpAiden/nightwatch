@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- wall behind poster -->
+  <rect x="0" y="0" width="512" height="512" fill="#2b3a36"/>
+  <rect x="0" y="0" width="512" height="512" fill="#26332f" fill-opacity="0.4"/>
+  <!-- faded paper sheet -->
+  <rect x="60" y="40" width="392" height="432" fill="#cdbfa0"/>
+  <rect x="60" y="40" width="392" height="432" fill="#b8ac90" fill-opacity="0.35"/>
+  <!-- paper aging tone patches -->
+  <rect x="60" y="40" width="392" height="120" fill="#d6c9aa" fill-opacity="0.4"/>
+  <rect x="60" y="360" width="392" height="112" fill="#a89c80" fill-opacity="0.4"/>
+  <!-- header color band (faded warm) -->
+  <rect x="60" y="40" width="392" height="70" fill="#c88a3a" fill-opacity="0.6"/>
+  <rect x="60" y="110" width="392" height="6" fill="#8a5e26" fill-opacity="0.5"/>
+  <!-- abstract figure (safety-poster person silhouette, no detail) -->
+  <circle cx="180" cy="210" r="34" fill="#3a4a63" fill-opacity="0.8"/>
+  <rect x="150" y="250" width="60" height="90" rx="14" fill="#3a4a63" fill-opacity="0.8"/>
+  <!-- abstract warning triangle -->
+  <polygon points="330,180 400,300 260,300" fill="#e8a33d" fill-opacity="0.7"/>
+  <polygon points="330,200 384,292 276,292" fill="none" stroke="#8a5e26" stroke-width="5" stroke-opacity="0.6"/>
+  <rect x="325" y="225" width="10" height="40" fill="#5a3a14" fill-opacity="0.7"/>
+  <circle cx="330" cy="278" r="6" fill="#5a3a14" fill-opacity="0.7"/>
+  <!-- abstract "text" represented as blurry faded bars (illegible blocks, NOT letters) -->
+  <g fill="#5a6b6a" fill-opacity="0.3">
+    <rect x="90" y="360" width="320" height="10" rx="5"/>
+    <rect x="90" y="384" width="280" height="10" rx="5"/>
+    <rect x="90" y="408" width="300" height="10" rx="5"/>
+    <rect x="90" y="432" width="180" height="10" rx="5"/>
+  </g>
+  <!-- a couple abstract icon dots in a row -->
+  <circle cx="110" cy="150" r="14" fill="#b3282d" fill-opacity="0.55"/>
+  <circle cx="160" cy="150" r="14" fill="#3a4a63" fill-opacity="0.55"/>
+  <circle cx="210" cy="150" r="14" fill="#e8a33d" fill-opacity="0.55"/>
+  <!-- water stain bloom -->
+  <radialGradient id="poststain" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#8a7a55" stop-opacity="0.5"/>
+    <stop offset="1" stop-color="#cdbfa0" stop-opacity="0"/>
+  </radialGradient>
+  <ellipse cx="400" cy="400" rx="80" ry="90" fill="url(#poststain)"/>
+  <ellipse cx="110" cy="300" rx="60" ry="70" fill="url(#poststain)"/>
+  <!-- creases / fold lines -->
+  <line x1="256" y1="40" x2="256" y2="472" stroke="#8a7a55" stroke-width="2" stroke-opacity="0.3"/>
+  <line x1="60" y1="256" x2="452" y2="256" stroke="#8a7a55" stroke-width="2" stroke-opacity="0.25"/>
+  <!-- torn corner (bottom-right exposes wall) -->
+  <polygon points="452,440 452,472 410,472" fill="#2b3a36"/>
+  <polyline points="410,472 452,440" fill="none" stroke="#9a8c6a" stroke-width="2" stroke-opacity="0.5"/>
+  <!-- curling top-left corner -->
+  <polygon points="60,40 100,40 60,76" fill="#a89c80" fill-opacity="0.7"/>
+  <!-- tape / pin at top corners -->
+  <rect x="88" y="30" width="40" height="22" fill="#cdd6d0" fill-opacity="0.35"/>
+  <rect x="384" y="30" width="40" height="22" fill="#cdd6d0" fill-opacity="0.35"/>
+  <!-- speckle foxing -->
+  <g fill="#7a6a48" fill-opacity="0.35">
+    <circle cx="150" cy="200" r="2"/><circle cx="300" cy="350" r="2.5"/><circle cx="220" cy="420" r="2"/>
+    <circle cx="380" cy="200" r="2"/><circle cx="120" cy="420" r="2.5"/><circle cx="350" cy="130" r="2"/>
+  </g>
+  <!-- vignette -->
+  <radialGradient id="postvig" cx="0.5" cy="0.5" r="0.8">
+    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.45"/>
+  </radialGradient>
+  <rect x="0" y="0" width="512" height="512" fill="url(#postvig)"/>
+</svg>

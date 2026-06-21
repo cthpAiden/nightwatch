@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768">
+  <defs>
+    <radialGradient id="idleAura" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.32"/>
+      <stop offset="55%" stop-color="#3a6f6a" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#1e2a3d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="idleWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e2a3d"/>
+      <stop offset="45%" stop-color="#13202e"/>
+      <stop offset="100%" stop-color="#0a0e14"/>
+    </linearGradient>
+    <linearGradient id="idleBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2c3f3a"/>
+      <stop offset="60%" stop-color="#1c2e2c"/>
+      <stop offset="100%" stop-color="#101c1c"/>
+    </linearGradient>
+    <linearGradient id="idleSheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="idleEye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a0e14" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#0a0e14" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="idleDrip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="430" rx="250" ry="330" fill="url(#idleAura)"/>
+
+  <!-- shoulders and bowed head silhouette, half-risen -->
+  <path d="M256 250
+           C224 250 206 272 200 300
+           C170 312 138 344 120 410
+           C108 452 100 520 96 600
+           L416 600
+           C412 520 404 452 392 410
+           C374 344 342 312 312 300
+           C306 272 288 250 256 250 Z" fill="url(#idleBody)"/>
+
+  <!-- wet sheen down the left of the torso -->
+  <path d="M214 300 C196 320 176 360 162 420 C152 470 146 530 144 596 L170 596 C172 532 178 474 188 426 C200 368 216 326 232 306 Z" fill="url(#idleSheen)" fill-opacity="0.5"/>
+
+  <!-- bowed head, tilted slightly -->
+  <g transform="rotate(-6 256 232)">
+    <ellipse cx="256" cy="232" rx="52" ry="58" fill="url(#idleBody)"/>
+    <!-- hollow eye sockets, barely seen under hair -->
+    <ellipse cx="236" cy="236" rx="13" ry="16" fill="url(#idleEye)"/>
+    <ellipse cx="278" cy="234" rx="13" ry="16" fill="url(#idleEye)"/>
+
+    <!-- long wet black hair draped over the face -->
+    <path d="M204 200 C204 168 226 150 256 150 C286 150 308 168 308 200
+             C308 232 306 300 300 372 L290 372 C292 304 290 252 286 214
+             C282 240 282 300 278 372 L268 372 C270 308 268 256 266 220
+             C262 250 262 312 258 374 L250 374 C250 312 250 256 248 222
+             C244 254 244 312 240 372 L230 372 C232 304 230 254 226 216
+             C222 248 222 304 218 370 L208 370 C204 300 204 232 204 200 Z" fill="#080d10"/>
+    <path d="M218 196 C218 174 234 160 256 160 C278 160 294 174 294 196 C294 196 280 184 256 184 C232 184 218 196 218 196 Z" fill="#101820"/>
+    <!-- a few stray wet strands -->
+    <path d="M242 372 C240 392 238 412 240 430" stroke="#080d10" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M270 372 C272 392 274 410 272 428" stroke="#080d10" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- drips off the shoulders -->
+  <path d="M150 410 C148 432 146 452 148 470" stroke="url(#idleDrip)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M362 408 C364 430 366 452 364 472" stroke="url(#idleDrip)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="148" cy="476" rx="4" ry="7" fill="#6f9bb3" fill-opacity="0.4"/>
+  <ellipse cx="364" cy="478" rx="4" ry="7" fill="#6f9bb3" fill-opacity="0.4"/>
+
+  <!-- water line at the bottom, body submerged below -->
+  <path d="M0 596 L512 596 L512 768 L0 768 Z" fill="url(#idleWater)"/>
+  <path d="M0 596 C60 590 120 600 188 596 C256 592 300 602 360 596 C420 590 470 600 512 596 L512 612 L0 612 Z" fill="#0a0e14" fill-opacity="0.6"/>
+  <!-- surface ripples around the figure -->
+  <path d="M120 604 C170 600 210 608 256 604 C302 600 342 608 392 604" stroke="#6f9bb3" stroke-width="2.5" fill="none" stroke-opacity="0.4"/>
+  <path d="M150 624 C196 620 222 628 256 624 C290 620 316 628 362 624" stroke="#6f9bb3" stroke-width="2" fill="none" stroke-opacity="0.28"/>
+  <path d="M180 648 C214 644 234 652 256 648 C278 644 298 652 332 648" stroke="#6f9bb3" stroke-width="2" fill="none" stroke-opacity="0.18"/>
+  <ellipse cx="256" cy="600" rx="140" ry="12" fill="#0a0e14" fill-opacity="0.5"/>
+</svg>
