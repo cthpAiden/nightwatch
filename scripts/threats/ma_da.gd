@@ -71,5 +71,8 @@ func on_offering(_location: String) -> void:
 func on_calm() -> void:
 	flood = maxf(0.0, flood - 30.0)   # incense at the pond shrine
 
+func on_ward_save() -> void:
+	flood = minf(flood, 25.0)         # a ward fully breaks the flood's hold
+
 func current_texture() -> Texture2D:
 	return tex_move if flood > 50.0 else tex_idle

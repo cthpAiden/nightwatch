@@ -36,6 +36,7 @@ var _desk_lamp: SpotLight3D
 var _desk_lamp_mat: StandardMaterial3D
 var _altar_light: OmniLight3D
 var _altar_mat: StandardMaterial3D
+var _altar_flames: Array = []     # candle/incense emissive mats, flicker with the light
 var _screen_mat: ShaderMaterial      # desk CRT showing cycling camera feeds
 var _screen_feeds: Array = []
 var _screen_idx := 0
@@ -46,6 +47,7 @@ var _yaw_target := 0.0
 var _pitch := 0.0
 var _pitch_target := 0.0
 var _look_enabled := true
+var _look_locked := false     # dev: hold a fixed framing for screenshots
 var _powered := true
 var _pan_speed := 0.0
 var _kb_dir := 0.0
@@ -58,8 +60,19 @@ func _ready() -> void:
 	_build_chair()
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
+	_build_props()
 	set_process(true)
 	set_process_unhandled_input(true)
+	# Dev framing hook for the screenshot harness: hold a fixed look angle.
+	if OS.has_environment("NW_LOOK_YAW"):
+		_look_locked = true
+		_yaw_target = float(OS.get_environment("NW_LOOK_YAW"))
+		_yaw = _yaw_target
+		if OS.has_environment("NW_LOOK_PITCH"):
+			_pitch_target = float(OS.get_environment("NW_LOOK_PITCH"))
+			_pitch = _pitch_target
+	if OS.has_environment("NW_LOOK_FOV"):
+		_cam.fov = float(OS.get_environment("NW_LOOK_FOV"))
 
 # --- build ------------------------------------------------------------------
 func _build_environment() -> void:
@@ -122,6 +135,14 @@ func _build_environment() -> void:
 		fill.light_energy = 1.0
 		fill.omni_range = 9.0
 		add_child(fill)
+	# a gentle wash on the upper front wall so the chalkboard / clock / calendar read
+	# as intentional decor instead of vanishing into black (kept dim for mood)
+	var wall_wash := OmniLight3D.new()
+	wall_wash.position = Vector3(0, 2.5, -3.0)
+	wall_wash.light_color = Color(0.5, 0.56, 0.68)
+	wall_wash.light_energy = 0.7
+	wall_wash.omni_range = 7.5
+	add_child(wall_wash)
 
 	_tube_mat = StandardMaterial3D.new()
 	_tube_mat.albedo_color = Color(0.9, 0.95, 1.0)
@@ -153,6 +174,33 @@ func _box(size: Vector3, pos: Vector3, mat: StandardMaterial3D, parent: Node3D =
 	var bm := BoxMesh.new()
 	bm.size = size
 	mi.mesh = bm
+	mi.material_override = mat
+	mi.position = pos
+	(parent if parent else self).add_child(mi)
+	return mi
+
+func _cyl(radius: float, height: float, pos: Vector3, mat: StandardMaterial3D,
+		top_radius: float = -1.0, parent: Node3D = null) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.bottom_radius = radius
+	cm.top_radius = radius if top_radius < 0.0 else top_radius
+	cm.height = height
+	cm.radial_segments = 18
+	mi.mesh = cm
+	mi.material_override = mat
+	mi.position = pos
+	(parent if parent else self).add_child(mi)
+	return mi
+
+func _sphere(radius: float, pos: Vector3, mat: StandardMaterial3D, parent: Node3D = null) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = radius
+	sm.height = radius * 2.0
+	sm.radial_segments = 16
+	sm.rings = 10
+	mi.mesh = sm
 	mi.material_override = mat
 	mi.position = pos
 	(parent if parent else self).add_child(mi)
@@ -245,21 +293,106 @@ func _build_desk_lamp() -> void:
 	add_child(_desk_lamp)
 
 func _build_altar() -> void:
-	# Ancestor altar (amber safe zone) — warm candlelight that survives a blackout.
-	_altar_mat = _mat("", Color(0.55, 0.22, 0.09), 1.0, true)
-	_altar_mat.emission_energy_multiplier = 2.2
-	_box(Vector3(0.6, 0.5, 0.4), Vector3(-1.2, 1.35, -1.8), _altar_mat)
-	# two little candle flames
-	for dx in [-0.12, 0.12]:
-		var flame := _mat("", Color(1.0, 0.6, 0.2), 1.0, true)
-		flame.emission_energy_multiplier = 5.0
-		var f := _box(Vector3(0.05, 0.12, 0.05), Vector3(-1.2 + dx, 1.66, -1.7), flame)
-		f.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# Vietnamese ancestor altar / bàn thờ (the amber "safe zone"): a red-lacquered
+	# shrine sitting on the desk's left end — gold-trimmed cabinet, raised backboard
+	# with a gilt medallion, a brass incense burner with glowing joss sticks, two red
+	# candles, a fruit offering plate and a flower vase. Its warm candle/ember light
+	# survives a blackout, so it stays the one warm island when the mains die.
+	var cx := -1.2
+	var bz := -1.84               # altar back-to-front anchor (back wall side)
+	var top := 1.52               # cabinet top surface height
+
+	# --- materials ---
+	var lacquer := _mat("", Color(0.46, 0.07, 0.06), 1.0, false, 0.32, 0.1)  # red lacquer
+	_altar_mat = lacquer
+	var gold := _mat("", Color(0.83, 0.66, 0.24), 1.0, false, 0.3, 0.9)
+	gold.emission_enabled = true
+	gold.emission = Color(0.7, 0.52, 0.16)
+	gold.emission_energy_multiplier = 0.28      # faint glint even in the dark
+	var darkwood := _mat("", Color(0.2, 0.12, 0.07), 1.0, false, 0.55)
+	var brass := _mat("", Color(0.58, 0.43, 0.18), 1.0, false, 0.34, 0.85)
+	var ash := _mat("", Color(0.62, 0.55, 0.46), 1.0, false, 1.0)
+	var stick := _mat("", Color(0.45, 0.18, 0.12), 1.0, false, 0.9)
+	var porcelain := _mat("", Color(0.86, 0.84, 0.8), 1.0, false, 0.35, 0.05)
+	var vase_mat := _mat("", Color(0.74, 0.8, 0.88), 1.0, false, 0.28, 0.05)
+
+	# --- cabinet body + gold trim ---
+	_box(Vector3(0.84, 0.46, 0.44), Vector3(cx, 1.29, bz), lacquer)          # body
+	_box(Vector3(0.9, 0.05, 0.5), Vector3(cx, top, bz), darkwood)            # top slab
+	_box(Vector3(0.9, 0.06, 0.5), Vector3(cx, 1.07, bz), darkwood)           # base plinth
+	_box(Vector3(0.86, 0.03, 0.46), Vector3(cx, 1.5, bz), gold)              # upper gold lip
+	_box(Vector3(0.86, 0.03, 0.46), Vector3(cx, 1.11, bz), gold)             # lower gold lip
+	for px in [-0.27, 0.0, 0.27]:                                            # gold panel dividers
+		_box(Vector3(0.03, 0.36, 0.02), Vector3(cx + px, 1.29, bz + 0.22), gold)
+
+	# --- backboard with gilt medallion ---
+	_box(Vector3(0.78, 0.56, 0.04), Vector3(cx, 1.82, bz - 0.2), lacquer)
+	_box(Vector3(0.82, 0.05, 0.05), Vector3(cx, 2.1, bz - 0.2), gold)        # crown rail
+	var medallion := _cyl(0.13, 0.02, Vector3(cx, 1.82, bz - 0.17), gold)
+	medallion.rotation = Vector3(PI / 2.0, 0, 0)
+	medallion.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_sphere(0.05, Vector3(cx, 1.82, bz - 0.15), brass).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+	# --- brass incense burner (bát hương) with glowing joss sticks ---
+	var burn_y := top + 0.1
+	_cyl(0.13, 0.05, Vector3(cx, top + 0.05, bz + 0.05), brass)              # foot
+	_cyl(0.12, 0.13, Vector3(cx, burn_y, bz + 0.05), brass, 0.14)            # bowl
+	_cyl(0.1, 0.03, Vector3(cx, burn_y + 0.07, bz + 0.05), ash)             # ash bed
+	for i in 3:
+		var sx: float = cx + (i - 1) * 0.045
+		var lean: float = (i - 1) * 0.05
+		var st := _cyl(0.006, 0.34, Vector3(sx, burn_y + 0.24, bz + 0.05 + lean * 0.3), stick)
+		st.rotation = Vector3(lean, 0, (i - 1) * -0.04)
+		st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var ember := StandardMaterial3D.new()
+		ember.albedo_color = Color(1.0, 0.4, 0.12)
+		ember.emission_enabled = true
+		ember.emission = Color(1.0, 0.35, 0.1)
+		ember.emission_energy_multiplier = 5.0
+		var tip := _sphere(0.013, Vector3(sx + sin(lean) * 0.17, burn_y + 0.41, bz + 0.05 + lean * 0.3), ember)
+		tip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_altar_flames.append(ember)
+
+	# --- two red candles flanking the burner ---
+	for dx in [-0.3, 0.3]:
+		var wax := _mat("", Color(0.66, 0.11, 0.09), 1.0, false, 0.5)
+		_cyl(0.025, 0.02, Vector3(cx + dx, top + 0.04, bz - 0.02), gold)     # holder
+		_cyl(0.022, 0.16, Vector3(cx + dx, top + 0.12, bz - 0.02), wax)      # candle
+		var flame_mat := StandardMaterial3D.new()
+		flame_mat.albedo_color = Color(1.0, 0.75, 0.35)
+		flame_mat.emission_enabled = true
+		flame_mat.emission = Color(1.0, 0.66, 0.28)
+		flame_mat.emission_energy_multiplier = 4.5
+		var fl := _sphere(0.028, Vector3(cx + dx, top + 0.23, bz - 0.02), flame_mat)
+		fl.scale = Vector3(1, 1.7, 1)
+		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_altar_flames.append(flame_mat)
+
+	# --- fruit offering plate (mâm) ---
+	_cyl(0.13, 0.025, Vector3(cx + 0.22, top + 0.04, bz + 0.18), porcelain)
+	var fruit_cols := [Color(0.86, 0.46, 0.1), Color(0.3, 0.55, 0.18), Color(0.86, 0.72, 0.15), Color(0.72, 0.13, 0.1)]
+	var fpos := [Vector2(-0.05, -0.03), Vector2(0.05, -0.03), Vector2(0.0, 0.05), Vector2(0.0, 0.0)]
+	for i in 4:
+		var fm := _mat("", fruit_cols[i], 1.0, false, 0.5)
+		var fr := _sphere(0.038 if i == 3 else 0.032, Vector3(cx + 0.22 + fpos[i].x, top + 0.08 + (0.02 if i == 3 else 0.0), bz + 0.18 + fpos[i].y), fm)
+		fr.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+	# --- flower vase (lọ hoa) ---
+	_cyl(0.045, 0.05, Vector3(cx - 0.26, top + 0.05, bz + 0.16), vase_mat, 0.035)  # foot
+	_cyl(0.05, 0.18, Vector3(cx - 0.26, top + 0.15, bz + 0.16), vase_mat, 0.04)    # body
+	for a in [Vector2(-0.05, 0.04), Vector2(0.05, 0.03), Vector2(0.0, -0.04)]:
+		var stem := _cyl(0.005, 0.14, Vector3(cx - 0.26 + a.x, top + 0.3, bz + 0.16 + a.y), _mat("", Color(0.25, 0.45, 0.2), 1.0, false, 0.8))
+		stem.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var bloom := _mat("", Color(0.92, 0.62, 0.16), 1.0, false, 0.5)
+		_sphere(0.03, Vector3(cx - 0.26 + a.x, top + 0.38, bz + 0.16 + a.y), bloom).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+	# --- warm altar light (the blackout-proof island) ---
 	_altar_light = OmniLight3D.new()
-	_altar_light.position = Vector3(-1.2, 1.75, -1.6)
-	_altar_light.light_color = Color(1.0, 0.6, 0.22)
+	_altar_light.position = Vector3(cx, top + 0.28, bz + 0.2)
+	_altar_light.light_color = Color(1.0, 0.62, 0.24)
 	_altar_light.light_energy = ALTAR_ENERGY
-	_altar_light.omni_range = 3.6
+	_altar_light.omni_range = 3.8
+	_altar_light.omni_attenuation = 1.3
 	add_child(_altar_light)
 
 func _build_chair() -> void:
@@ -271,6 +404,10 @@ func _build_chair() -> void:
 	var sz := 0.45
 	_box(Vector3(0.56, 0.09, 0.54), Vector3(sx, 0.95, sz), wood)         # seat
 	_box(Vector3(0.56, 0.72, 0.09), Vector3(sx, 1.33, sz + 0.3), wood)   # backrest
+	# a worn red seat cushion + a lumbar pad so the long shift looks a little comfier
+	var cushion := _mat("", Color(0.46, 0.13, 0.12), 1.0, false, 0.92)
+	_box(Vector3(0.5, 0.07, 0.48), Vector3(sx, 1.02, sz), cushion)
+	_box(Vector3(0.5, 0.26, 0.06), Vector3(sx, 1.18, sz + 0.27), cushion)
 	# arm rests (extend forward so they frame the bottom of your view)
 	for ax in [-0.31, 0.31]:
 		_box(Vector3(0.07, 0.09, 0.6), Vector3(sx + ax, 1.18, sz - 0.06), wood_dark)
@@ -279,6 +416,72 @@ func _build_chair() -> void:
 	for lx in [-0.25, 0.25]:
 		for lz in [sz - 0.24, sz + 0.24]:
 			_box(Vector3(0.08, 0.92, 0.08), Vector3(sx + lx, 0.46, lz), wood_dark)
+
+func _build_props() -> void:
+	# Lived-in clutter so the booth reads as a real night-guard's post, not an empty
+	# stage. Everything here is decorative; nothing is referenced by gameplay.
+	var dy := 1.07     # desk surface top
+
+	# --- floor mat under the desk/feet ---
+	var rug := _mat("", Color(0.34, 0.1, 0.1), 1.0, false, 1.0)
+	var rug_b := _mat("", Color(0.5, 0.16, 0.13), 1.0, false, 1.0)
+	_box(Vector3(2.2, 0.02, 1.9), Vector3(0, 0.012, -0.1), rug_b)
+	_box(Vector3(1.9, 0.03, 1.6), Vector3(0, 0.02, -0.1), rug)
+
+	# --- logbook + pen (front-center of desk) ---
+	_box(Vector3(0.34, 0.04, 0.24), Vector3(-0.05, dy + 0.02, -1.34), _mat("", Color(0.22, 0.26, 0.36), 1.0, false, 0.7))
+	_box(Vector3(0.3, 0.02, 0.2), Vector3(-0.02, dy + 0.05, -1.34), _mat("", Color(0.85, 0.82, 0.72), 1.0, false, 0.9))
+	var pen := _box(Vector3(0.15, 0.012, 0.012), Vector3(0.02, dy + 0.07, -1.3), _mat("", Color(0.1, 0.14, 0.4), 1.0, false, 0.4, 0.3))
+	pen.rotation.y = 0.5
+
+	# --- thermos + cup (the guard's tea) ---
+	var cream := _mat("", Color(0.88, 0.85, 0.78), 1.0, false, 0.45)
+	var red_lid := _mat("", Color(0.7, 0.13, 0.11), 1.0, false, 0.4)
+	_cyl(0.065, 0.26, Vector3(0.5, dy + 0.13, -1.4), cream)
+	_cyl(0.05, 0.06, Vector3(0.5, dy + 0.29, -1.4), red_lid)
+	_box(Vector3(0.13, 0.04, 0.13), Vector3(0.5, dy + 0.17, -1.4), red_lid)   # red waist band
+	_cyl(0.036, 0.07, Vector3(0.72, dy + 0.045, -1.3), cream)                 # cup
+
+	# --- small desk fan (off) facing the guard ---
+	var plastic := _mat("", Color(0.16, 0.17, 0.19), 1.0, false, 0.5)
+	var cage := _mat("", Color(0.55, 0.57, 0.6), 1.0, false, 0.4, 0.6)
+	_box(Vector3(0.22, 0.03, 0.16), Vector3(-0.62, dy + 0.02, -1.28), plastic)   # base
+	_box(Vector3(0.04, 0.2, 0.04), Vector3(-0.62, dy + 0.12, -1.32), plastic)    # neck
+	var head := _cyl(0.13, 0.05, Vector3(-0.62, dy + 0.26, -1.26), cage)         # cage ring
+	head.rotation.x = PI / 2.0
+	var hub := _cyl(0.04, 0.06, Vector3(-0.62, dy + 0.26, -1.27), plastic)
+	hub.rotation.x = PI / 2.0
+	for i in 3:
+		var blade := _box(Vector3(0.02, 0.16, 0.02), Vector3(-0.62, dy + 0.26, -1.25), plastic)
+		blade.rotation.z = i * (TAU / 3.0)
+
+	# --- flashlight lying on the desk ---
+	var torch := _cyl(0.026, 0.2, Vector3(0.28, dy + 0.03, -1.22), _mat("", Color(0.12, 0.12, 0.13), 1.0, false, 0.4, 0.5))
+	torch.rotation.z = PI / 2.0
+	var torch_head := _cyl(0.032, 0.05, Vector3(0.39, dy + 0.03, -1.22), _mat("", Color(0.7, 0.6, 0.2), 1.0, false, 0.3, 0.6))
+	torch_head.rotation.z = PI / 2.0
+
+	# --- wall clock (front wall, right of the chalkboard) ---
+	var clock_rim := _mat("", Color(0.12, 0.12, 0.14), 1.0, false, 0.5, 0.3)
+	var clock_face := _mat("", Color(0.9, 0.9, 0.85), 1.0, false, 0.6)
+	var cf := _cyl(0.26, 0.05, Vector3(3.0, 2.25, -4.16), clock_rim)
+	cf.rotation.x = PI / 2.0
+	var face := _cyl(0.22, 0.02, Vector3(3.0, 2.25, -4.12), clock_face)
+	face.rotation.x = PI / 2.0
+	var hh := _box(Vector3(0.025, 0.13, 0.012), Vector3(3.0, 2.27, -4.1), clock_rim)   # hour hand
+	hh.rotation.z = -0.6
+	var mh := _box(Vector3(0.018, 0.19, 0.012), Vector3(3.0, 2.26, -4.1), clock_rim)   # minute hand
+	mh.rotation.z = 1.4
+
+	# --- paper wall calendar (front wall, left of the chalkboard) ---
+	_box(Vector3(0.46, 0.66, 0.03), Vector3(-2.9, 1.95, -4.17), _mat("", Color(0.75, 0.2, 0.16), 1.0, false, 0.85))
+	_box(Vector3(0.4, 0.46, 0.02), Vector3(-2.9, 1.82, -4.15), _mat("", Color(0.92, 0.9, 0.84), 1.0, false, 0.9))
+	_box(Vector3(0.4, 0.12, 0.02), Vector3(-2.9, 2.12, -4.15), _mat("", Color(0.85, 0.7, 0.2), 1.0, false, 0.8))
+
+	# --- baseboards along the front + back walls for grounding ---
+	var base := _mat("", Color(0.16, 0.15, 0.17), 1.0, false, 0.7)
+	_box(Vector3(9, 0.2, 0.06), Vector3(0, 0.1, -4.18), base)
+	_box(Vector3(9, 0.2, 0.06), Vector3(0, 0.1, 4.18), base)
 
 func _build_window() -> void:
 	# A barred window on the back wall lets cool moonlight rake across the room,
@@ -295,6 +498,15 @@ func _build_window() -> void:
 	# window bars
 	for bx in [-0.45, 0.0, 0.45]:
 		_box(Vector3(0.05, 1.2, 0.06), Vector3(bx, 1.9, 4.14), frame)
+	# a sill ledge + a soft moon disc behind the pane for depth
+	_box(Vector3(2.2, 0.08, 0.22), Vector3(0, 1.18, 4.12), frame)
+	var moon_mat := StandardMaterial3D.new()
+	moon_mat.albedo_color = Color(0.85, 0.9, 1.0)
+	moon_mat.emission_enabled = true
+	moon_mat.emission = Color(0.7, 0.8, 1.0)
+	moon_mat.emission_energy_multiplier = 2.2
+	var disc := _sphere(0.34, Vector3(0.5, 2.25, 4.7), moon_mat)
+	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var moon := SpotLight3D.new()
 	moon.position = Vector3(0, 2.4, 3.9)
 	moon.rotation = Vector3(0.35, PI, 0)   # shine forward (-z) and slightly down
@@ -371,7 +583,7 @@ func _build_doorway(side: int, x: float) -> void:
 # --- look controls ----------------------------------------------------------
 func _process(delta: float) -> void:
 	_t += delta
-	if _look_enabled:
+	if _look_enabled and not _look_locked:
 		_update_look_targets()
 	var prev_yaw := _yaw
 	_yaw = lerpf(_yaw, _yaw_target, clampf(delta * LOOK_LERP, 0, 1))
@@ -383,6 +595,11 @@ func _process(delta: float) -> void:
 	if _altar_light:
 		var f := 0.85 + 0.1 * sin(_t * 7.3) + 0.05 * sin(_t * 19.0)
 		_altar_light.light_energy = ALTAR_ENERGY * f
+		# the flames/embers breathe with the light so the shrine feels alive
+		for i in _altar_flames.size():
+			var m: StandardMaterial3D = _altar_flames[i]
+			var base: float = 5.0 if i < 3 else 4.5
+			m.emission_energy_multiplier = base * (0.8 + 0.25 * sin(_t * 8.0 + i * 1.7))
 	if not _powered:
 		# blackout: mains lights die out, only the altar candle remains
 		_ceiling.light_energy = maxf(0.0, _ceiling.light_energy - delta * 2.5)

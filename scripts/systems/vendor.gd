@@ -90,5 +90,12 @@ func _repelled() -> void:
 	Events.notify.emit("VENDOR_LEFT", [])
 	_reset_idle()
 
+## A ward/charm save (or any forced clear) must send the impostor packing —
+## otherwise she stays frozen mid-lunge with her timer already spent and re-fires
+## the grab on the very next frame, silently wasting the ward.
+func repel_to_idle() -> void:
+	if state == GameEnums.VendorState.HOSTILE or state == GameEnums.VendorState.SHOP:
+		_reset_idle()
+
 func _attack() -> void:
 	Events.jumpscare_started.emit("ba_hang_rong")

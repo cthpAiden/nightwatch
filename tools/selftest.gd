@@ -228,6 +228,27 @@ func _run(c) -> void:
 	if c.shop.visible:
 		c.shop.visible = false
 
+	print("\n--- WARD SAVE EDGE CASES ---")
+	# Counterfeit vendor: a ward must send her packing, not leave her frozen to
+	# re-fire the grab next frame (regression guard for the vendor ward-block bug).
+	ve.state = GameEnums.VendorState.HOSTILE
+	ve._hostile_t = -1.0
+	c.ward_tokens = 1
+	c._ending = false
+	c._on_jumpscare("ba_hang_rong")
+	check("ward blocks vendor grab (night alive)", not c._ending)
+	check("ward sends hostile vendor back to idle", ve.state == GameEnums.VendorState.IDLE)
+	# Meter threat: a ward must actually break the meter's hold, not just dent it.
+	var md2 = d.get_threat("ma_da")
+	if md2:
+		md2.flood = 100.0
+		md2._active = false
+		c.ward_tokens = 1
+		c._ending = false
+		c._on_jumpscare("ma_da")
+		check("ward fully breaks ma_da flood", md2.flood <= 25.0)
+		check("ward revives ma_da (not stuck dead)", md2._active)
+
 	print("\n--- ROSTER INTEGRITY ---")
 	var ids := ["ong_ke", "ma_da", "co_hon", "quy_nhap_trang", "ma_troi", "oan_hon"]
 	var tex_ok := true

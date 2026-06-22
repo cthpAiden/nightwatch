@@ -240,6 +240,14 @@ func on_via_state(_state: int) -> void:
 func on_calm() -> void:
 	pass
 
+## A one-time ward/charm save should genuinely neutralise whatever triggered the
+## grab, not merely nudge it. Positional rushers are already sent back to spawn by
+## the caller, so the default is the gentle incense calm; meter threats override
+## this to drop their meter to a clearly-safe level (otherwise a save against, say,
+## ma da at full flood buys only a few seconds before it kills again).
+func on_ward_save() -> void:
+	on_calm()
+
 # --- queries for views / items ---------------------------------------------
 func distance_to_office() -> int:
 	return MapGraph.distance(current_location, MapGraph.OFFICE)

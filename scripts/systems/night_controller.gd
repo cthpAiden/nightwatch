@@ -420,10 +420,14 @@ func _on_jumpscare(threat_id: String) -> void:
 		return
 	# Bùa thật / bánh chưng "save": spend a ward to survive the grab once.
 	if try_block_death(threat_id):
+		# The counterfeit vendor isn't a director threat, so try_block_death can't
+		# repel her — send her off explicitly or she re-fires the grab immediately.
+		if threat_id == "ba_hang_rong" and vendor:
+			vendor.repel_to_idle()
 		var t := director.get_threat(threat_id)
 		if t:
 			t.reset_to_spawn()
-			t.on_calm()   # also clears the meter that triggered the kill
+			t.on_ward_save()   # fully clears the meter/position that triggered the kill
 		via = maxf(via, via_max * 0.4)
 		Events.via_changed.emit(via, via_max)
 		return

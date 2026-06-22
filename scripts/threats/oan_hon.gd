@@ -53,5 +53,8 @@ func on_offering(_location: String) -> void:
 func on_calm() -> void:
 	agro = maxf(0.0, agro - 40.0)   # incense pacifies her zone short-term
 
+func on_ward_save() -> void:
+	agro = minf(agro, 25.0)         # a ward fully quiets her grievance for now
+
 func current_texture() -> Texture2D:
 	return tex_move if agro > 55.0 else tex_idle

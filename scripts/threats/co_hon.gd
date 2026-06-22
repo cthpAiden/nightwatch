@@ -27,6 +27,9 @@ func on_offering(_location: String) -> void:
 func on_calm() -> void:
 	crowd = maxf(0.0, crowd - 30.0)   # incense settles the crowd a while
 
+func on_ward_save() -> void:
+	crowd = minf(crowd, 25.0)         # a ward scatters the pressing crowd
+
 func on_via_state(state: int) -> void:
 	# When the guard is already shaken, a big crowd presses harder (handled via drain).
 	pass
