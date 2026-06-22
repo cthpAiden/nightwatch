@@ -94,7 +94,8 @@ func _run(c) -> void:
 	for def in ItemRegistry.all():
 		c.via = 60.0
 		c.power = 80.0
-		c.item_system.apply(def)
+		if not c.item_system.apply(def):   # apply() now reports unknown/dead effects
+			all_ok = false
 	check("all %d item effects applied cleanly" % ItemRegistry.all().size(), all_ok)
 	check("ward-granting items added a ward", c.ward_tokens >= 1)
 	c.cleanse()
@@ -218,11 +219,13 @@ func _run(c) -> void:
 	ve.counterfeit = false
 	ve.stock = ItemRegistry.random_shop(ve._rng, 3, false)
 	c.item_held = null
+	c.coins = 10   # shop items now cost vàng mã, so the buyer needs a wallet
 	c.open_shop()
 	await _frames(2)
 	check("shop opens at gate", c.shop.visible)
 	if not ve.stock.is_empty():
-		ve.on_bought(ve.stock[0])
+		var price: int = ve.stock[0].cost
+		check("bought item deducts its cost", ve.on_bought(ve.stock[0]) and c.coins == 10 - price)
 		check("buying acquires the item", c.item_held != null)
 		check("vendor leaves after purchase", ve.state == GameEnums.VendorState.IDLE)
 	if c.shop.visible:
@@ -248,6 +251,77 @@ func _run(c) -> void:
 		c._on_jumpscare("ma_da")
 		check("ward fully breaks ma_da flood", md2.flood <= 25.0)
 		check("ward revives ma_da (not stuck dead)", md2._active)
+
+	print("\n--- ALTAR RITUAL (hương) ---")
+	c.huong = 10.0
+	c.altar_lit = true
+	c.request_light_incense()
+	check("light incense refills hương", c.huong >= 99.0)
+	check("light incense keeps altar lit", c.altar_lit)
+	c._gutter_candles()
+	check("cold draft guts the altar", not c.altar_lit and c.huong <= 0.1)
+	c._light_incense(true)
+	check("relight restores altar", c.altar_lit and c.huong >= 99.0)
+	c.huong = 100.0
+	c.altar_lit = true
+	var mult_lit: float = c.meter_mult()
+	c.altar_lit = false
+	var mult_dark: float = c.meter_mult()
+	check("guttered altar raises threat aggression", mult_dark > mult_lit)
+	c.altar_lit = true
+	c.huong = 100.0
+	c._bell_cd = 0.0
+	c.via = 50.0
+	c.request_ring_bell()
+	check("bell raises vía + starts cooldown", c.via > 50.0 and c._bell_cd > 0.0)
+
+	print("\n--- VÍA DRAIN (regen not locked by meter pressure) ---")
+	c.via = 50.0
+	c._via_drain_cd = 0.0
+	c.add_via_drain(-1.0)
+	check("add_via_drain lowers vía", c.via < 50.0)
+	check("meter drain does NOT freeze regen", c._via_drain_cd <= 0.0)
+	c.add_via(-1.0)
+	check("burst drain DOES pause regen", c._via_drain_cd > 0.0)
+
+	print("\n--- PHONE ---")
+	var ph = c.phone
+	ph.begin()
+	ph._start_real()
+	check("real phone call rings", ph.is_ringing() and not ph.is_fake())
+	c.via = 50.0
+	ph.answer()
+	check("answering real call stops the ring", not ph.is_ringing())
+	ph._on_water_lure(true)
+	check("ma da lure rings a FAKE call", ph.is_ringing() and ph.is_fake())
+	var md3 = d.get_threat("ma_da")
+	if md3:
+		md3.flood = 30.0
+		md3._lure_active = true
+		ph.answer()
+		check("answering the fake ring spikes flood", md3.flood > 30.0)
+
+	print("\n--- CAMERA ANOMALY TAG ---")
+	var ot = d.get_threat("ong_ke")
+	ot.reset_to_spawn()
+	ot._arrive_at_door(GameEnums.Side.LEFT)
+	c._tag_cds.clear()
+	c.reveal_timer = 0.0
+	c.tag_anomaly("ong_ke")
+	check("tagging sets a rusher back", not ot.is_at_door())
+	check("tagging briefly reveals the map", c.is_revealed())
+
+	print("\n--- COINS + SHRINE UPGRADES ---")
+	var c0: int = c.coins
+	c._earn_coins(5)
+	check("earning coins adds + persists", c.coins == c0 + 5 and Save.coins == c.coins)
+	check("cannot overspend coins", not c.try_spend_coins(c.coins + 100))
+	check("spending deducts coins", c.try_spend_coins(3) and c.coins == c0 + 2)
+	Save.coins = 100
+	check("buy shrine upgrade persists", Save.purchase_upgrade("sturdy_doors", 34) and Save.has_upgrade("sturdy_doors"))
+	check("cannot rebuy an owned upgrade", not Save.purchase_upgrade("sturdy_doors", 34))
+	Save.upgrades.erase("sturdy_doors")   # don't pollute the real save with a test buy
+	Save.save_progress()
 
 	print("\n--- ROSTER INTEGRITY ---")
 	var ids := ["ong_ke", "ma_da", "co_hon", "quy_nhap_trang", "ma_troi", "oan_hon"]

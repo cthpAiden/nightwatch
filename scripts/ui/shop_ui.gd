@@ -34,6 +34,8 @@ func open(stock: Array, counterfeit: bool, on_pick: Callable) -> void:
 	panel.add_child(vb)
 	vb.add_child(UI.label("SHOP_TITLE", 28, Color(0.95, 0.8, 0.5)))
 	vb.add_child(UI.label("SHOP_PICK_ONE", 18, UI.COL_DIM))
+	var coins: int = _c.coins if _c else 0
+	vb.add_child(UI.text_label("%s: %d" % [tr("HUD_COINS"), coins], 18, Color(1.0, 0.85, 0.4)))
 	var row := UI.hbox(14)
 	vb.add_child(row)
 	for def in stock:
@@ -55,9 +57,12 @@ func _make_card(def: ItemDef) -> Control:
 	vb.add_child(UI.label(def.name_key, 20, UI.COL_TEXT))
 	var flavor := UI.label(def.flavor_key, 15, UI.COL_DIM)
 	flavor.autowrap_mode = TextServer.AUTOWRAP_WORD
-	flavor.custom_minimum_size = Vector2(196, 90)
+	flavor.custom_minimum_size = Vector2(196, 76)
 	vb.add_child(flavor)
+	vb.add_child(UI.text_label("%s: %d" % [tr("HUD_COINS"), def.cost], 16, Color(1.0, 0.85, 0.4)))
 	var take := UI.button("SHOP_TAKE", 196, 40)
+	var afford: bool = _c == null or _c.coins >= def.cost
+	take.disabled = not afford
 	take.pressed.connect(func(): _pick(def))
 	vb.add_child(take)
 	return card
@@ -65,7 +70,9 @@ func _make_card(def: ItemDef) -> Control:
 func _pick(def: ItemDef) -> void:
 	Audio.play_sfx("ui_confirm", -4.0)
 	if _on_pick.is_valid():
-		_on_pick.call(def)
+		var ok = _on_pick.call(def)
+		if ok == false:
+			return   # couldn't afford it — leave the window open to pick another
 	close()
 
 func close() -> void:

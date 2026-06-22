@@ -8,6 +8,7 @@ extends ThreatBase
 var mun_progress := 0.0
 var triggered := false
 var _mun_tex: Texture2D
+var _rest := 0.0   # time the risen corpse has been frozen (stillness only SLOWS it)
 
 func _configure() -> void:
 	movement_model = MODEL_PATH
@@ -37,6 +38,18 @@ func process_ai(delta: float, night_progress: float) -> void:
 			_trigger()
 	else:
 		super.process_ai(delta, night_progress)
+		# A CREEPER only lurches while you pan, so a perfectly still player could
+		# freeze the corpse at spawn forever. Guarantee a slow baseline creep so
+		# stillness only SLOWS it — eventually it reaches the left door and you must
+		# actually shut it.
+		if not _player_panning and phase != GameEnums.ThreatPhase.AT_DOOR \
+				and phase != GameEnums.ThreatPhase.ATTACKING:
+			_rest += delta
+			if _rest >= 22.0:
+				_rest = 0.0
+				_advance_path()
+		else:
+			_rest = 0.0
 
 func _trigger() -> void:
 	triggered = true
@@ -51,6 +64,14 @@ func _trigger() -> void:
 	path_index = 0
 	_move_accum = 0.0
 	Events.threat_relocated.emit(id, current_location)
+
+## A setback (salt line / repel item) genuinely pushes the cat back: before the
+## corpse rises it knocks Mun's approach meter down, not just her on-camera position.
+func reset_to_spawn() -> void:
+	if not triggered:
+		mun_progress = maxf(0.0, mun_progress - 35.0)
+	_rest = 0.0
+	super.reset_to_spawn()
 
 func current_texture() -> Texture2D:
 	if not triggered:

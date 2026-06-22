@@ -213,6 +213,22 @@ func _reset_position() -> void:
 func set_speed_mult(m: float) -> void:
 	_speed_mult = maxf(0.05, m)
 
+## Global aggression multiplier the meter threats fold into their per-frame growth:
+## the altar incense (hương) suppresses them when tended, a guttered altar or a
+## cursed pastry (speed_curse) speeds them up. 1.0 when there is no controller.
+func _meter_mult() -> float:
+	if _controller and _controller.has_method("meter_mult"):
+		return _controller.meter_mult()
+	return 1.0
+
+## Continuous (per-frame) vía drain that does NOT freeze regen — meter pressure is
+## a net bleed you can offset, not a hard regen lockout (see NightController).
+func _bleed_via(amount: float) -> void:
+	if _controller and _controller.has_method("add_via_drain"):
+		_controller.add_via_drain(amount)
+	elif _controller:
+		_controller.add_via(amount)
+
 func on_door(side: int, closed: bool) -> void:
 	if closed and phase == GameEnums.ThreatPhase.AT_DOOR and side == threatening_side:
 		if counter_door and not ignores_doors:

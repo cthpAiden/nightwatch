@@ -22,7 +22,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
 	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
-	flood = minf(100.0, flood + (0.35 + lvl * 0.11) * delta)
+	flood = minf(100.0, flood + (0.35 + lvl * 0.11) * delta * _meter_mult())
 	Events.water_level.emit(flood / 100.0)
 
 	if _lure_active:
@@ -37,8 +37,8 @@ func process_ai(delta: float, night_progress: float) -> void:
 	# alternate the camera it appears under, for flavor
 	current_location = MapGraph.RESTROOM if flood < 55.0 else MapGraph.COURTYARD
 
-	if flood > 70.0 and _controller:
-		_controller.add_via(-(flood - 70.0) * 0.05 * delta)
+	if flood > 70.0:
+		_bleed_via(-(flood - 70.0) * 0.05 * delta)
 	if flood >= 100.0:
 		_kill()
 
@@ -66,7 +66,7 @@ func _on_action(action: String) -> void:
 		Audio.play_sfx("incense_whoosh", -8.0)
 
 func on_offering(_location: String) -> void:
-	flood = maxf(0.0, flood - 22.0)
+	flood = maxf(0.0, flood - 32.0)   # one offering reliably drops it below the drain threshold
 
 func on_calm() -> void:
 	flood = maxf(0.0, flood - 30.0)   # incense at the pond shrine

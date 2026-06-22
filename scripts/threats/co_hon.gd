@@ -15,14 +15,14 @@ func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
 	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
-	crowd = clampf(crowd + (0.35 + lvl * 0.13) * delta, 0.0, 100.0)
+	crowd = clampf(crowd + (0.35 + lvl * 0.13) * delta * _meter_mult(), 0.0, 100.0)
 	Events.crowd_changed.emit(crowd / 100.0)
 	current_location = MapGraph.GATE if crowd < 50.0 else MapGraph.LEFT_HALL
-	if crowd > 60.0 and _controller:
-		_controller.add_via(-(crowd - 60.0) * 0.05 * delta)
+	if crowd > 60.0:
+		_bleed_via(-(crowd - 60.0) * 0.05 * delta)
 
 func on_offering(_location: String) -> void:
-	crowd = maxf(0.0, crowd - 36.0)
+	crowd = maxf(0.0, crowd - 45.0)   # one tray reliably scatters them below the drain threshold
 
 func on_calm() -> void:
 	crowd = maxf(0.0, crowd - 30.0)   # incense settles the crowd a while

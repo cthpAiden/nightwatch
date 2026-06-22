@@ -62,11 +62,15 @@ func _appear() -> void:
 	Events.vendor_state_changed.emit(state)
 	Events.notify.emit("VENDOR_FAKE_TELL" if counterfeit else "SHOP_PROMPT", [])
 
-func on_bought(def: ItemDef) -> void:
+func on_bought(def: ItemDef) -> bool:
 	if state != GameEnums.VendorState.SHOP:
-		return   # window already closed/turned hostile; no late purchase
+		return false   # window already closed/turned hostile; no late purchase
+	if not _c.try_spend_coins(def.cost):
+		Events.notify.emit("SHOP_NOT_ENOUGH", [])
+		return false   # keep the window open so the player can pick something cheaper
 	_c.acquire_item(def)
 	_leave()
+	return true
 
 func _leave() -> void:
 	state = GameEnums.VendorState.LEAVING

@@ -43,6 +43,23 @@ var taint_timer := 0.0
 var _via_drain_cd := 0.0     # pauses vía regen briefly after any drain
 var _agitation := 0.0        # "panic" signal (fast pan + rapid cam-switching) for Ma trơi
 
+# Living-altar ritual ("hương" incense protection) — the core active defense.
+var huong := 100.0
+var huong_max := 100.0
+var altar_lit := true        # false = candles guttered by a cold draft; relight!
+var coins := 0               # vàng mã (spirit money): shop + shrine-upgrade currency
+var phone                    # phone_system.gd
+var _aggro_mult := 1.0       # global threat aggression (bánh lạ curse) read by meters
+var _huong_decay := 1.3      # incense burn rate /s (set per night + upgrades at begin)
+var _bright_altar := false   # shrine upgrade: stronger suppression while lit
+var _door_drain_mult := 1.0  # shrine upgrade: sturdier doors
+var _incense_cd := 0.0
+var _bell_cd := 0.0
+var _bell_cd_max := 18.0
+var _draft_cd := 35.0
+var _auto_relight := false   # shrine upgrade: one free relight when it gutters
+var _tag_cds := {}           # threat_id -> camera-anomaly tag cooldown
+
 var _running := false
 var _ending := false
 var _powered := true
@@ -87,6 +104,10 @@ func _build_world() -> void:
 	vendor.name = "Vendor"
 	add_child(vendor)
 	vendor.setup(self, config)
+	phone = load("res://scripts/systems/phone_system.gd").new()
+	phone.name = "Phone"
+	add_child(phone)
+	phone.setup(self)
 
 func _build_ui() -> void:
 	_ui_layer = CanvasLayer.new()
@@ -153,7 +174,13 @@ func _start_sequence() -> void:
 func _begin_night() -> void:
 	_running = true
 	director.set_paused(false)
+	_init_altar()
+	_apply_shrine_upgrades()
+	coins = Save.coins
+	Events.coins_changed.emit(coins)
 	vendor.begin()
+	if phone:
+		phone.begin()
 	# Start with one stick of incense (nhang) in hand so the player always has the
 	# calm tool available and learns what it does.
 	if item_held == null:
@@ -161,6 +188,34 @@ func _begin_night() -> void:
 		if nhang:
 			acquire_item(nhang)
 	Events.notify.emit("NIGHT_BEGIN", [])
+
+func _init_altar() -> void:
+	huong = huong_max
+	altar_lit = true
+	# Later nights burn the incense down faster, so you must tend it more often.
+	_huong_decay = 1.0 + 0.14 * float(config.night_index)
+	if room:
+		room.set_huong(1.0)
+		room.set_altar_lit(true)
+	Events.huong_changed.emit(1.0)
+	Events.altar_lit_changed.emit(true)
+
+func _apply_shrine_upgrades() -> void:
+	var up: Dictionary = Save.upgrades
+	if up.get("incense_slow", false):
+		_huong_decay *= 0.7
+	if up.get("bright_altar", false):
+		_bright_altar = true
+	if up.get("sturdy_doors", false):
+		_door_drain_mult = 0.7
+	if up.get("fast_bell", false):
+		_bell_cd_max *= 0.6
+	if up.get("auto_relight", false):
+		_auto_relight = true
+	if up.get("extra_ward", false):
+		ward_tokens += 1
+	if up.get("more_offerings", false):
+		offerings += 2
 
 # --- main loop --------------------------------------------------------------
 func _process(delta: float) -> void:
@@ -179,6 +234,10 @@ func _process(delta: float) -> void:
 	room.set_look_enabled(not monitor_open and not shop.visible and not pause.visible and not cassette.visible)
 	director.night_progress = night_progress()
 	director.broadcast_pan(room.get_pan_speed() > 0.7)
+	# Re-broadcast the watched camera every frame so a threat that wanders under a
+	# held view (e.g. Oan hồn) is correctly seen/unseen — fixes the stale _viewing flag.
+	director.broadcast_view(current_cam if monitor_open else "")
+	_update_altar(delta)
 	_refresh_door_sprite(GameEnums.Side.LEFT)
 	_refresh_door_sprite(GameEnums.Side.RIGHT)
 
@@ -197,6 +256,7 @@ func _advance_clock(delta: float) -> void:
 		Events.hour_reached.emit(_last_hour)
 		if _last_hour > 0 and _last_hour < 6:
 			Audio.play_sfx("clock_chime", -10.0)
+			_earn_coins(3)   # vàng mã for each hour you survive
 	if game_minutes >= NIGHT_MINUTES:
 		_win()
 
@@ -204,10 +264,11 @@ func _update_power(delta: float) -> void:
 	if not _powered:
 		return
 	var drain := config.power_drain_idle
+	var door_cost := config.power_drain_per_door * _door_drain_mult
 	if room.is_door_closed(GameEnums.Side.LEFT):
-		drain += config.power_drain_per_door
+		drain += door_cost
 	if room.is_door_closed(GameEnums.Side.RIGHT):
-		drain += config.power_drain_per_door
+		drain += door_cost
 	if room.is_light_on(GameEnums.Side.LEFT):
 		drain += config.power_drain_per_light
 	if room.is_light_on(GameEnums.Side.RIGHT):
@@ -271,6 +332,10 @@ func _update_via_state() -> void:
 func _via_zero() -> void:
 	if try_block_death("via"):
 		via = via_max * 0.4
+		# A meter threat (flood/crowd/agro) bled you to zero; without breaking its
+		# hold the refilled vía is drained right back. Spend the ward to clear it.
+		for t in director.threats:
+			t.on_ward_save()
 		Events.via_changed.emit(via, via_max)
 		return
 	_caught("via")
@@ -288,6 +353,10 @@ func _update_timers(delta: float) -> void:
 		speed_timer = maxf(0.0, speed_timer - delta)
 		if speed_timer == 0.0:
 			director.set_speed_all(1.0)
+			_aggro_mult = 1.0
+	for k in _tag_cds.keys():
+		if _tag_cds[k] > 0.0:
+			_tag_cds[k] = maxf(0.0, _tag_cds[k] - delta)
 
 # --- input ------------------------------------------------------------------
 func _unhandled_input(e: InputEvent) -> void:
@@ -318,6 +387,12 @@ func _unhandled_input(e: InputEvent) -> void:
 		request_toggle_light(GameEnums.Side.RIGHT)
 	elif e.is_action_pressed("place_offering"):
 		request_offering()
+	elif e.is_action_pressed("light_incense"):
+		request_light_incense()
+	elif e.is_action_pressed("ring_bell"):
+		request_ring_bell()
+	elif e.is_action_pressed("answer_phone"):
+		request_answer_phone()
 
 # --- requests from UI / input ----------------------------------------------
 func request_toggle_door(side: int) -> void:
@@ -450,6 +525,7 @@ func _caught(cause: String) -> void:
 	else:
 		# accessibility / non-lethal cause: soft fade + low cue
 		Audio.play_sfx("stinger", -6.0)
+	Events.game_over.emit(cause)
 	await get_tree().create_timer(1.3).timeout
 	Save.record_death(cause)
 	Router.to_game_over(cause)
@@ -462,6 +538,8 @@ func _win() -> void:
 	director.set_paused(true)
 	Audio.stop_loop("heartbeat")
 	Audio.play_sfx("rooster", -3.0)
+	_earn_coins(12)   # survival bonus toward shrine upgrades
+	Events.night_survived.emit()
 	Game.notify_night_survived()
 	await get_tree().create_timer(0.6).timeout
 	Router.to_win()
@@ -532,7 +610,8 @@ func start_reveal(d: float) -> void:
 	reveal_timer = maxf(reveal_timer, d)
 
 func set_global_speed(mult: float, d: float) -> void:
-	director.set_speed_all(mult)
+	director.set_speed_all(mult)       # positional cadence (path/wander threats)
+	_aggro_mult = mult                 # meter-growth multiplier (flood/crowd/agro/lock)
 	speed_timer = d
 
 func add_taint(d: float) -> void:
@@ -543,6 +622,7 @@ func cleanse() -> void:
 	via_drain_mult = 1.0
 	taint_timer = 0.0
 	speed_timer = 0.0
+	_aggro_mult = 1.0
 	director.set_speed_all(1.0)
 
 func set_barrier(d: float) -> void:
@@ -553,3 +633,148 @@ func add_startle_resist(v: float) -> void:
 
 func setback_nearest() -> void:
 	director.setback_nearest()
+
+# --- living-altar ritual ----------------------------------------------------
+## Per-frame incense burn, cold-draft events, and the low-protection vía bleed.
+func _update_altar(delta: float) -> void:
+	# Cold-draft event: a gust snuffs the candles. Likelier (and meaner) late at night.
+	_draft_cd -= delta
+	if _draft_cd <= 0.0:
+		_draft_cd = randf_range(32.0, 62.0) * (1.0 - 0.35 * night_progress())
+		if altar_lit and randf() < 0.45 + 0.35 * night_progress():
+			_gutter_candles()
+	if altar_lit:
+		huong = maxf(0.0, huong - _huong_decay * delta)
+		if huong <= 0.0:
+			if _auto_relight:
+				_auto_relight = false
+				_light_incense(true)
+				Events.notify.emit("ALTAR_AUTORELIGHT", [])
+			else:
+				_gutter_candles()
+	# When the altar is dark — or the incense is nearly out — the spirits press in.
+	# Routed through add_via_drain so vía regen can still fight it (no hard lockout).
+	if not altar_lit:
+		add_via_drain(-3.0 * delta)
+	elif huong <= 20.0:
+		add_via_drain(-1.2 * delta)
+	if room:
+		room.set_huong(huong / huong_max)
+		room.set_altar_lit(altar_lit)
+	Events.huong_changed.emit(huong / huong_max)
+	if _incense_cd > 0.0:
+		_incense_cd = maxf(0.0, _incense_cd - delta)
+	if _bell_cd > 0.0:
+		_bell_cd = maxf(0.0, _bell_cd - delta)
+
+func _gutter_candles() -> void:
+	if not altar_lit:
+		return
+	altar_lit = false
+	huong = 0.0
+	Audio.play_sfx("candle_gust", -3.0)
+	Audio.play_sfx("stinger", -12.0)
+	Events.altar_lit_changed.emit(false)
+	Events.huong_changed.emit(0.0)
+	Events.notify.emit("ALTAR_DRAFT", [])
+
+func request_light_incense() -> void:
+	if not _running or _incense_cd > 0.0:
+		return
+	_light_incense(false)
+
+func _light_incense(silent: bool) -> void:
+	huong = huong_max
+	altar_lit = true
+	_incense_cd = 2.2
+	if room:
+		room.set_huong(1.0)
+		room.set_altar_lit(true)
+	Events.altar_lit_changed.emit(true)
+	Events.huong_changed.emit(1.0)
+	if not silent:
+		Audio.play_sfx("incense_whoosh", -3.0)
+		Events.notify.emit("ALTAR_LIT", [])
+
+func request_ring_bell() -> void:
+	if not _running or _bell_cd > 0.0:
+		return
+	_bell_cd = _bell_cd_max
+	Audio.play_sfx("offering_bell", -2.0)
+	director.setback_nearest()   # the bell shoves the nearest rusher back
+	director.broadcast_calm()    # and settles the meter spirits a little
+	huong = minf(huong_max, huong + 25.0)
+	add_via(8.0)
+	Events.notify.emit("BELL_RUNG", [])
+
+## Combined threat-aggression multiplier (read by the meter threats each frame):
+## tending the incense suppresses them; a guttered altar or the bánh-lạ curse
+## whips them up. This is what makes the altar your primary, active defense.
+func meter_mult() -> float:
+	var m := _aggro_mult
+	if not altar_lit:
+		m *= 1.35
+	elif huong >= 60.0:
+		m *= (0.4 if _bright_altar else 0.5)
+	elif huong <= 25.0:
+		m *= 1.3
+	return m
+
+# --- phone ------------------------------------------------------------------
+func request_answer_phone() -> void:
+	if not _running or phone == null:
+		return
+	phone.answer()
+
+# --- camera anomaly tagging -------------------------------------------------
+## Spotting a threat on its camera and "tagging" it: a small reward for active
+## camera use — sets a rusher back / settles a meter spirit, briefly reveals the
+## map, and steadies your nerve. Per-threat cooldown so it can't be spammed.
+func tag_anomaly(threat_id: String) -> void:
+	if not _running:
+		return
+	var t := director.get_threat(threat_id)
+	if t == null:
+		return
+	if float(_tag_cds.get(threat_id, 0.0)) > 0.0:
+		return
+	_tag_cds[threat_id] = 12.0
+	if t.counter_door:
+		t.reset_to_spawn()
+	else:
+		t.on_calm()
+	start_reveal(4.0)
+	add_via(4.0)
+	Audio.play_sfx("camera_switch", -4.0)
+	Events.anomaly_tagged.emit(threat_id)
+	Events.notify.emit("ANOMALY_TAGGED", [])
+
+# --- vía / currency ---------------------------------------------------------
+## Continuous meter drain that does NOT freeze vía regen (see _update_via). Slow
+## meter pressure is a net bleed you can offset, not an unrecoverable lockout.
+func add_via_drain(amount: float) -> void:
+	if amount < 0.0:
+		amount *= via_drain_mult
+	via = clampf(via + amount, 0.0, via_max)
+	Events.via_changed.emit(via, via_max)
+
+func _earn_coins(n: int) -> void:
+	coins += n
+	Save.coins = coins
+	Save.save_progress()
+	Events.coins_changed.emit(coins)
+
+func try_spend_coins(n: int) -> bool:
+	if coins < n:
+		return false
+	coins -= n
+	Save.coins = coins
+	Save.save_progress()
+	Events.coins_changed.emit(coins)
+	return true
+
+func get_coins() -> int:
+	return coins
+
+func get_huong() -> float:
+	return huong

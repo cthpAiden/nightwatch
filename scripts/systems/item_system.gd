@@ -7,8 +7,11 @@ var _c   # NightController
 func setup(controller) -> void:
 	_c = controller
 
-func apply(def: ItemDef) -> void:
+## Returns true if the effect_id was recognised and applied. (The headless self-test
+## relies on this so an unknown/dead effect is a real failure, not a silent pass.)
+func apply(def: ItemDef) -> bool:
 	var cursed := def.kind == GameEnums.ItemKind.CURSED
+	var known := true
 	match def.effect_id:
 		"calm_zone":
 			_c.add_via(def.magnitude)
@@ -16,6 +19,7 @@ func apply(def: ItemDef) -> void:
 			_c.broadcast_calm()   # incense actually settles ma da / cô hồn / oan hồn
 		"salt_line":
 			_c.setback_nearest()
+			_c.broadcast_calm()   # the salt line also unsettles the meter spirits
 			_c.add_via(4.0)
 		"ward_save":
 			_c.grant_ward(int(def.magnitude))
@@ -43,11 +47,14 @@ func apply(def: ItemDef) -> void:
 		"odor_cloud":
 			_c.add_via(5.0)
 			_c.setback_nearest()
+			_c.broadcast_calm()
 		"fragile_light":
 			_c.start_reveal(def.duration)
 		_:
+			known = false
 			push_warning("ItemSystem: unknown effect " + def.effect_id)
 	Audio.play_sfx("item_bad" if cursed else "item_good", -2.0)
 	Events.item_consumed.emit(def.id)
 	Events.item_effect_applied.emit(def.effect_id, {})
 	Events.notify.emit("ITEM_USED", [tr(def.name_key)])
+	return known

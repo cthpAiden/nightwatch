@@ -24,8 +24,8 @@ func process_ai(delta: float, night_progress: float) -> void:
 		lock = minf(100.0, lock + (7.0 + lvl) * delta)
 	else:
 		lock = maxf(0.0, lock - 8.0 * delta)
-	if lock > 40.0 and _controller:
-		_controller.add_via(-(lock - 40.0) * 0.05 * delta)
+	if lock > 40.0:
+		_bleed_via(-(lock - 40.0) * 0.05 * delta)
 	_move_accum += delta
 	if _move_accum >= move_interval:
 		_move_accum = 0.0

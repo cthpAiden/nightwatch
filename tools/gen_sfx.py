@@ -435,6 +435,47 @@ def vendor_bell():
         add(s, exp_decay(sine(1100 * mult, 0.8), tau), 0.0, g)
     save("vendor_bell.wav", s, peak=0.55)
 
+def candle_gust():
+    # a cold draft snuffing the altar candles: an airy whoosh + a soft low "fwoomp"
+    s = buf(0.6)
+    g = bandpass(noise(0.5), 200, 1900)
+    sh = []
+    for i, x in enumerate(g):
+        t = i / SR
+        env = math.sin(math.pi * min(1.0, t / 0.5))
+        sh.append(x * env)
+    add(s, sh, 0.0, 0.85)
+    add(s, exp_decay(sine(90, 0.22), 0.05), 0.34, 0.45)
+    save("candle_gust.wav", soft_clip(s), peak=0.55)
+
+def phone_ring():
+    # an old desk phone: two bursts of a 440+480 Hz tone, chopped by a ~20 Hz ringer
+    n = int(SR * 1.4)
+    out = []
+    for i in range(n):
+        t = i / SR
+        burst = 1.0 if (t < 0.4 or (0.6 < t < 1.0)) else 0.0
+        warble = 1.0 if math.sin(2 * math.pi * 20 * t) > 0 else 0.25
+        v = (math.sin(2 * math.pi * 440 * t) + math.sin(2 * math.pi * 480 * t)) * 0.5
+        out.append(v * burst * warble)
+    save("phone_ring.wav", soft_clip(out), peak=0.5)
+
+def phone_ring_warp():
+    # the SAME phone, but WRONG — lower, detuned, sagging pitch, slower ringer. The
+    # tell that it's Ma da imitating the call. Answering this is the mistake.
+    n = int(SR * 1.6)
+    out = []
+    for i in range(n):
+        t = i / SR
+        burst = 1.0 if (t < 0.5 or (0.8 < t < 1.4)) else 0.0
+        warble = 1.0 if math.sin(2 * math.pi * 11 * t) > 0 else 0.3
+        bend = 1.0 - 0.1 * t          # the pitch sags as it rings
+        v = (math.sin(2 * math.pi * 300 * bend * t)
+             + math.sin(2 * math.pi * 317 * bend * t)) * 0.5
+        out.append(v * burst * warble)
+    out = lowpass(out, 1500)
+    save("phone_ring_warp.wav", soft_clip(out), peak=0.5)
+
 # ---------------------------------------------------------------- ambience (stereo)
 def _cricket(left, right, n, at, freq, pan, gain):
     # one cricket chirp (short trilled high tone), panned, summed into L/R
@@ -491,6 +532,7 @@ if __name__ == "__main__":
     stinger(); power_down(); low_power_beep()
     offering_bell(); incense_whoosh(); item_good(); item_bad()
     footstep_wood(); knock(); rooster(); vendor_bell()
+    candle_gust(); phone_ring(); phone_ring_warp()
     print("Generating jumpscare ...")
     jumpscare()
     print("Generating ambience (this takes a moment) ...")

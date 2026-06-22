@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="380" viewBox="0 0 300 380">
+  <defs>
+    <radialGradient id="vig" cx="50%" cy="42%" r="70%">
+      <stop offset="0%" stop-color="#6b6258"/>
+      <stop offset="55%" stop-color="#3c372f"/>
+      <stop offset="100%" stop-color="#16140f"/>
+    </radialGradient>
+    <radialGradient id="face" cx="50%" cy="46%" r="60%">
+      <stop offset="0%" stop-color="#b6ab98"/>
+      <stop offset="70%" stop-color="#8a8170"/>
+      <stop offset="100%" stop-color="#5c5547"/>
+    </radialGradient>
+    <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#46403a"/>
+      <stop offset="100%" stop-color="#211e19"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="380" fill="url(#vig)"/>
+  <!-- shoulders / áo -->
+  <path d="M40 380 C55 300 95 268 150 268 C205 268 245 300 260 380 Z" fill="url(#cloth)"/>
+  <path d="M150 268 L150 380" stroke="#15130f" stroke-width="3" opacity="0.5"/>
+  <!-- neck -->
+  <rect x="132" y="232" width="36" height="46" rx="14" fill="#7d745f"/>
+  <!-- head -->
+  <ellipse cx="150" cy="170" rx="74" ry="88" fill="url(#face)"/>
+  <!-- hair / brow shadow -->
+  <path d="M82 150 C86 96 116 78 150 78 C184 78 214 96 218 150 C214 120 184 104 150 104 C116 104 86 120 82 150 Z" fill="#322d25" opacity="0.85"/>
+  <!-- eyes (soft, hollow) -->
+  <ellipse cx="120" cy="168" rx="14" ry="9" fill="#2a261f" opacity="0.8"/>
+  <ellipse cx="180" cy="168" rx="14" ry="9" fill="#2a261f" opacity="0.8"/>
+  <!-- nose + mouth suggestion -->
+  <path d="M150 176 L144 204 L156 204 Z" fill="#5e5647" opacity="0.7"/>
+  <path d="M128 224 Q150 234 172 224" stroke="#3d362b" stroke-width="4" fill="none" opacity="0.6"/>
+  <!-- film grain dots -->
+  <g fill="#d8cfbe" opacity="0.05">
+    <circle cx="60" cy="90" r="1.4"/><circle cx="240" cy="120" r="1.2"/>
+    <circle cx="90" cy="300" r="1.5"/><circle cx="210" cy="320" r="1.3"/>
+    <circle cx="150" cy="60" r="1.2"/><circle cx="40" cy="200" r="1.4"/>
+    <circle cx="262" cy="240" r="1.3"/><circle cx="120" cy="350" r="1.2"/>
+  </g>
+  <rect x="6" y="6" width="288" height="368" fill="none" stroke="#0c0b08" stroke-width="8"/>
+</svg>

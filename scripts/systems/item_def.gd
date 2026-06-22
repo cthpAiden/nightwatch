@@ -11,3 +11,4 @@ extends Resource
 @export var duration: float = 0.0
 @export var magnitude: float = 1.0
 @export var icon_path: String = ""
+@export var cost: int = 1          # vàng mã price at the vendor

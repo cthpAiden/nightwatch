@@ -25,6 +25,7 @@ func _ready() -> void:
 	var cont := _add(vb, "MENU_CONTINUE", func(): Game.start_story_night(Save.highest_unlocked))
 	cont.disabled = not cleared_any
 	_add(vb, "MENU_NIGHTS", func(): Router.change_scene("res://scenes/screens/NightSelect.tscn"))
+	_add(vb, "MENU_SHRINE", func(): Router.change_scene("res://scenes/screens/ShrineScreen.tscn"))
 	var custom := _add(vb, "MENU_CUSTOM_NIGHT", func(): _start_custom())
 	custom.disabled = not Save.nights_cleared.has(6)
 	if custom.disabled:

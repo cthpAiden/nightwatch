@@ -12,18 +12,24 @@ var _night: Label
 var _toast: Label
 var _warn: Label
 var _offerings_lbl: Label
+var _coins_lbl: Label
 var _crowd_bar: ProgressBar
 var _water_bar: ProgressBar
+var _huong_bar: ProgressBar
+var _grievance_bar: ProgressBar
 var _item_icon: TextureRect
 var _use_btn: Button
 var _answer_btn: Button
 var _drain_btn: Button
+var _incense_btn: Button
+var _bell_btn: Button
 var _invite_btn: Button
 var _help_panel: Control
 var _help_lines: VBoxContainer
 var _door_btn := {}
 var _light_btn := {}
 var _toast_t := 0.0
+var _huong_danger := false
 var _vendor_state := GameEnums.VendorState.IDLE
 
 func setup(controller) -> void:
@@ -37,7 +43,7 @@ func setup(controller) -> void:
 func _build() -> void:
 	# meters (top-left)
 	var meters := UI.vbox(8)
-	UI.place(meters, 0, 0, 0, 0, 22, 16, 322, 110)
+	UI.place(meters, 0, 0, 0, 0, 22, 16, 322, 156)
 	add_child(meters)
 	var prow := UI.hbox(8)
 	prow.add_child(UI.texture_rect("res://assets/art/ui/power_icon.svg", TextureRect.STRETCH_KEEP_ASPECT))
@@ -53,6 +59,15 @@ func _build() -> void:
 	_via_bar.custom_minimum_size = Vector2(240, 22)
 	vrow.add_child(_via_bar)
 	meters.add_child(vrow)
+	# hương (incense protection) — your active altar defense
+	var hrow := UI.hbox(8)
+	hrow.add_child(UI.texture_rect("res://assets/art/ui/btn_offering.svg", TextureRect.STRETCH_KEEP_ASPECT))
+	hrow.get_child(0).custom_minimum_size = Vector2(26, 26)
+	_huong_bar = UI.progress(1.0, Color(1.0, 0.62, 0.2))
+	_huong_bar.custom_minimum_size = Vector2(240, 18)
+	_huong_bar.value = 1.0
+	hrow.add_child(_huong_bar)
+	meters.add_child(hrow)
 
 	# clock + night (top-center)
 	var cbox := UI.vbox(0)
@@ -64,10 +79,12 @@ func _build() -> void:
 	_night = UI.label("HUD_NIGHT", 18, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER)
 	cbox.add_child(_night)
 
-	# offerings + crowd/water (top-right)
+	# coins + offerings + crowd/water/grievance (top-right)
 	var rbox := UI.vbox(6)
-	UI.place(rbox, 1, 0, 1, 0, -260, 16, -22, 120)
+	UI.place(rbox, 1, 0, 1, 0, -260, 16, -22, 186)
 	add_child(rbox)
+	_coins_lbl = UI.text_label("", 18, Color(1.0, 0.85, 0.4), HORIZONTAL_ALIGNMENT_RIGHT)
+	rbox.add_child(_coins_lbl)
 	_offerings_lbl = UI.text_label("", 18, UI.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 	rbox.add_child(_offerings_lbl)
 	_crowd_bar = UI.progress(1.0, Color(0.7, 0.66, 0.5))
@@ -80,6 +97,11 @@ func _build() -> void:
 	_water_bar.value = 0
 	_water_bar.visible = false
 	rbox.add_child(_water_bar)
+	_grievance_bar = UI.progress(1.0, Color(0.85, 0.86, 0.9))
+	_grievance_bar.custom_minimum_size = Vector2(220, 14)
+	_grievance_bar.value = 0
+	_grievance_bar.visible = false
+	rbox.add_child(_grievance_bar)
 
 	# left controls
 	var lbox := UI.vbox(8)
@@ -101,10 +123,14 @@ func _build() -> void:
 
 	# center controls
 	var center := UI.hbox(10)
-	UI.place(center, 0.5, 1, 0.5, 1, -250, -86, 250, -26)
+	UI.place(center, 0.5, 1, 0.5, 1, -380, -86, 380, -26)
 	add_child(center)
-	center.add_child(_ctrl_btn("HUD_CAM", func(): _c.request_toggle_monitor(), 110))
-	center.add_child(_ctrl_btn("OFFERING_PROMPT", func(): _c.request_offering(), 150))
+	center.add_child(_ctrl_btn("HUD_CAM", func(): _c.request_toggle_monitor(), 100))
+	_incense_btn = _ctrl_btn("HUD_INCENSE", func(): _c.request_light_incense(), 130)
+	center.add_child(_incense_btn)
+	_bell_btn = _ctrl_btn("HUD_BELL", func(): _c.request_ring_bell(), 100)
+	center.add_child(_bell_btn)
+	center.add_child(_ctrl_btn("OFFERING_PROMPT", func(): _c.request_offering(), 130))
 	var slot := UI.hbox(4)
 	_item_icon = UI.texture_rect("res://assets/art/ui/item_slot.svg", TextureRect.STRETCH_KEEP_ASPECT)
 	_item_icon.custom_minimum_size = Vector2(48, 48)
@@ -120,9 +146,9 @@ func _build() -> void:
 	add_child(water)
 	_drain_btn = _ctrl_btn("ACTION_CLOSE_DRAIN", func(): Events.office_action.emit("close_drain"), 170)
 	_drain_btn.visible = false
-	_answer_btn = _ctrl_btn("ACTION_ANSWER", func(): Events.intercom_answered.emit(), 150)
+	_answer_btn = _ctrl_btn("ACTION_ANSWER", func(): _c.request_answer_phone(), 150)
 	_answer_btn.visible = false
-	_answer_btn.modulate = Color(1.0, 0.6, 0.5)
+	_answer_btn.modulate = Color(0.6, 0.9, 0.7)
 	water.add_child(_drain_btn)
 	water.add_child(_answer_btn)
 
@@ -171,7 +197,7 @@ func _build_help() -> void:
 	col.add_child(hdr)
 	_help_lines = UI.vbox(2)
 	col.add_child(_help_lines)
-	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_OFFERING2", "HELP_PAUSE"]:
+	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_RITUAL", "HELP_PHONE", "HELP_OFFERING2", "HELP_PAUSE"]:
 		_help_lines.add_child(UI.label(k, 15, UI.COL_DIM))
 
 func toggle_help() -> void:
@@ -189,9 +215,14 @@ func _connect() -> void:
 	Events.water_lure.connect(_on_water_lure)
 	Events.water_level.connect(_on_water_level)
 	Events.crowd_changed.connect(_on_crowd)
+	Events.grievance_changed.connect(_on_grievance)
+	Events.huong_changed.connect(_on_huong)
+	Events.phone_ring.connect(_on_phone_ring)
+	Events.coins_changed.connect(_on_coins)
 	Events.vendor_state_changed.connect(_on_vendor_state)
 	_night.text = tr("NIGHT_LABEL").format([str(Game.current_night)])
 	_offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings]
+	_coins_lbl.text = "%s: %d" % [tr("HUD_COINS"), _c.coins]
 	Events.offering_placed.connect(func(_l): _offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings])
 
 func _process(delta: float) -> void:
@@ -242,7 +273,8 @@ func _on_notify(key: String, args: Array) -> void:
 	_toast.modulate.a = 1.0
 
 func _on_water_lure(active: bool) -> void:
-	_answer_btn.visible = active
+	# The lure also makes the drain action relevant; the phone's answer button is
+	# driven separately by phone_ring (the lure rings the phone with a warped tone).
 	if active:
 		_drain_btn.visible = true
 
@@ -255,6 +287,30 @@ func _on_water_level(level: float) -> void:
 func _on_crowd(level: float) -> void:
 	_crowd_bar.visible = level > 0.01
 	_crowd_bar.value = level
+
+func _on_grievance(level: float) -> void:
+	_grievance_bar.visible = level > 0.01
+	_grievance_bar.value = level
+
+func _on_huong(level: float) -> void:
+	_huong_bar.value = level
+	# tint toward danger as the incense burns down (only swap the stylebox when the
+	# danger bucket actually changes — this fires every frame)
+	var danger := level <= 0.25
+	if danger == _huong_danger:
+		return
+	_huong_danger = danger
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.85, 0.3, 0.2) if danger else Color(1.0, 0.62, 0.2)
+	sb.set_corner_radius_all(5)
+	_huong_bar.add_theme_stylebox_override("fill", sb)
+
+func _on_phone_ring(active: bool, fake: bool) -> void:
+	_answer_btn.visible = active
+	_answer_btn.modulate = Color(0.95, 0.4, 0.35) if fake else Color(0.6, 0.9, 0.7)
+
+func _on_coins(amount: int) -> void:
+	_coins_lbl.text = "%s: %d" % [tr("HUD_COINS"), amount]
 
 func _on_vendor_state(state: int) -> void:
 	_vendor_state = state

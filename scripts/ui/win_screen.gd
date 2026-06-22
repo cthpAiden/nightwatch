@@ -14,6 +14,7 @@ func _ready() -> void:
 	vb.add_child(UI.label("WIN_SURVIVED", 26, UI.COL_TEXT, HORIZONTAL_ALIGNMENT_CENTER))
 	vb.add_child(UI.label("WIN_THANKS", 18, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	vb.add_child(UI.label("WIN_SIGN", 16, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
+	vb.add_child(UI.text_label("%s: %d" % [tr("HUD_COINS"), Save.coins], 20, Color(1.0, 0.85, 0.4), HORIZONTAL_ALIGNMENT_CENTER))
 
 	var row := UI.hbox(14)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -24,6 +25,9 @@ func _ready() -> void:
 		row.add_child(nxt)
 	else:
 		vb.add_child(UI.label("WIN_ALL_DONE", 18, Color(1, 0.85, 0.5), HORIZONTAL_ALIGNMENT_CENTER))
+	var shrine := UI.button("MENU_SHRINE", 200, 50)
+	shrine.pressed.connect(func(): Router.change_scene("res://scenes/screens/ShrineScreen.tscn"))
+	row.add_child(shrine)
 	var menu := UI.button("PAUSE_MENU", 240, 50)
 	menu.pressed.connect(func(): Router.to_main_menu())
 	row.add_child(menu)

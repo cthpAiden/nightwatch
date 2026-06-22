@@ -207,3 +207,55 @@ TAPE_N5_L3,(tiếng thở dốc) ...khoan... đừng... AAAA— (băng đứt),(
 TAPE_N6_L1,Con bé áo dài trắng... nó không tìm tao. Nó tìm người khác.,The girl in the white áo dài... she isn't looking for me. She's looking for someone else.
 TAPE_N6_L2,Có chuyện oan ức năm xưa chưa ai trả lại cho nó. Tao tìm hoài chưa xong.,An old wrong was never set right for her. I searched for years and never finished.
 TAPE_N6_L3,"Nếu mày còn nghe được... làm ơn, làm nốt giùm tao. Cho nó yên nghỉ.","If you can still hear this... please, finish it for me. Let her rest."
+HUD_INCENSE,Thắp nhang,Light incense
+HUD_BELL,Thỉnh chuông,Ring bell
+HUD_COINS,Vàng mã,Spirit money
+HELP_RITUAL,Bàn thờ: R thắp nhang · B thỉnh chuông,Altar: R incense · B bell
+HELP_PHONE,Nghe điện thoại: E,Answer phone: E
+ALTAR_LIT,"Nhang đã thắp. Khói lên, vong lùi.",Incense lit. The smoke rises; spirits draw back.
+ALTAR_DRAFT,Gió lạnh lùa... nến tắt rồi! Thắp lại mau!,A cold draft... the candles went out! Relight them!
+ALTAR_AUTORELIGHT,Bàn thờ tự bén lửa lại.,The altar rekindles itself.
+BELL_RUNG,Tiếng chuông ngân... mọi thứ chững lại.,The bell rings out... everything stills.
+ANOMALY_TAGGED,Đã đánh dấu. Anh thấy nó rồi.,Tagged. You've spotted it.
+ANOMALY_HINT,Bấm vào bóng dáng để đánh dấu,Click the figure to tag it
+PHONE_RING,Điện thoại reo. Bác Tư gọi?,The phone rings. Bác Tư calling?
+PHONE_FAKE,Đầu dây bên kia... toàn nước.,The other end... is all water.
+PHONE_MISSED,Anh không kịp nghe. Chuông tắt.,You missed the call. It falls silent.
+SHOP_NOT_ENOUGH,Không đủ vàng mã.,Not enough spirit money.
+SHRINE_TITLE,Bàn Thờ,The Shrine
+SHRINE_SUB,Dùng vàng mã (kiếm được khi sống sót) để nâng cấp.,Spend spirit money (earned by surviving) on upgrades.
+SHRINE_OWNED,Đã có,Owned
+SHRINE_BUY,Thỉnh,Buy
+MENU_SHRINE,Bàn Thờ,Shrine
+UPG_MORE_OFFERINGS_NAME,Mâm cúng đầy,Fuller offering tray
+UPG_MORE_OFFERINGS_DESC,Bắt đầu mỗi đêm với thêm 2 đồ cúng.,Start each night with 2 extra offerings.
+UPG_FAST_BELL_NAME,Chuông đồng tốt,Fine bronze bell
+UPG_FAST_BELL_DESC,Giảm thời gian chờ giữa hai lần thỉnh chuông.,Shortens the bell's cooldown.
+UPG_INCENSE_SLOW_NAME,Nhang trầm bền,Long-burning incense
+UPG_INCENSE_SLOW_DESC,"Nhang cháy chậm hơn, lâu mới phải thắp lại.",Incense burns slower — relight less often.
+UPG_STURDY_DOORS_NAME,Cửa chắc chắn,Sturdier doors
+UPG_STURDY_DOORS_DESC,Đóng cửa tốn ít điện hơn.,Holding doors drains less power.
+UPG_AUTO_RELIGHT_NAME,Đèn dầu thần,Sacred oil lamp
+UPG_AUTO_RELIGHT_DESC,Tự thắp lại nhang một lần mỗi đêm khi nến tắt.,Auto-relights the incense once per night if it goes out.
+UPG_BRIGHT_ALTAR_NAME,Bàn thờ linh thiêng,Hallowed altar
+UPG_BRIGHT_ALTAR_DESC,Khi nhang còn cháy, trấn áp ma mạnh hơn.,Stronger suppression of spirits while incense burns.
+UPG_EXTRA_WARD_NAME,Bùa hộ mệnh,Guardian charm
+UPG_EXTRA_WARD_DESC,Bắt đầu mỗi đêm với một lá bùa cứu mạng.,Start each night with one life-saving ward.
+PHONE_N1_L1,"Alô? Bác Tư đây. Nhớ thắp nhang trên bàn thờ — đó là lá chắn của mày.","Hello? Bác Tư here. Keep the altar incense lit — that's your shield."
+PHONE_N1_L2,"Ông kẹ tới cửa thì bật đèn, nhìn thẳng, ngồi yên. Hoặc đóng cửa.","Bogeyman at the door? Light it, face him, sit still. Or shut the door."
+PHONE_N1_L3,"Gió lùa tắt nến là thường. Thắp lại ngay, đừng ngồi trong tối.",Drafts snuff the candles often. Relight at once; don't sit in the dark.
+PHONE_N2_L1,Đêm nay có ma da. Nghe tiếng kêu cứu dưới nước thì... kệ nó.,Ma da's about tonight. A cry for help from the water? Ignore it.
+PHONE_N2_L2,"Nó giả được cả tiếng chuông điện thoại. Nghe sai sai thì đừng bắt máy.","It can fake even the phone's ring. If it sounds wrong, don't pick up."
+PHONE_N2_L3,Nước dâng cao thì khóa cống cho nó rút bớt.,If the water rises, shut the drain to bring it down.
+PHONE_N3_L1,"Tháng cô hồn rồi. Giữ mâm cúng đầy, đặt ngoài cổng.",Hungry-ghost month. Keep the offering tray full out by the gate.
+PHONE_N3_L2,"Đông quá thì thỉnh một tiếng chuông, chúng giãn ra liền.",If the crowd swells, one ring of the bell scatters them.
+PHONE_N3_L3,Bà hàng rong có thể là đồ giả. Tiếng rao méo thì đóng cửa.,The vendor may be a fake. If her cry is warped, shut the door.
+PHONE_N4_L1,Cái mền trong kho... đừng giở. Và giữ con Mun tránh xa nó.,The sheet in the storeroom... don't lift it. Keep Mun away from it.
+PHONE_N4_L2,Mèo nhảy qua xác là xác dậy. Đóng cửa phải để lùa nó đi.,"Cat leaps the corpse, it rises. Close the right door to divert her."
+PHONE_N4_L3,Lỡ xác dậy rồi thì đừng cử động nhiều. Đứng im nó chậm lại.,If it's already risen, move little. Stay still and it slows.
+PHONE_N5_L1,"Sân sau có đốm lửa xanh. Thấy thì đi chậm, đừng hốt hoảng.",Blue flames out back. See them? Move slow — don't panic.
+PHONE_N5_L2,"Lia camera loạn xạ cũng là 'chạy' đó. Bình tĩnh, từ tốn.",Flipping cameras in a panic counts as running. Stay calm.
+PHONE_N5_L3,Tao mệt rồi... chỉ giúp được tới đây thôi. Ráng nghe đứa nhỏ.,I'm tired... this is as far as I can help. Hang on, kid.
+PHONE_N6_L1,"Con bé áo dài trắng... liếc nhanh thôi. Đừng nhìn lâu, cũng đừng bỏ mặc.","The girl in white — glance briefly. Don't stare, don't ignore her."
+PHONE_N6_L2,Nó chịu oan. Nhang và đồ cúng làm nó dịu lại.,She was wronged. Incense and offerings calm her.
+PHONE_N6_L3,"Sống tới sáng đi đã. Rồi... giúp nó siêu thoát giùm tao.","Just live till dawn. Then... help her find peace, for me."

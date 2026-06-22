@@ -30,6 +30,9 @@ func _ready() -> void:
 			b.disabled = true
 		grid.add_child(b)
 
+	var shrine := UI.button("MENU_SHRINE", 220, 48)
+	shrine.pressed.connect(func(): Router.change_scene("res://scenes/screens/ShrineScreen.tscn"))
+	vb.add_child(shrine)
 	var back := UI.button("SET_BACK", 220, 48)
 	back.pressed.connect(func(): Router.to_main_menu())
 	vb.add_child(back)

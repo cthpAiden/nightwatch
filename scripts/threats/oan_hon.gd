@@ -20,19 +20,21 @@ func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
 	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var mult := _meter_mult()
 	if _viewing:
-		agro += (3.2 + lvl * 0.4) * delta      # watched too long
+		agro += (3.2 + lvl * 0.4) * delta * mult      # watched too long
 	else:
-		agro += (0.9 + lvl * 0.12) * delta      # ignored too long (slower)
+		agro += (0.9 + lvl * 0.12) * delta * mult      # ignored too long (slower)
 	agro = clampf(agro - 0.6 * delta, 0.0, 100.0)  # slow settle if you neither stare nor neglect
+	Events.grievance_changed.emit(agro / 100.0)
 	# occasional drift for camera flavor
 	_move_accum += delta
 	if _move_accum >= move_interval:
 		_move_accum = 0.0
 		if _rng.randf() * 20.0 < lvl * 0.7:
 			_wander()
-	if agro > 80.0 and _controller:
-		_controller.add_via(-(agro - 80.0) * 0.06 * delta)
+	if agro > 80.0:
+		_bleed_via(-(agro - 80.0) * 0.06 * delta)
 	if agro >= 100.0:
 		_attack()
 

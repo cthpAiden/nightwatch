@@ -34,7 +34,21 @@ static func _make(row: Array) -> ItemDef:
 	d.duration = row[5]
 	d.magnitude = row[6]
 	d.icon_path = "res://assets/art/ui/%s.svg" % row[7]
+	d.cost = _cost(row[0])
 	return d
+
+## Vàng mã price per item. Sacred death-savers cost the most; the Tier-B gamble is
+## cheap bait. (Currency is earned by surviving hours; see NightController._earn_coins.)
+static func _cost(id: String) -> int:
+	match id:
+		"bua_that", "banh_chung", "canh_gai":
+			return 3
+		"nhang", "muoi_gao", "nuoc_phep", "vong_dau_tam", "toi":
+			return 2
+		"nuoc_mam", "den_ong_sao":
+			return 1
+		_:
+			return 1
 
 static func all() -> Array:
 	var out: Array = []

@@ -9,6 +9,8 @@ var nights_cleared: Dictionary = {}           # night(int) -> true
 var bestiary_seen: Dictionary = {}            # threat_id(String) -> true
 var tapes_unlocked: Dictionary = {}           # night(int) -> true
 var custom_night_beaten: bool = false
+var coins: int = 0                            # vàng mã: shop + shrine-upgrade currency
+var upgrades: Dictionary = {}                 # upgrade_id(String) -> true (purchased)
 var stats: Dictionary = {
 	"deaths": 0,
 	"deaths_by": {},                          # threat_id -> count
@@ -32,6 +34,8 @@ func load_progress() -> void:
 	bestiary_seen = cfg.get_value("progress", "bestiary_seen", {})
 	tapes_unlocked = cfg.get_value("progress", "tapes_unlocked", {1: true})
 	custom_night_beaten = cfg.get_value("progress", "custom_night_beaten", false)
+	coins = cfg.get_value("progress", "coins", 0)
+	upgrades = cfg.get_value("progress", "upgrades", {})
 	stats = cfg.get_value("stats", "data", stats)
 
 func save_progress() -> void:
@@ -41,6 +45,8 @@ func save_progress() -> void:
 	cfg.set_value("progress", "bestiary_seen", bestiary_seen)
 	cfg.set_value("progress", "tapes_unlocked", tapes_unlocked)
 	cfg.set_value("progress", "custom_night_beaten", custom_night_beaten)
+	cfg.set_value("progress", "coins", coins)
+	cfg.set_value("progress", "upgrades", upgrades)
 	cfg.set_value("stats", "data", stats)
 	cfg.save(PATH)
 
@@ -78,11 +84,25 @@ func record_offering() -> void:
 	stats["offerings_made"] = int(stats.get("offerings_made", 0)) + 1
 	save_progress()
 
+func has_upgrade(id: String) -> bool:
+	return upgrades.get(id, false)
+
+## Buy a shrine upgrade if affordable and not already owned. Returns true on success.
+func purchase_upgrade(id: String, cost: int) -> bool:
+	if has_upgrade(id) or coins < cost:
+		return false
+	coins -= cost
+	upgrades[id] = true
+	save_progress()
+	return true
+
 func reset_all() -> void:
 	highest_unlocked = 1
 	nights_cleared = {}
 	bestiary_seen = {}
 	tapes_unlocked = {1: true}
 	custom_night_beaten = false
+	coins = 0
+	upgrades = {}
 	stats = {"deaths": 0, "deaths_by": {}, "nights_won": 0, "power_outages": 0, "offerings_made": 0}
 	save_progress()

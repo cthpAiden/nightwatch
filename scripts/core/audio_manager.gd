@@ -13,6 +13,7 @@ const SFX_NAMES := [
 	"static_loop", "camera_up", "camera_down", "heartbeat", "breathing", "whisper",
 	"stinger", "power_down", "low_power_beep", "offering_bell", "incense_whoosh",
 	"item_good", "item_bad", "footstep_wood", "knock", "rooster", "vendor_bell",
+	"candle_gust", "phone_ring", "phone_ring_warp",
 ]
 const MUSIC_NAMES := ["ambience_night", "ambience_dread"]
 # NOTE: "whisper" is intentionally NOT here. It is played as a one-shot lure

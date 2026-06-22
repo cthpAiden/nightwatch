@@ -63,6 +63,10 @@ func nearest_threat() -> ThreatBase:
 		# threats store their danger in flood/crowd/agro/lock, not in position.
 		if t.movement_model != ThreatBase.MODEL_PATH and t.movement_model != ThreatBase.MODEL_FLYER:
 			continue
+		# Ma da is MODEL_PATH but its danger is the flood meter, not its tile, so a
+		# positional setback does nothing useful — skip it (its counter is incense).
+		if not t.counter_door:
+			continue
 		if t.phase == GameEnums.ThreatPhase.ATTACKING or t.phase == GameEnums.ThreatPhase.DORMANT:
 			continue
 		var d := t.distance_to_office()

@@ -130,3 +130,14 @@ func _refresh_threats() -> void:
 		tr_node.modulate = Color(0.85, 0.87, 0.87)
 		UI.place(tr_node, 0.5, 1, 0.5, 1, -180, -440, 180, -20)
 		_threat_host.add_child(tr_node)
+		# Click the figure to "tag" the anomaly — a reward for actually watching the
+		# cameras (sets a rusher back / settles a meter spirit + a brief reveal).
+		var tag := Button.new()
+		tag.flat = true
+		tag.focus_mode = Control.FOCUS_NONE
+		tag.mouse_filter = Control.MOUSE_FILTER_STOP
+		tag.tooltip_text = tr("ANOMALY_HINT")
+		UI.place(tag, 0.5, 1, 0.5, 1, -180, -440, 180, -20)
+		var tid: String = t.id
+		tag.pressed.connect(func(): _c.tag_anomaly(tid))
+		_threat_host.add_child(tag)
