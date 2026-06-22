@@ -29,6 +29,16 @@ var _lights := {}            # side -> SpotLight3D
 var _light_on := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}
 var _lamp_mats := {}         # side -> StandardMaterial3D (visible wall fixture glow)
 var _threat_sprites := {}    # side -> Sprite3D
+var _threat_base_pos := {}   # side -> Vector3 (rest pose; sprites sway around it)
+
+# Front-wall apparition: a faint shape that briefly bleeds through over the
+# chalkboard for atmosphere. Purely cosmetic — no gameplay effect, no counter.
+var _apparition: Sprite3D
+var _appar_tex: Texture2D
+var _appar_cd := 14.0        # seconds until the next flicker
+var _appar_t := 0.0          # progress through the current flicker (0 = idle)
+var _appar_dur := 1.6
+var _appar_peak := 0.3       # max alpha of the flicker
 
 var _ceiling: OmniLight3D
 var _tube_mat: StandardMaterial3D
@@ -61,6 +71,7 @@ func _ready() -> void:
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
 	_build_props()
+	_build_apparition()
 	set_process(true)
 	set_process_unhandled_input(true)
 	# Dev framing hook for the screenshot harness: hold a fixed look angle.
@@ -212,7 +223,9 @@ func _build_room() -> void:
 	_box(Vector3(9, 0.2, 9), Vector3(0, 3.0, 0), _mat("ceiling.svg", Color(0.4, 0.42, 0.45), 2.0))
 	# front wall (what you face) with chalkboard + altar
 	_box(Vector3(9, 3.2, 0.2), Vector3(0, 1.5, -4.3), wall)
-	_box(Vector3(3.4, 1.8, 0.06), Vector3(0.4, 1.7, -4.18), _mat("chalkboard.svg", Color(0.8, 0.85, 0.8)))
+	# Near-white tint so the slate's own dark green + wood frame read true (a heavy
+	# tint here used to wash it into a flat pale-green panel). Matte, non-metal.
+	_box(Vector3(3.4, 1.8, 0.06), Vector3(0.4, 1.7, -4.18), _mat("chalkboard.svg", Color(0.96, 0.98, 0.96), 1.0, false, 0.97))
 	# back wall (behind you)
 	_box(Vector3(9, 3.2, 0.2), Vector3(0, 1.5, 4.3), wall)
 	# desk
@@ -483,6 +496,52 @@ func _build_props() -> void:
 	_box(Vector3(9, 0.2, 0.06), Vector3(0, 0.1, -4.18), base)
 	_box(Vector3(9, 0.2, 0.06), Vector3(0, 0.1, 4.18), base)
 
+func _build_apparition() -> void:
+	# A faint face that occasionally bleeds through the front wall, just over the
+	# chalkboard. It sits flush to the wall and faces the desk; alpha is driven in
+	# _process so it fades in and out. Cosmetic dread only — nothing reacts to it.
+	var p := "res://assets/art/room/wall_face.svg"
+	if ResourceLoader.exists(p):
+		_appar_tex = load(p)
+	_apparition = Sprite3D.new()
+	_apparition.texture = _appar_tex
+	_apparition.pixel_size = 0.0055
+	_apparition.position = Vector3(0.4, 1.75, -4.12)   # on the front wall, over the board
+	_apparition.modulate = Color(0.8, 0.85, 0.95, 0.0) # starts invisible
+	_apparition.shaded = false                          # self-lit haze, ignores room lights
+	_apparition.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_apparition)
+
+func _update_apparition(delta: float) -> void:
+	if _apparition == null or _appar_tex == null:
+		return
+	if _appar_t > 0.0:
+		# Active flicker: fade up to the peak, hold a beat, fade back down.
+		_appar_t += delta
+		var f: float = _appar_t / _appar_dur
+		var a := 0.0
+		if f < 0.35:
+			a = (f / 0.35)                       # fade in
+		elif f < 0.6:
+			a = 1.0                              # brief hold
+		elif f < 1.0:
+			a = 1.0 - (f - 0.6) / 0.4           # fade out
+		else:
+			_appar_t = 0.0
+			# Next sighting sooner in a blackout, rarer while the lights hold.
+			_appar_cd = _rng_range(20.0, 45.0) * (0.5 if not _powered else 1.0)
+		# a slow drift + breathing so it never looks like a static decal
+		_apparition.position.x = 0.4 + sin(_t * 0.7) * 0.25
+		_apparition.modulate.a = a * _appar_peak
+	else:
+		_appar_cd -= delta
+		if _appar_cd <= 0.0:
+			_appar_t = 0.0001                   # begin a flicker next branch
+			_appar_dur = _rng_range(1.2, 2.2)
+
+func _rng_range(a: float, b: float) -> float:
+	return a + (b - a) * fmod(absf(sin(_t * 12.9898) * 43758.5453), 1.0)
+
 func _build_window() -> void:
 	# A barred window on the back wall lets cool moonlight rake across the room,
 	# giving depth and a cold rim opposite the warm desk.
@@ -544,15 +603,21 @@ func _build_doorway(side: int, x: float) -> void:
 	var ex := x + dir * depth
 	_box(Vector3(0.2, 2.8, 5.0), Vector3(ex + dir * 0.1, 1.3, 0), _mat("", Color(0.03, 0.03, 0.035)))
 	_box(Vector3(2.2, 0.2, 5.0), Vector3(ex - dir * 1.0, -0.1, 0), hall_floor)
-	# threat billboard standing just OUTSIDE the door, in the corridor mouth
+	# threat billboard standing just OUTSIDE the door, in the corridor mouth.
+	# shaded=true lets the doorway spotlight actually rim-light it, and alpha_cut
+	# gives crisp edges + proper depth sorting — together they read far more 3D
+	# than a flat unlit decal (our no-Meshy 2.5D pass).
 	var spr := Sprite3D.new()
 	spr.pixel_size = 0.007
 	spr.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	spr.shaded = true
+	spr.alpha_cut = SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS
 	spr.position = Vector3(x + dir * 0.45, 1.35, 0)
 	spr.modulate = Color(0.7, 0.72, 0.72)
 	spr.visible = false
 	add_child(spr)
 	_threat_sprites[side] = spr
+	_threat_base_pos[side] = spr.position
 	# roller shutter door
 	var door := _box(Vector3(0.16, 2.6, 2.5), Vector3(x, DOOR_OPEN_Y, 0),
 		_mat("door.svg", Color(0.6, 0.62, 0.66), 1.0, false, 0.5, 0.5))
@@ -617,6 +682,22 @@ func _process(delta: float) -> void:
 			_screen_timer = 2.6
 			_screen_idx = (_screen_idx + 1) % _screen_feeds.size()
 			_screen_mat.set_shader_parameter("feed", _screen_feeds[_screen_idx])
+	_update_apparition(delta)
+	_update_threat_sprites()
+
+func _update_threat_sprites() -> void:
+	# A visible threat sways/breathes around its rest pose so the billboard reads as
+	# a living silhouette in the doorway, not a flat decal pinned to the wall.
+	for side in _threat_sprites:
+		var spr: Sprite3D = _threat_sprites[side]
+		if not spr.visible:
+			continue
+		var base: Vector3 = _threat_base_pos[side]
+		var ph: float = _t + side * 1.7
+		spr.position.x = base.x + sin(ph * 1.3) * 0.035
+		spr.position.y = base.y + sin(ph * 2.1) * 0.045
+		var s := 1.0 + 0.025 * sin(ph * 2.7)
+		spr.scale = Vector3(s, s, 1.0)
 
 func _update_look_targets() -> void:
 	var vp := get_viewport()

@@ -9,7 +9,7 @@ const PATH := "user://settings.cfg"
 enum Scare { FULL, REDUCED, OFF }
 
 var language: String = "vi"
-var master_volume: float = 0.9      # 0..1 linear
+var master_volume: float = 0.45     # 0..1 linear (default halved from 0.9)
 var music_volume: float = 0.8
 var sfx_volume: float = 1.0
 var fullscreen: bool = false
