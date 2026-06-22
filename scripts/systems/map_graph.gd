@@ -53,6 +53,16 @@ static func door_side(loc: String) -> int:
 static func side_door(side: int) -> String:
 	return LEFT_DOOR if side == GameEnums.Side.LEFT else RIGHT_DOOR
 
+## Left/right mirror so a PATH threat can approach from either side on a symmetric
+## corridor. Locations with no mirror (gate, courtyard, office…) map to themselves.
+const MIRROR := {
+	LEFT_HALL: RIGHT_HALL, RIGHT_HALL: LEFT_HALL,
+	LEFT_DOOR: RIGHT_DOOR, RIGHT_DOOR: LEFT_DOOR,
+}
+
+static func mirror(loc: String) -> String:
+	return MIRROR.get(loc, loc)
+
 static func name_key(loc: String) -> String:
 	return NAME_KEYS.get(loc, "")
 

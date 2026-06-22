@@ -1,6 +1,7 @@
 extends ThreatBase
-## Ông kẹ — the bogeyman. Classic left-door rusher (teaches the door loop) with a
-## second, power-free counter: behave ("ngoan") — kill the doorway light and stay
+## Ông kẹ — the bogeyman. Classic door rusher (teaches the door loop); he comes
+## down either the left OR right corridor (randomize_side), so you must check both.
+## Second, power-free counter: behave ("ngoan") — kill the doorway light and stay
 ## still and he loses patience instead of advancing.
 
 var _behave_t := 0.0
@@ -8,7 +9,10 @@ var _behave_t := 0.0
 func _configure() -> void:
 	movement_model = MODEL_PATH
 	spawn_location = MapGraph.GATE
+	# Authored as a left route; randomize_side mirrors it to the right ~half the
+	# time, so he rushes either door (you can't camp the left one).
 	path = [MapGraph.GATE, MapGraph.LEFT_HALL, MapGraph.LEFT_DOOR]
+	randomize_side = true
 	move_interval = 5.0
 	attack_time = 7.0
 	counter_door = true

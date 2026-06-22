@@ -24,6 +24,7 @@ var movement_model: int = MODEL_PATH
 var spawn_location: String = MapGraph.CLASSROOM
 var path: Array = []                       # for PATH / FLYER / STALKER / CREEPER
 var wander_zone: Array = []                 # if set, WANDER stays within these locations
+var randomize_side: bool = false           # PATH: re-roll left/right on each approach
 var move_interval: float = 5.0             # seconds between movement opportunities
 var attack_time: float = 6.0               # seconds at a door before it kills
 var via_drain_at_door: float = 6.0         # vía/sec drained while looming at a door
@@ -56,11 +57,14 @@ var _active: bool = false
 var _player_viewing_me: bool = false
 var _player_panning: bool = false
 var _cooldown: float = 0.0
+var _base_path: Array = []                  # canonical (authored) path before mirroring
 
 func setup(level: float, level_end: float, controller) -> void:
 	_controller = controller
 	_rng.randomize()
 	_configure()
+	_base_path = path.duplicate()
+	_apply_side()
 	ai_level = level
 	ai_level_end = maxf(level_end, level)
 	current_location = spawn_location
@@ -206,8 +210,20 @@ func reset_to_spawn() -> void:
 
 func _reset_position() -> void:
 	path_index = 0
+	_apply_side()
 	current_location = spawn_location
 	Events.threat_relocated.emit(id, current_location)
+
+## Pick which side of the building this approach comes down. PATH threats with
+## randomize_side flip a coin and mirror their authored (left) route to the right
+## half on roughly half of approaches, so the right door is a live threat too.
+func _apply_side() -> void:
+	if not randomize_side or movement_model != MODEL_PATH or _base_path.is_empty():
+		return
+	if _rng.randf() < 0.5:
+		path = _base_path.duplicate()
+	else:
+		path = _base_path.map(func(loc): return MapGraph.mirror(loc))
 
 # --- director / controller hooks -------------------------------------------
 func set_speed_mult(m: float) -> void:
