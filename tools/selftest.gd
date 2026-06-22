@@ -1,0 +1,240 @@
+extends Node
+## Dev-only headless self-test. Boots a Night and drives the gameplay systems
+## through every scenario, asserting outcomes. Run:
+##   NW_SKIP_TAPE=1 NW_NIGHT=6 godot --headless --path . res://tools/SelfTest.tscn
+## Prints PASS/FAIL per check and a summary, then quits. It deliberately avoids
+## triggering the real game-over / win (those change scene and would kill it).
+
+var passed := 0
+var failed := 0
+var fails: Array = []
+
+func check(name: String, cond: bool) -> void:
+	if cond:
+		passed += 1
+	else:
+		failed += 1
+		fails.append(name)
+	print(("  PASS  " if cond else "  FAIL  ") + name)
+
+func _frames(n: int) -> void:
+	for i in n:
+		await get_tree().process_frame
+
+func _ready() -> void:
+	await _frames(2)
+	var night = load("res://scenes/Night.tscn").instantiate()
+	add_child(night)
+	await _frames(40)                 # let _ready build + _begin_night run
+	if not night._running and night.has_method("_begin_night"):
+		night._begin_night()
+		await _frames(2)
+	await _run(night)
+	print("\n==== SELFTEST: %d passed, %d failed ====" % [passed, failed])
+	if failed > 0:
+		print("FAILURES:")
+		for f in fails:
+			print("   - " + f)
+	get_tree().quit(1 if failed > 0 else 0)
+
+func _run(c) -> void:
+	var d = c.director
+	d.set_paused(true)   # take manual control of threat ticking
+
+	print("\n--- BOOT ---")
+	check("running after begin", c._running)
+	check("power starts full", c.power >= 99.0)
+	check("via starts full", c.via >= c.via_max - 0.5)
+	check("incense in hand by default", c.item_held != null and c.item_held.id == "nhang")
+	check("offerings start > 0 (night6)", c.offerings > 0)
+	check("6 threats spawned (night6)", d.threats.size() == 6)
+
+	print("\n--- DOORS / LIGHTS / MONITOR ---")
+	c.request_toggle_door(GameEnums.Side.LEFT)
+	check("left door closes", c.is_door_closed(GameEnums.Side.LEFT))
+	c.request_toggle_door(GameEnums.Side.LEFT)
+	check("left door reopens", not c.is_door_closed(GameEnums.Side.LEFT))
+	c.request_toggle_light(GameEnums.Side.RIGHT)
+	check("right light on", c.is_light_on(GameEnums.Side.RIGHT))
+	c.request_toggle_light(GameEnums.Side.RIGHT)
+	check("right light off", not c.is_light_on(GameEnums.Side.RIGHT))
+	c.request_toggle_monitor()
+	check("monitor opens", c.is_monitor_open())
+	c.on_camera_changed(MapGraph.RIGHT_HALL)
+	check("camera switch registers", c.current_cam == MapGraph.RIGHT_HALL)
+	c.request_toggle_monitor()
+	check("monitor closes", not c.is_monitor_open())
+
+	print("\n--- POWER DRAIN ---")
+	c.power = 100.0
+	var p0: float = c.power
+	c.request_toggle_door(GameEnums.Side.LEFT)
+	await _frames(20)
+	check("power drains while door held", c.power < p0)
+	c.request_toggle_door(GameEnums.Side.LEFT)
+	c.power = 100.0
+
+	print("\n--- OFFERINGS ---")
+	c.offerings = 2
+	c.via = 50.0
+	c.request_offering()
+	check("offering consumed", c.offerings == 1)
+	check("offering raised via", c.via > 50.0)
+
+	print("\n--- INCENSE ITEM (calm_zone) ---")
+	c.via = 40.0
+	c.item_held = ItemRegistry.get_def("nhang")
+	c.request_use_item()
+	check("item consumed on use", c.item_held == null)
+	check("incense raised via", c.via > 40.0)
+	check("incense triggered reveal", c.is_revealed())
+
+	print("\n--- EVERY ITEM EFFECT (no crash) ---")
+	var all_ok := true
+	for def in ItemRegistry.all():
+		c.via = 60.0
+		c.power = 80.0
+		c.item_system.apply(def)
+	check("all %d item effects applied cleanly" % ItemRegistry.all().size(), all_ok)
+	check("ward-granting items added a ward", c.ward_tokens >= 1)
+	c.cleanse()
+
+	print("\n--- WARD BLOCKS DEATH ---")
+	c.ward_tokens = 1
+	c._ending = false
+	var og = d.get_threat("ong_ke")
+	og._arrive_at_door(GameEnums.Side.LEFT)
+	check("ong_ke reaches the door", og.is_at_door())
+	og._kill()
+	await _frames(2)
+	check("ward consumed on grab", c.ward_tokens == 0)
+	check("ward block keeps night alive", not c._ending)
+
+	print("\n--- ONG KE COUNTERS ---")
+	og.reset_to_spawn()
+	og._arrive_at_door(GameEnums.Side.LEFT)
+	c.request_toggle_door(GameEnums.Side.LEFT)
+	d.broadcast_door(GameEnums.Side.LEFT, true)
+	check("closed door repels ong_ke", not og.is_at_door())
+	c.request_toggle_door(GameEnums.Side.LEFT)
+	og.reset_to_spawn()
+	og._arrive_at_door(GameEnums.Side.LEFT)
+	c.room.set_light(GameEnums.Side.LEFT, true)
+	for i in 40:
+		og._process_attack(0.1)
+	check("light+still 'ngoan' repels ong_ke", not og.is_at_door())
+	c.room.set_light(GameEnums.Side.LEFT, false)
+
+	print("\n--- MA DA ---")
+	var md = d.get_threat("ma_da")
+	if md:
+		md.flood = 30.0
+		md._lure_active = true
+		Events.intercom_answered.emit()
+		check("ma_da: answering raises flood", md.flood > 30.0)
+		md.flood = 50.0
+		Events.office_action.emit("close_drain")
+		check("ma_da: close_drain lowers flood", md.flood < 50.0)
+		md.flood = 50.0
+		md.on_calm()
+		check("ma_da: incense lowers flood", md.flood < 50.0)
+		md.flood = 50.0
+		md.on_offering("")
+		check("ma_da: offering lowers flood", md.flood < 50.0)
+
+	print("\n--- CO HON ---")
+	var ch = d.get_threat("co_hon")
+	if ch:
+		ch.crowd = 60.0
+		ch.on_offering("")
+		check("co_hon: offering lowers crowd", ch.crowd < 60.0)
+		ch.crowd = 60.0
+		ch.on_calm()
+		check("co_hon: incense lowers crowd", ch.crowd < 60.0)
+
+	print("\n--- OAN HON ---")
+	var oh = d.get_threat("oan_hon")
+	if oh:
+		oh.agro = 30.0
+		oh.on_view(true)
+		oh.process_ai(0.5, 0.5)
+		check("oan_hon: agro rises while watched", oh.agro > 30.0)
+		oh.agro = 50.0
+		oh.on_offering("")
+		check("oan_hon: offering lowers agro", oh.agro < 50.0)
+
+	print("\n--- MA TROI (non-lethal surge) ---")
+	var mt = d.get_threat("ma_troi")
+	if mt:
+		c._agitation = 0.9
+		mt.lock = 99.0
+		var vbefore: float = c.via
+		mt.process_ai(0.2, 0.5)
+		check("ma_troi: surge resets lock (not a kill)", mt.lock <= 60.0 and mt._active)
+		check("ma_troi: surge costs via", c.via < vbefore)
+		c._agitation = 0.0
+
+	print("\n--- QUY NHAP TRANG (cat) ---")
+	var qy = d.get_threat("quy_nhap_trang")
+	if qy:
+		if c.is_door_closed(GameEnums.Side.RIGHT):
+			c.request_toggle_door(GameEnums.Side.RIGHT)
+		c.barrier_timer = 0.0
+		qy.triggered = false
+		qy.mun_progress = 99.0
+		qy.process_ai(0.5, 0.5)
+		check("quy: cat crossing triggers corpse", qy.triggered)
+		check("quy: becomes creeper post-trigger", qy.movement_model == ThreatBase.MODEL_CREEPER)
+		qy.triggered = false
+		qy.movement_model = ThreatBase.MODEL_PATH
+		qy.mun_progress = 50.0
+		c.request_toggle_door(GameEnums.Side.RIGHT)   # close -> divert
+		d.broadcast_door(GameEnums.Side.RIGHT, true)
+		var mp: float = qy.mun_progress
+		qy.process_ai(0.5, 0.5)
+		check("quy: right door diverts the cat", qy.mun_progress < mp)
+		c.request_toggle_door(GameEnums.Side.RIGHT)
+
+	print("\n--- POWER OUT ---")
+	c._powered = true
+	c.power = 0.05
+	c.request_toggle_door(GameEnums.Side.LEFT)   # extra drain so it reaches 0 quickly
+	await _frames(20)
+	check("reaching 0 power blacks out", not c._powered)
+	check("blackout forces doors open", not c.is_door_closed(GameEnums.Side.LEFT))
+	c.power = 100.0
+	c._powered = true
+	c.room.set_powered(true)
+
+	print("\n--- VIA-ZERO DECISION ---")
+	c.ward_tokens = 1
+	check("try_block_death true with ward", c.try_block_death("x"))
+	check("ward consumed by block", c.ward_tokens == 0)
+	check("try_block_death false without ward", not c.try_block_death("x"))
+
+	print("\n--- VENDOR SHOP ---")
+	var ve = c.vendor
+	ve.state = GameEnums.VendorState.SHOP
+	ve.counterfeit = false
+	ve.stock = ItemRegistry.random_shop(ve._rng, 3, false)
+	c.item_held = null
+	c.open_shop()
+	await _frames(2)
+	check("shop opens at gate", c.shop.visible)
+	if not ve.stock.is_empty():
+		ve.on_bought(ve.stock[0])
+		check("buying acquires the item", c.item_held != null)
+		check("vendor leaves after purchase", ve.state == GameEnums.VendorState.IDLE)
+	if c.shop.visible:
+		c.shop.visible = false
+
+	print("\n--- ROSTER INTEGRITY ---")
+	var ids := ["ong_ke", "ma_da", "co_hon", "quy_nhap_trang", "ma_troi", "oan_hon"]
+	var tex_ok := true
+	for id in ids:
+		var t = d.get_threat(id)
+		if t == null or t.current_texture() == null:
+			tex_ok = false
+	check("every threat has a current texture", tex_ok)
+	check("clock advanced past 0", c.game_minutes > 0.0)
+	check("not accidentally ending", not c._ending)
