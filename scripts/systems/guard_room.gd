@@ -61,10 +61,13 @@ var _smoke: Array = []       # [{node, base, phase}]
 var _fan: Node3D
 var _hand_min: Node3D
 var _hand_hr: Node3D
-var _screen_mat: ShaderMaterial      # desk CRT showing cycling camera feeds
-var _screen_feeds: Array = []
+var _screen_mat: ShaderMaterial      # desk CRT showing the camera feed
+var _screen_feeds: Array = []        # feeds in CAMERAS order (idle slideshow)
+var _feed_by_cam := {}               # cam_id -> Texture2D
 var _screen_idx := 0
 var _screen_timer := 0.0
+var _desk_mirror := false            # true = mirror the player's operated camera
+var _desk_threat: Sprite3D           # threat figure shown on the desk CRT
 
 var _huong := 1.0            # incense-protection fraction (set by NightController)
 var _altar_lit := true       # false = candles guttered out (cold-draft event)
@@ -295,7 +298,9 @@ void fragment() {
 	for cam in MapGraph.CAMERAS:
 		var p := "res://assets/art/cameras/cam_%s.svg" % cam
 		if ResourceLoader.exists(p):
-			_screen_feeds.append(load(p))
+			var tex: Texture2D = load(p)
+			_screen_feeds.append(tex)
+			_feed_by_cam[cam] = tex
 	if not _screen_feeds.is_empty():
 		_screen_mat.set_shader_parameter("feed", _screen_feeds[0])
 	_screen_mat.set_shader_parameter("t", 0.0)
@@ -307,6 +312,38 @@ void fragment() {
 	mi.material_override = _screen_mat
 	mi.position = Vector3(0.9, 1.47, -1.46)
 	add_child(mi)
+	# Threat figure composited onto the desk CRT (sits just in front of the glass,
+	# tinted to match the cool phosphor). Shown when a threat is on the mirrored cam.
+	_desk_threat = Sprite3D.new()
+	_desk_threat.pixel_size = 0.0016
+	_desk_threat.position = Vector3(0.9, 1.44, -1.445)
+	_desk_threat.modulate = Color(0.7, 0.95, 0.85, 0.0)
+	_desk_threat.shaded = false
+	_desk_threat.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_desk_threat.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	add_child(_desk_threat)
+	_build_dvr()
+
+func _build_dvr() -> void:
+	# A đầu thu (DVR / receiver) box on the desk beside the monitor, with a ribbon of
+	# coax running up into the CRT — so the setup reads as real CCTV, not a TV.
+	var case_mat := _mat("", Color(0.08, 0.085, 0.1), 1.0, false, 0.5, 0.3)
+	var dvr := _box(Vector3(0.66, 0.14, 0.44), Vector3(0.9, 1.13, -1.74), case_mat)  # chassis on the desk
+	dvr.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# front fascia + vents
+	_box(Vector3(0.6, 0.1, 0.02), Vector3(0.9, 1.13, -1.52), _mat("", Color(0.05, 0.05, 0.06))).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# status LEDs (a steady green "rec" + an amber link)
+	var led_g := _emat(Color(0.2, 1.0, 0.4), 4.0)
+	_box(Vector3(0.02, 0.02, 0.01), Vector3(0.74, 1.13, -1.51), led_g).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var led_a := _emat(Color(1.0, 0.7, 0.15), 3.0)
+	_box(Vector3(0.02, 0.02, 0.01), Vector3(0.8, 1.13, -1.51), led_a).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# coax cable from the DVR up the back of the CRT (two short segments)
+	var cable := _mat("", Color(0.04, 0.04, 0.05), 1.0, false, 0.6)
+	var c1 := _cyl(0.015, 0.3, Vector3(1.12, 1.28, -1.7), cable)
+	c1.rotation = Vector3(0, 0, 0.5)
+	c1.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var c2 := _cyl(0.015, 0.34, Vector3(1.18, 1.5, -1.74), cable)
+	c2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 func _build_desk_lamp() -> void:
 	# A warm desk lamp pooling light over the desk — the cozy island in the dark.
@@ -756,11 +793,44 @@ func _animate_screen(delta: float) -> void:
 		return
 	_screen_mat.set_shader_parameter("t", _t)
 	_screen_mat.set_shader_parameter("lit", 1.0 if _powered else 0.0)
+	# Only auto-cycle when NOT mirroring the player's live camera. The desk-threat
+	# figure dims out when the screen is dead (blackout) or when mirroring is off.
+	if _desk_mirror:
+		if _desk_threat and not _powered:
+			_desk_threat.modulate.a = 0.0
+		return
+	if _desk_threat:
+		_desk_threat.modulate.a = 0.0
 	_screen_timer -= delta
 	if _screen_timer <= 0.0 and not _screen_feeds.is_empty():
 		_screen_timer = 2.6
 		_screen_idx = (_screen_idx + 1) % _screen_feeds.size()
 		_screen_mat.set_shader_parameter("feed", _screen_feeds[_screen_idx])
+
+## Desk CRT mirrors the camera the player is operating. cam_id "" -> idle slideshow.
+func set_desk_mirror(cam_id: String) -> void:
+	if cam_id == "" or not _feed_by_cam.has(cam_id):
+		_desk_mirror = false
+		set_desk_threat(null)
+		return
+	_desk_mirror = true
+	if _screen_mat:
+		_screen_mat.set_shader_parameter("feed", _feed_by_cam[cam_id])
+
+func set_desk_idle() -> void:
+	_desk_mirror = false
+	set_desk_threat(null)
+
+## Show (or clear) the threat figure composited on the desk CRT.
+func set_desk_threat(tex: Texture2D) -> void:
+	if _desk_threat == null:
+		return
+	if tex == null or not _desk_mirror or not _powered:
+		_desk_threat.modulate.a = 0.0
+		return
+	_desk_threat.texture = tex
+	_desk_threat.modulate.a = 0.85
+
 func _update_threat_sprites() -> void:
 	# A visible threat sways/breathes around its rest pose so the billboard reads as
 	# a living silhouette in the doorway, not a flat decal pinned to the wall.

@@ -70,7 +70,7 @@ func _build_map() -> void:
 	map.add_child(bg)
 	# Click target is deliberately larger than the drawn dot so you don't have to
 	# hit the circle exactly; the icon stays centered at a comfortable visual size.
-	const DOT_HIT := 64.0   # clickable square
+	const DOT_HIT := 48.0   # clickable square (smaller now there are 10 cameras)
 	for cam in MapGraph.CAMERAS:
 		var pos: Vector2 = MapGraph.MAP_POS[cam]
 		var b := UI.icon_button("res://assets/art/ui/cam_dot.svg", DOT_HIT)

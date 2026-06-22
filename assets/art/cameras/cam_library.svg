@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <!-- ===== ABANDONED SCHOOL LIBRARY (thư viện): moonlit ===== -->
+
+  <!-- base darkness -->
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+  <!-- back wall (muted blue) -->
+  <rect x="0" y="0" width="1280" height="500" fill="#2b3647"/>
+  <rect x="0" y="380" width="1280" height="120" fill="#243246" fill-opacity="0.6"/>
+  <!-- floor (dark wood) -->
+  <rect x="0" y="486" width="1280" height="234" fill="#121a2b"/>
+  <rect x="0" y="480" width="1280" height="10" fill="#1e2a3d"/>
+  <line x1="0" y1="545" x2="1280" y2="545" stroke="#0a0e14" stroke-width="2"/>
+  <line x1="0" y1="610" x2="1280" y2="610" stroke="#0a0e14" stroke-width="2"/>
+  <line x1="0" y1="675" x2="1280" y2="675" stroke="#0a0e14" stroke-width="2"/>
+  <!-- ceiling shadow -->
+  <rect x="0" y="0" width="1280" height="60" fill="#0a0e14" fill-opacity="0.6"/>
+
+  <!-- ===== BARRED WINDOW (back wall, center) with moonlight ===== -->
+  <rect x="560" y="60" width="170" height="250" fill="#1e2a3d"/>
+  <rect x="572" y="72" width="146" height="226" fill="#0a0e14"/>
+  <radialGradient id="libMoonSky" cx="55%" cy="35%" r="75%">
+    <stop offset="0%" stop-color="#e8ead0" stop-opacity="0.8"/>
+    <stop offset="32%" stop-color="#5b6f7e" stop-opacity="0.38"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+  </radialGradient>
+  <rect x="572" y="72" width="146" height="226" fill="url(#libMoonSky)"/>
+  <circle cx="660" cy="135" r="24" fill="#e8ead0"/>
+  <circle cx="652" cy="129" r="24" fill="#0a0e14" fill-opacity="0.18"/>
+  <rect x="600" y="72" width="6" height="226" fill="#0a0e14"/>
+  <rect x="642" y="72" width="6" height="226" fill="#0a0e14"/>
+  <rect x="684" y="72" width="6" height="226" fill="#0a0e14"/>
+  <rect x="572" y="182" width="146" height="6" fill="#0a0e14"/>
+  <!-- moonlight pool on floor -->
+  <radialGradient id="libMoonPool" cx="50%" cy="0%" r="100%">
+    <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+  </radialGradient>
+  <polygon points="572,486 718,486 800,720 480,720" fill="url(#libMoonPool)"/>
+  <polygon points="600,486 606,486 648,720 626,720" fill="#0a0e14" fill-opacity="0.4"/>
+  <polygon points="684,486 690,486 720,720 698,720" fill="#0a0e14" fill-opacity="0.4"/>
+
+  <!-- ===== TALL BOOKSHELVES (back wall, flanking window) ===== -->
+  <g>
+    <rect x="40" y="120" width="500" height="370" fill="#16202e"/>
+    <rect x="40" y="120" width="500" height="370" fill="#1e2a3d" fill-opacity="0.5"/>
+    <rect x="40" y="196" width="500" height="10" fill="#0a0e14"/><rect x="40" y="282" width="500" height="10" fill="#0a0e14"/>
+    <rect x="40" y="368" width="500" height="10" fill="#0a0e14"/><rect x="40" y="454" width="500" height="10" fill="#0a0e14"/>
+    <g fill-opacity="0.7">
+      <rect x="52" y="138" width="9" height="56" fill="#3a4a4a"/><rect x="63" y="142" width="11" height="52" fill="#2f3b52"/><rect x="76" y="136" width="8" height="58" fill="#4a3a3a"/><rect x="86" y="144" width="12" height="50" fill="#36473f"/><rect x="100" y="140" width="9" height="54" fill="#3a4458"/><rect x="111" y="138" width="10" height="56" fill="#52423a"/><rect x="123" y="142" width="8" height="52" fill="#2f4a44"/><rect x="133" y="138" width="11" height="56" fill="#3a4a4a"/>
+      <rect x="52" y="224" width="11" height="56" fill="#2f3b52"/><rect x="65" y="220" width="8" height="60" fill="#4a3a3a"/><rect x="75" y="226" width="12" height="54" fill="#36473f"/><rect x="89" y="222" width="9" height="58" fill="#3a4458"/><rect x="100" y="224" width="10" height="56" fill="#52423a"/><rect x="112" y="220" width="8" height="60" fill="#2f4a44"/><rect x="122" y="226" width="11" height="54" fill="#3a4a4a"/>
+      <rect x="380" y="138" width="9" height="56" fill="#3a4458"/><rect x="391" y="142" width="11" height="52" fill="#52423a"/><rect x="404" y="136" width="8" height="58" fill="#2f4a44"/><rect x="414" y="144" width="12" height="50" fill="#3a4a4a"/><rect x="428" y="140" width="9" height="54" fill="#2f3b52"/><rect x="439" y="138" width="10" height="56" fill="#4a3a3a"/><rect x="451" y="142" width="8" height="52" fill="#36473f"/><rect x="461" y="138" width="11" height="56" fill="#3a4458"/>
+      <rect x="380" y="310" width="11" height="56" fill="#36473f"/><rect x="393" y="306" width="8" height="60" fill="#3a4458"/><rect x="403" y="312" width="12" height="54" fill="#52423a"/><rect x="417" y="308" width="9" height="58" fill="#2f4a44"/><rect x="428" y="310" width="10" height="56" fill="#3a4a4a"/><rect x="440" y="306" width="8" height="60" fill="#2f3b52"/><rect x="450" y="312" width="11" height="54" fill="#4a3a3a"/>
+    </g>
+  </g>
+  <!-- side shelves receding (left + right walls) -->
+  <polygon points="0,150 40,170 40,470 0,520" fill="#16202e"/>
+  <polygon points="0,170 40,186 40,200 0,186" fill="#3a4a4a" fill-opacity="0.5"/><polygon points="0,300 40,310 40,324 0,316" fill="#52423a" fill-opacity="0.5"/><polygon points="0,420 40,426 40,440 0,436" fill="#2f3b52" fill-opacity="0.5"/>
+  <polygon points="1280,150 1100,180 1100,520 1280,560" fill="#16202e"/>
+  <polygon points="1280,150 1100,180 1100,500 1280,540" fill="#1e2a3d" fill-opacity="0.4"/>
+  <g fill-opacity="0.6">
+    <rect x="1120" y="210" width="150" height="44" fill="#3a4a4a"/><rect x="1120" y="290" width="150" height="44" fill="#52423a"/><rect x="1120" y="370" width="150" height="44" fill="#2f3b52"/><rect x="1120" y="450" width="150" height="44" fill="#36473f"/>
+  </g>
+
+  <!-- ===== ROLLING LADDER against right shelf ===== -->
+  <line x1="1040" y1="200" x2="1090" y2="500" stroke="#2a3a52" stroke-width="9"/>
+  <line x1="1080" y1="200" x2="1130" y2="500" stroke="#243246" stroke-width="9"/>
+  <line x1="1048" y1="240" x2="1098" y2="245" stroke="#2a3a52" stroke-width="6"/><line x1="1056" y1="300" x2="1106" y2="305" stroke="#2a3a52" stroke-width="6"/><line x1="1064" y1="360" x2="1114" y2="365" stroke="#2a3a52" stroke-width="6"/><line x1="1072" y1="420" x2="1122" y2="425" stroke="#2a3a52" stroke-width="6"/>
+  <circle cx="1090" cy="502" r="10" fill="#16202e"/><circle cx="1130" cy="502" r="10" fill="#16202e"/>
+
+  <!-- ===== READING TABLES + CHAIRS ===== -->
+  <!-- table 1 (left front) -->
+  <rect x="150" y="540" width="240" height="30" fill="#2a3a52"/>
+  <rect x="150" y="540" width="240" height="9" fill="#374d68"/>
+  <rect x="166" y="570" width="16" height="100" fill="#16202e"/><rect x="358" y="570" width="16" height="100" fill="#16202e"/>
+  <ellipse cx="270" cy="680" rx="150" ry="16" fill="#0a0e14" fill-opacity="0.5"/>
+  <rect x="200" y="600" width="14" height="70" fill="#1e2a3d"/><rect x="200" y="560" width="14" height="44" fill="#1a2535"/>
+  <!-- table 2 (right) -->
+  <rect x="820" y="560" width="240" height="30" fill="#243246"/>
+  <rect x="820" y="560" width="240" height="9" fill="#2f4258"/>
+  <rect x="836" y="590" width="16" height="100" fill="#16202e"/><rect x="1028" y="590" width="16" height="100" fill="#16202e"/>
+  <ellipse cx="940" cy="700" rx="150" ry="16" fill="#0a0e14" fill-opacity="0.5"/>
+  <rect x="900" y="620" width="14" height="70" fill="#1e2a3d"/><rect x="900" y="580" width="14" height="44" fill="#1a2535"/>
+
+  <!-- ===== KNOCKED-OVER CHAIR (center floor) ===== -->
+  <rect x="540" y="630" width="90" height="14" fill="#243246"/>
+  <rect x="540" y="600" width="14" height="44" fill="#1a2535"/>
+  <rect x="546" y="644" width="12" height="40" fill="#16202e"/><rect x="614" y="644" width="12" height="36" fill="#16202e"/>
+  <ellipse cx="585" cy="688" rx="70" ry="12" fill="#0a0e14" fill-opacity="0.5"/>
+
+  <!-- ===== SCATTERED BOOKS / PAPERS on floor ===== -->
+  <rect x="430" y="660" width="46" height="12" fill="#3a4458" transform="rotate(-12 453 666)"/>
+  <rect x="470" y="690" width="40" height="10" fill="#52423a" transform="rotate(8 490 695)"/>
+  <polygon points="700,650 740,646 744,664 704,668" fill="#cdd6d0" fill-opacity="0.5"/>
+  <polygon points="760,700 800,704 796,718 758,714" fill="#cdd6d0" fill-opacity="0.4"/>
+  <rect x="350" y="700" width="50" height="12" fill="#2f4a44" transform="rotate(-6 375 706)"/>
+
+  <!-- ===== heavy vignette (oppressive corners) ===== -->
+  <radialGradient id="libVig" cx="50%" cy="50%" r="62%">
+    <stop offset="52%" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.92"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#libVig)"/>
+  <rect x="0" y="0" width="1280" height="56" fill="#0a0e14" fill-opacity="0.55"/>
+  <rect x="0" y="666" width="1280" height="54" fill="#0a0e14" fill-opacity="0.5"/>
+</svg>

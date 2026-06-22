@@ -11,7 +11,7 @@ var _viewing := false
 func _configure() -> void:
 	movement_model = MODEL_WANDER
 	spawn_location = MapGraph.CLASSROOM
-	wander_zone = [MapGraph.CLASSROOM, MapGraph.LEFT_HALL, MapGraph.RIGHT_HALL, MapGraph.COURTYARD]
+	wander_zone = [MapGraph.CLASSROOM, MapGraph.LIBRARY, MapGraph.INFIRMARY, MapGraph.COURTYARD]
 	counter_door = false
 	counter_offering = true
 	move_interval = 6.0

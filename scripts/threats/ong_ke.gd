@@ -9,11 +9,13 @@ var _behave_t := 0.0
 func _configure() -> void:
 	movement_model = MODEL_PATH
 	spawn_location = MapGraph.GATE
-	# Authored as a left route; randomize_side mirrors it to the right ~half the
-	# time, so he rushes either door (you can't camp the left one).
-	path = [MapGraph.GATE, MapGraph.LEFT_HALL, MapGraph.LEFT_DOOR]
+	# Authored as the full left-wing route; randomize_side mirrors it to the right
+	# wing ~half the time, so he rushes either door and you must watch both wings.
+	# He now strolls the whole wing node-by-node (gate→canteen→classroom→library→
+	# hall→door) instead of teleporting two tiles to the door.
+	path = [MapGraph.GATE, MapGraph.CANTEEN, MapGraph.CLASSROOM, MapGraph.LIBRARY, MapGraph.LEFT_HALL, MapGraph.LEFT_DOOR]
 	randomize_side = true
-	move_interval = 5.0
+	move_interval = 2.2   # shorter step cadence so the longer route still arrives on time
 	attack_time = 7.0
 	counter_door = true
 	via_drain_at_door = 4.0

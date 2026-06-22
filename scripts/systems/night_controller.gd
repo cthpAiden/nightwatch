@@ -188,6 +188,8 @@ func _begin_night() -> void:
 		if nhang:
 			acquire_item(nhang)
 	Events.notify.emit("NIGHT_BEGIN", [])
+	if OS.has_environment("NW_OPEN_CAM"):   # dev: raise the camera panel for screenshots
+		_set_monitor(true)
 
 func _init_altar() -> void:
 	huong = huong_max
@@ -237,6 +239,8 @@ func _process(delta: float) -> void:
 	# Re-broadcast the watched camera every frame so a threat that wanders under a
 	# held view (e.g. Oan hồn) is correctly seen/unseen — fixes the stale _viewing flag.
 	director.broadcast_view(current_cam if monitor_open else "")
+	if monitor_open:
+		room.set_desk_threat(_desk_threat_tex())   # mirror the threat onto the desk CRT
 	_update_altar(delta)
 	_refresh_door_sprite(GameEnums.Side.LEFT)
 	_refresh_door_sprite(GameEnums.Side.RIGHT)
@@ -424,17 +428,27 @@ func _set_monitor(open: bool) -> void:
 		Audio.start_loop("static_loop", -22.0)
 		monitor.show_feed(current_cam)
 		director.broadcast_view(current_cam)
+		room.set_desk_mirror(current_cam)   # desk CRT mirrors what you're watching
 	else:
 		Audio.play_sfx("camera_down", -6.0)
 		Audio.stop_loop("static_loop")
 		director.broadcast_view("")
+		room.set_desk_idle()                # back to the idle slideshow
 	Events.cameras_toggled.emit(open)
 
 func on_camera_changed(cam_id: String) -> void:
 	current_cam = cam_id
 	_agitation = minf(1.0, _agitation + 0.45)   # flipping channels fast = panic
 	director.broadcast_view(cam_id)
+	room.set_desk_mirror(cam_id)
 	Events.camera_changed.emit(cam_id)
+
+## The threat texture (if any) to composite on the desk CRT for the watched camera.
+func _desk_threat_tex() -> Texture2D:
+	for t in director.threats:
+		if t.current_location == current_cam:
+			return t.current_texture()
+	return null
 
 func request_offering() -> void:
 	if not _running:

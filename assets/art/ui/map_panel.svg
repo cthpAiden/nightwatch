@@ -1,28 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 340">
+  <!-- panel backing -->
   <rect x="0" y="0" width="420" height="340" rx="10" fill="#0b1018" fill-opacity="0.92" stroke="#2b3647" stroke-width="2"/>
   <rect x="0" y="0" width="420" height="30" rx="10" fill="#141c2b"/>
-  <rect x="6" y="22" width="408" height="10" fill="#0b1018"/>
-  <!-- corridors (lines behind rooms) -->
-  <g stroke="#2b3a4d" stroke-width="6" stroke-linecap="round">
-    <line x1="210" y1="74" x2="210" y2="120"/>
-    <line x1="105" y1="135" x2="315" y2="135"/>
-    <line x1="100" y1="150" x2="100" y2="200"/>
-    <line x1="320" y1="150" x2="320" y2="200"/>
-    <line x1="140" y1="135" x2="170" y2="270"/>
-    <line x1="280" y1="135" x2="250" y2="270"/>
+  <rect x="0" y="22" width="420" height="8" fill="#141c2b"/>
+  <!-- header lamp dots -->
+  <circle cx="16" cy="15" r="4" fill="#3b9c6b"/>
+  <circle cx="30" cy="15" r="4" fill="#2b3647"/>
+
+  <!-- ===== corridors (drawn first, under the rooms) ===== -->
+  <g stroke="#2b3647" stroke-width="5" stroke-linecap="round">
+    <line x1="210" y1="50" x2="120" y2="96"/>
+    <line x1="210" y1="50" x2="300" y2="96"/>
+    <line x1="210" y1="50" x2="210" y2="152"/>
+    <line x1="210" y1="152" x2="72" y2="158"/>
+    <line x1="210" y1="152" x2="348" y2="158"/>
+    <line x1="120" y1="96" x2="72" y2="158"/>
+    <line x1="72" y1="158" x2="96" y2="224"/>
+    <line x1="96" y1="224" x2="150" y2="284"/>
+    <line x1="150" y1="284" x2="210" y2="308"/>
+    <line x1="300" y1="96" x2="348" y2="158"/>
+    <line x1="348" y1="158" x2="324" y2="224"/>
+    <line x1="324" y1="224" x2="270" y2="284"/>
+    <line x1="270" y1="284" x2="210" y2="308"/>
   </g>
-  <!-- rooms -->
-  <g fill="#1c2a3d" stroke="#3a4a60" stroke-width="2">
-    <rect x="180" y="44" width="60" height="34" rx="4"/>
-    <rect x="180" y="120" width="60" height="32" rx="4"/>
-    <rect x="68" y="120" width="74" height="30" rx="4"/>
-    <rect x="278" y="120" width="74" height="30" rx="4"/>
-    <rect x="58" y="200" width="84" height="34" rx="4"/>
-    <rect x="278" y="200" width="84" height="34" rx="4"/>
+
+  <!-- ===== rooms (rounded plates centred on each MAP_POS) ===== -->
+  <g fill="#16202e" stroke="#2f4258" stroke-width="2">
+    <rect x="184" y="34" width="52" height="32" rx="6"/>    <!-- gate -->
+    <rect x="184" y="136" width="52" height="32" rx="6"/>   <!-- courtyard -->
+    <!-- left wing -->
+    <rect x="94" y="80" width="52" height="32" rx="6"/>     <!-- canteen -->
+    <rect x="46" y="142" width="52" height="32" rx="6"/>    <!-- classroom -->
+    <rect x="70" y="208" width="52" height="32" rx="6"/>    <!-- library -->
+    <rect x="124" y="268" width="52" height="32" rx="6"/>   <!-- left_hall -->
+    <!-- right wing -->
+    <rect x="274" y="80" width="52" height="32" rx="6"/>    <!-- gym -->
+    <rect x="322" y="142" width="52" height="32" rx="6"/>   <!-- restroom -->
+    <rect x="298" y="208" width="52" height="32" rx="6"/>   <!-- infirmary -->
+    <rect x="244" y="268" width="52" height="32" rx="6"/>   <!-- right_hall -->
   </g>
-  <!-- office (you) -->
-  <rect x="160" y="270" width="100" height="44" rx="5" fill="#21303f" stroke="#e8a33d" stroke-width="2"/>
-  <!-- door thresholds -->
-  <rect x="150" y="246" width="20" height="10" rx="2" fill="#b3282d"/>
-  <rect x="250" y="246" width="20" height="10" rx="2" fill="#b3282d"/>
+
+  <!-- door squares either side of the office -->
+  <rect x="176" y="296" width="14" height="14" rx="2" fill="#243246" stroke="#3a4a60" stroke-width="1.5"/>
+  <rect x="230" y="296" width="14" height="14" rx="2" fill="#243246" stroke="#3a4a60" stroke-width="1.5"/>
+
+  <!-- ===== the office (you are here) ===== -->
+  <rect x="182" y="298" width="56" height="30" rx="6" fill="#3a2f1a" stroke="#9a7a2c" stroke-width="2"/>
+  <circle cx="210" cy="313" r="6" fill="#f2c14e"/>
+  <circle cx="210" cy="313" r="11" fill="none" stroke="#f2c14e" stroke-width="1.5" stroke-opacity="0.5"/>
 </svg>

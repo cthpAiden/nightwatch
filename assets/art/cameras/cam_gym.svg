@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <!-- ===== ABANDONED VIETNAMESE SCHOOL GYM / HOI TRUONG: moonlit ===== -->
+
+  <!-- base darkness -->
+  <rect x="0" y="0" width="1280" height="720" fill="#0a0e14"/>
+
+  <!-- far wall (muted teal) -->
+  <rect x="0" y="0" width="1280" height="430" fill="#2b3a36"/>
+  <!-- side wall (left, darker blue, in perspective) -->
+  <polygon points="0,0 230,90 230,470 0,430" fill="#243246"/>
+  <!-- side wall (right, blue) -->
+  <polygon points="1280,0 1050,90 1050,470 1280,430" fill="#2b3647"/>
+  <!-- wall lower shadow band -->
+  <rect x="0" y="330" width="1280" height="100" fill="#1f2c28" fill-opacity="0.7"/>
+  <!-- ceiling shadow -->
+  <rect x="0" y="0" width="1280" height="70" fill="#0a0e14" fill-opacity="0.6"/>
+
+  <!-- ===== WIDE WOODEN FLOOR ===== -->
+  <rect x="0" y="430" width="1280" height="290" fill="#121a2b"/>
+  <rect x="0" y="424" width="1280" height="10" fill="#1e2a3d"/>
+  <!-- floorboard depth lines -->
+  <line x1="0" y1="490" x2="1280" y2="490" stroke="#0a0e14" stroke-width="2"/>
+  <line x1="0" y1="560" x2="1280" y2="560" stroke="#0a0e14" stroke-width="2"/>
+  <line x1="0" y1="640" x2="1280" y2="640" stroke="#0a0e14" stroke-width="2"/>
+
+  <!-- painted court lines (faint, in perspective) -->
+  <polygon points="430,440 850,440 1130,710 150,710" fill="none" stroke="#cdd6d0" stroke-width="3" stroke-opacity="0.1"/>
+  <line x1="640" y1="440" x2="640" y2="710" stroke="#cdd6d0" stroke-width="3" stroke-opacity="0.1"/>
+  <ellipse cx="640" cy="575" rx="120" ry="40" fill="none" stroke="#cdd6d0" stroke-width="3" stroke-opacity="0.09"/>
+  <path d="M520 440 q120 70 240 0" fill="none" stroke="#e8ead0" stroke-width="3" stroke-opacity="0.08"/>
+
+  <!-- ===== TALL HIGH WINDOWS (far wall, near ceiling) ===== -->
+  <radialGradient id="gymSky1" cx="50%" cy="40%" r="75%">
+    <stop offset="0%" stop-color="#e8ead0" stop-opacity="0.8"/>
+    <stop offset="35%" stop-color="#5b6f7e" stop-opacity="0.4"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
+  </radialGradient>
+  <g>
+    <rect x="360" y="40" width="130" height="150" fill="#1e2a3d"/>
+    <rect x="372" y="52" width="106" height="126" fill="#0a0e14"/>
+    <rect x="372" y="52" width="106" height="126" fill="url(#gymSky1)"/>
+    <rect x="424" y="52" width="5" height="126" fill="#0a0e14"/>
+    <rect x="372" y="113" width="106" height="5" fill="#0a0e14"/>
+  </g>
+  <circle cx="408" cy="92" r="18" fill="#e8ead0"/>
+  <circle cx="402" cy="87" r="18" fill="#0a0e14" fill-opacity="0.18"/>
+  <g>
+    <rect x="790" y="40" width="130" height="150" fill="#1e2a3d"/>
+    <rect x="802" y="52" width="106" height="126" fill="#0a0e14"/>
+    <rect x="802" y="52" width="106" height="126" fill="url(#gymSky1)"/>
+    <rect x="854" y="52" width="5" height="126" fill="#0a0e14"/>
+    <rect x="802" y="113" width="106" height="5" fill="#0a0e14"/>
+  </g>
+
+  <!-- ===== moonlight pools on floor ===== -->
+  <radialGradient id="gymMoon1" cx="50%" cy="0%" r="100%">
+    <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.3"/>
+    <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+  </radialGradient>
+  <polygon points="372,430 478,430 600,720 250,720" fill="url(#gymMoon1)"/>
+  <radialGradient id="gymMoon2" cx="50%" cy="0%" r="100%">
+    <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="#cdd6d0" stop-opacity="0"/>
+  </radialGradient>
+  <polygon points="802,430 908,430 1060,720 720,720" fill="url(#gymMoon2)"/>
+
+  <!-- ===== BASKETBALL HOOP + BACKBOARD (far wall, center) ===== -->
+  <rect x="586" y="200" width="108" height="70" fill="#16202e"/>
+  <rect x="592" y="206" width="96" height="58" fill="#1e2a3d"/>
+  <rect x="618" y="236" width="44" height="28" fill="none" stroke="#cdd6d0" stroke-width="2" stroke-opacity="0.4"/>
+  <rect x="636" y="270" width="8" height="20" fill="#243246"/>
+  <ellipse cx="640" cy="292" rx="22" ry="6" fill="none" stroke="#e8ead0" stroke-width="3" stroke-opacity="0.55"/>
+  <path d="M620 294 l8 26 M640 296 l0 28 M660 294 l-8 26" fill="none" stroke="#cdd6d0" stroke-width="1.5" stroke-opacity="0.3"/>
+
+  <!-- ===== FOLDED WOODEN BLEACHERS (right side, perspective) ===== -->
+  <g>
+    <polygon points="1000,470 1280,500 1280,540 1000,505" fill="#243246"/>
+    <polygon points="1000,505 1280,540 1280,580 1000,540" fill="#1e2a3d"/>
+    <polygon points="1000,540 1280,580 1280,625 1000,580" fill="#16202e"/>
+    <line x1="1000" y1="488" x2="1280" y2="520" stroke="#2f4258" stroke-width="3" stroke-opacity="0.6"/>
+    <line x1="1000" y1="523" x2="1280" y2="560" stroke="#2f4258" stroke-width="3" stroke-opacity="0.5"/>
+  </g>
+
+  <!-- ===== STACK OF MATS (left side) ===== -->
+  <g>
+    <rect x="120" y="560" width="220" height="26" fill="#2a3a52"/>
+    <rect x="120" y="586" width="220" height="26" fill="#243246"/>
+    <rect x="120" y="612" width="220" height="26" fill="#1e2a3d"/>
+    <rect x="120" y="560" width="220" height="6" fill="#374d68"/>
+    <ellipse cx="230" cy="648" rx="130" ry="16" fill="#0a0e14" fill-opacity="0.55"/>
+  </g>
+
+  <!-- ===== LONE BALL on the floor ===== -->
+  <ellipse cx="690" cy="660" rx="34" ry="10" fill="#0a0e14" fill-opacity="0.55"/>
+  <circle cx="690" cy="636" r="24" fill="#243246"/>
+  <circle cx="683" cy="629" r="24" fill="#0a0e14" fill-opacity="0.2"/>
+  <path d="M666 636 h48 M690 612 v48 M672 619 q18 17 0 34 M708 619 q-18 17 0 34" fill="none" stroke="#0a0e14" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- ===== heavy vignette (oppressive corners) ===== -->
+  <radialGradient id="gymVig" cx="50%" cy="50%" r="62%">
+    <stop offset="52%" stop-color="#0a0e14" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#0a0e14" stop-opacity="0.92"/>
+  </radialGradient>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#gymVig)"/>
+  <rect x="0" y="0" width="1280" height="56" fill="#0a0e14" fill-opacity="0.55"/>
+  <rect x="0" y="666" width="1280" height="54" fill="#0a0e14" fill-opacity="0.5"/>
+</svg>

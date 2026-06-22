@@ -9,7 +9,7 @@ var lock := 0.0
 func _configure() -> void:
 	movement_model = MODEL_WANDER
 	spawn_location = MapGraph.COURTYARD
-	wander_zone = [MapGraph.COURTYARD, MapGraph.RIGHT_HALL, MapGraph.CLASSROOM]
+	wander_zone = [MapGraph.COURTYARD, MapGraph.GYM, MapGraph.LIBRARY]
 	counter_door = false
 	move_interval = 5.0
 

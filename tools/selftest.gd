@@ -323,6 +323,22 @@ func _run(c) -> void:
 	Save.upgrades.erase("sturdy_doors")   # don't pollute the real save with a test buy
 	Save.save_progress()
 
+	print("\n--- MAP (10 cameras, two wings, FNAF routes) ---")
+	check("10 camera locations", MapGraph.CAMERAS.size() == 10)
+	check("left wing mirrors to right", MapGraph.mirror(MapGraph.LEFT_HALL) == MapGraph.RIGHT_HALL and MapGraph.mirror(MapGraph.CANTEEN) == MapGraph.GYM)
+	var ogk = d.get_threat("ong_ke")
+	check("ong_ke walks a full multi-node wing route", ogk != null and ogk.path.size() >= 5)
+	check("a wing route ends at a door", ogk != null and MapGraph.door_side(ogk.path[ogk.path.size() - 1]) != -1)
+	var locs_ok := true
+	for t in d.threats:
+		var loc: String = t.current_location
+		if not (MapGraph.is_camera(loc) or loc == MapGraph.OFFICE or MapGraph.door_side(loc) != -1):
+			locs_ok = false
+			print("    bad location: %s -> %s" % [t.id, loc])
+	check("every threat sits on a valid map node", locs_ok)
+	check("gate is a long approach from the office", MapGraph.distance(MapGraph.GATE, MapGraph.OFFICE) >= 5)
+	check("a deep wing node still routes to the office", MapGraph.distance(MapGraph.LIBRARY, MapGraph.OFFICE) == 3)
+
 	print("\n--- ROSTER INTEGRITY ---")
 	var ids := ["ong_ke", "ma_da", "co_hon", "quy_nhap_trang", "ma_troi", "oan_hon"]
 	var tex_ok := true

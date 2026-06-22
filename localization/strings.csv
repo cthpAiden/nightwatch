@@ -72,11 +72,15 @@ GO_RETRY,Thử Lại,Try Again
 GO_MENU,Về Menu,Main Menu
 GO_CAUGHT_BY,Bị bắt bởi: {0},Caught by: {0}
 CAM1_NAME,Cổng Trường,School Gate
-CAM2_NAME,Hành Lang Trái,Left Corridor
-CAM3_NAME,Hành Lang Phải,Right Corridor
-CAM4_NAME,Nhà Vệ Sinh,Restroom
-CAM5_NAME,Lớp Học Cũ,Old Classroom
-CAM6_NAME,Sân Sau,Back Courtyard
+CAM2_NAME,Sân Trường,Courtyard
+CAM3_NAME,Căng Tin,Canteen
+CAM4_NAME,Lớp Học Cũ,Old Classroom
+CAM5_NAME,Thư Viện,Library
+CAM6_NAME,Hành Lang Trái,Left Corridor
+CAM7_NAME,Nhà Thể Chất,Gymnasium
+CAM8_NAME,Nhà Vệ Sinh,Restroom
+CAM9_NAME,Phòng Y Tế,Infirmary
+CAM10_NAME,Hành Lang Phải,Right Corridor
 CAM_SIGNAL_LOST,MẤT TÍN HIỆU,SIGNAL LOST
 CAM_OFFLINE,CAMERA HỎNG,CAMERA DOWN
 CAM_HINT,Bấm [C] hoặc nút CAM để xem,Press [C] or the CAM button to watch

@@ -12,9 +12,12 @@ var _rest := 0.0   # time the risen corpse has been frozen (stillness only SLOWS
 
 func _configure() -> void:
 	movement_model = MODEL_PATH
-	spawn_location = MapGraph.CLASSROOM
-	path = [MapGraph.CLASSROOM, MapGraph.LEFT_HALL, MapGraph.LEFT_DOOR]
-	move_interval = 4.0
+	spawn_location = MapGraph.GATE
+	# Authored down the right wing; randomize_side can mirror it to the left, so the
+	# risen corpse may rush either door once Mun triggers it.
+	path = [MapGraph.GATE, MapGraph.GYM, MapGraph.RESTROOM, MapGraph.INFIRMARY, MapGraph.RIGHT_HALL, MapGraph.RIGHT_DOOR]
+	randomize_side = true
+	move_interval = 3.0
 	attack_time = 6.0
 	counter_door = true
 	via_drain_at_door = 5.0
