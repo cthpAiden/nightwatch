@@ -28,6 +28,7 @@ var randomize_side: bool = false           # PATH: re-roll left/right on each ap
 var move_interval: float = 5.0             # seconds between movement opportunities
 var attack_time: float = 6.0               # seconds at a door before it kills
 var via_drain_at_door: float = 6.0         # vía/sec drained while looming at a door
+var approach_sfx: String = "knock"         # diegetic cue when it reaches a door (per threat)
 
 # How it is countered
 var counter_door: bool = true
@@ -156,7 +157,7 @@ func _arrive_at_door(side: int) -> void:
 	# Diegetic warning only: a knock + a vague unease. It does NOT say which door
 	# or what it is — you have to check the doorway lights to find out, then react
 	# (light it up and hold still, or shut the door). That's the tension.
-	Audio.play_sfx("knock", -4.0)
+	Audio.play_sfx(approach_sfx, -4.0, 1.0, Audio.VERB_BUS)
 	Events.notify.emit("THREAT_NEARBY", [])
 	# If the relevant counter is already engaged, leave immediately.
 	if _is_repelled_now():

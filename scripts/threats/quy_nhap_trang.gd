@@ -21,6 +21,7 @@ func _configure() -> void:
 	attack_time = 6.0
 	counter_door = true
 	via_drain_at_door = 5.0
+	approach_sfx = "approach_drag"   # a slow, wet drag down the corridor
 	if ResourceLoader.exists("res://assets/art/threats/mun_walk.svg"):
 		_mun_tex = load("res://assets/art/threats/mun_walk.svg")
 
@@ -61,7 +62,7 @@ func _trigger() -> void:
 	movement_model = MODEL_CREEPER
 	Events.cat_triggered.emit()
 	Events.notify.emit("CAT_WARN", [])
-	Audio.play_sfx("stinger", -3.0)
+	Audio.play_sfx("sting_metal", -3.0, 1.0, Audio.VERB_BUS)   # the corpse sits up
 	phase = GameEnums.ThreatPhase.ACTIVE
 	current_location = spawn_location
 	path_index = 0

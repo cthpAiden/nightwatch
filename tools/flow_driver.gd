@@ -20,7 +20,7 @@ func _ready() -> void:
 	if mode == "death":
 		if night:
 			night._caught("ong_ke")
-		await _frames(1600)   # _caught has a ~1.3s await before Router fires
+		await _frames(3600)   # _caught now has a ~2.3s anticipation+linger before Router fires
 		_report("res://scenes/screens/GameOver.tscn", "death -> GameOver")
 	else:
 		await _frames(3200)

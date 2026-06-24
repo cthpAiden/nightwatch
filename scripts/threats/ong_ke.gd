@@ -19,6 +19,7 @@ func _configure() -> void:
 	attack_time = 7.0
 	counter_door = true
 	via_drain_at_door = 4.0
+	approach_sfx = "approach_heavy"   # three slow, descending knocks
 
 func _process_attack(delta: float) -> void:
 	# Closing the door always repels him (the panic / power-hungry counter).

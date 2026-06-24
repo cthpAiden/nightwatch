@@ -14,16 +14,22 @@ const SFX_NAMES := [
 	"stinger", "power_down", "low_power_beep", "offering_bell", "incense_whoosh",
 	"item_good", "item_bad", "footstep_wood", "knock", "rooster", "vendor_bell",
 	"candle_gust", "phone_ring", "phone_ring_warp", "drone_tension", "coin_chime",
+	# horror pass: anticipation, per-threat approaches, water, stinger family, loops
+	"pre_scare", "ambience_sub", "approach_drag", "approach_heavy", "approach_soft",
+	"water_loop", "water_call", "sting_low", "sting_rise", "sting_metal", "sting_breath",
+	"shutter_strain", "incense_bed",
 ]
 const MUSIC_NAMES := ["ambience_night", "ambience_dread"]
 # NOTE: "whisper" is intentionally NOT here. It is played as a one-shot lure
 # (ma_da / counterfeit vendor); if its WAV had loop_mode set it would play
 # forever in the SFX pool — that was the "windy/sawing" bug.
 const LOOPING := ["fluorescent_hum", "static_loop", "heartbeat", "breathing",
-	"ambience_night", "ambience_dread", "drone_tension"]
+	"ambience_night", "ambience_dread", "drone_tension",
+	"ambience_sub", "water_loop", "shutter_strain", "incense_bed"]
 
 const MUSIC_BUS := "Music"
 const SFX_BUS := "SFX"
+const VERB_BUS := "Verb"   # wet send for scares/stingers so they bloom + survive a duck()
 const POOL_SIZE := 16
 
 var _streams: Dictionary = {}                 # name -> AudioStream
@@ -47,17 +53,46 @@ func _ready() -> void:
 
 # --- bus / volume -----------------------------------------------------------
 func _ensure_buses() -> void:
-	for b in [MUSIC_BUS, SFX_BUS]:
+	for b in [MUSIC_BUS, SFX_BUS, VERB_BUS]:
 		if AudioServer.get_bus_index(b) == -1:
 			var idx := AudioServer.bus_count
 			AudioServer.add_bus(idx)
 			AudioServer.set_bus_name(idx, b)
 			AudioServer.set_bus_send(idx, "Master")
+	# Verb: a dim, dark room tail. Scares/stingers route here so they sound spatial
+	# and — crucially — are NOT touched by duck() (which only drops Music + dry SFX),
+	# so the hit punches through a momentarily-silenced mix.
+	var vi := AudioServer.get_bus_index(VERB_BUS)
+	if vi != -1 and AudioServer.get_bus_effect_count(vi) == 0:
+		var rv := AudioEffectReverb.new()
+		rv.room_size = 0.78
+		rv.damping = 0.45
+		rv.wet = 0.32
+		rv.dry = 0.92
+		rv.predelay_msec = 28.0
+		rv.spread = 0.7
+		AudioServer.add_bus_effect(vi, rv)
+	# Master glue: a gentle compressor tames the procedural peaks, a limiter stops the
+	# jumpscare from hard-clipping. Keeps the mix cohesive without obvious pumping.
+	var mi := AudioServer.get_bus_index("Master")
+	if mi != -1 and AudioServer.get_bus_effect_count(mi) == 0:
+		var comp := AudioEffectCompressor.new()
+		comp.threshold = -14.0
+		comp.ratio = 3.5
+		comp.attack_us = 18000.0
+		comp.release_ms = 240.0
+		comp.gain = 2.0
+		AudioServer.add_bus_effect(mi, comp)
+		var lim := AudioEffectLimiter.new()
+		lim.ceiling_db = -0.6
+		lim.soft_clip_db = 2.0
+		AudioServer.add_bus_effect(mi, lim)
 
 func apply_volumes() -> void:
 	_set_bus("Master", Settings.master_volume)
 	_set_bus(MUSIC_BUS, Settings.music_volume)
 	_set_bus(SFX_BUS, Settings.sfx_volume)
+	_set_bus(VERB_BUS, Settings.sfx_volume)   # wet send tracks the SFX slider
 
 func _set_bus(bus: String, linear: float) -> void:
 	var idx := AudioServer.get_bus_index(bus)
@@ -96,7 +131,7 @@ func _wav_frames(w: AudioStreamWAV) -> int:
 	return w.data.size() / denom if denom > 0 else 0
 
 # --- one-shots --------------------------------------------------------------
-func play_sfx(sound_name: String, volume_db: float = 0.0, pitch: float = 1.0) -> AudioStreamPlayer:
+func play_sfx(sound_name: String, volume_db: float = 0.0, pitch: float = 1.0, bus: String = SFX_BUS) -> AudioStreamPlayer:
 	var s: AudioStream = _streams.get(sound_name)
 	if s == null:
 		return null
@@ -104,7 +139,7 @@ func play_sfx(sound_name: String, volume_db: float = 0.0, pitch: float = 1.0) ->
 	p.stream = s
 	p.volume_db = volume_db
 	p.pitch_scale = pitch
-	p.bus = SFX_BUS
+	p.bus = bus
 	p.play()
 	return p
 
@@ -119,11 +154,11 @@ func _free_player() -> AudioStreamPlayer:
 	_pool.append(np)
 	return np
 
-func play_jumpscare() -> void:
+func play_jumpscare(pitch: float = 1.0) -> void:
 	var scale := Settings.scare_volume_scale()
 	if scale <= 0.0:
 		return
-	play_sfx("jumpscare", linear_to_db(scale))
+	play_sfx("jumpscare", linear_to_db(scale), pitch, VERB_BUS)
 
 # --- sustained loops --------------------------------------------------------
 func start_loop(sound_name: String, volume_db: float = 0.0) -> void:
@@ -150,6 +185,27 @@ func set_loop_volume(sound_name: String, volume_db: float) -> void:
 	var p: AudioStreamPlayer = _loops.get(sound_name)
 	if p:
 		p.volume_db = volume_db
+
+## Live-pitch a sustained loop (e.g. ramp the heartbeat faster as danger climbs).
+func set_loop_pitch(sound_name: String, pitch: float) -> void:
+	var p: AudioStreamPlayer = _loops.get(sound_name)
+	if p:
+		p.pitch_scale = maxf(0.01, pitch)
+
+## Sidechain duck: drop Music + dry SFX for a held beat, then recover. Sounds routed
+## to the Verb bus (jumpscare, key stingers) are untouched, so they punch through the
+## sudden quiet — the "the mix drops out a beat before the hit" scare move.
+func duck(amount_db: float = 16.0, attack: float = 0.05, hold: float = 0.22, release: float = 0.5) -> void:
+	for bus in [MUSIC_BUS, SFX_BUS]:
+		var idx := AudioServer.get_bus_index(bus)
+		if idx == -1 or AudioServer.is_bus_mute(idx):
+			continue
+		var base := AudioServer.get_bus_volume_db(idx)
+		var low := base - amount_db
+		var tw := create_tween()
+		tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(idx, v), base, low, attack)
+		tw.tween_interval(hold)
+		tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(idx, v), low, base, release)
 
 func stop_all_loops() -> void:
 	for k in _loops:

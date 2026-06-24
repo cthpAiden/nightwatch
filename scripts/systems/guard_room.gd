@@ -95,8 +95,8 @@ var _env: Environment
 var _dread := 0.0
 var _dread_target := 0.0
 const FOG_BASE := 0.018
-const SAT_BASE := 0.9
-const CON_BASE := 1.13
+const SAT_BASE := 1.08
+const CON_BASE := 1.12
 const EXP_BASE := 1.0
 
 func _ready() -> void:
@@ -148,11 +148,13 @@ func _build_environment() -> void:
 	env.ssao_enabled = true
 	env.ssao_radius = 1.2
 	env.ssao_intensity = 1.9
-	# Cold, contrasty night grade.
+	# Cold, contrasty night grade — but keep colour RICH, not washed-grey. The room is
+	# meant to read dark, not desaturated; saturation sits above 1.0 so the warm altar/
+	# lamp islands and the cold blue night stay vivid against the gloom.
 	env.adjustment_enabled = true
 	env.adjustment_brightness = 1.0
-	env.adjustment_contrast = 1.13
-	env.adjustment_saturation = 0.9
+	env.adjustment_contrast = 1.12
+	env.adjustment_saturation = 1.08
 	we.environment = env
 	_env = env
 	add_child(we)
@@ -959,9 +961,12 @@ func _update_dread(delta: float) -> void:
 	_dread = move_toward(_dread, _dread_target, delta * 0.8)
 	if _dread <= 0.0001 and _dread_target <= 0.0001:
 		return
-	_env.adjustment_saturation = lerpf(SAT_BASE, 0.5, _dread)
-	_env.adjustment_contrast = lerpf(CON_BASE, 1.32, _dread)
-	_env.tonemap_exposure = lerpf(EXP_BASE, 0.82, _dread)
+	# Danger sours the grade via CONTRAST, exposure and fog — not by draining colour to
+	# grey. A small desaturation at peak dread reads as "blood draining" without the
+	# washed-out look the player disliked.
+	_env.adjustment_saturation = lerpf(SAT_BASE, 0.92, _dread)
+	_env.adjustment_contrast = lerpf(CON_BASE, 1.34, _dread)
+	_env.tonemap_exposure = lerpf(EXP_BASE, 0.84, _dread)
 	_env.fog_density = lerpf(FOG_BASE, 0.05, _dread)
 
 func is_door_closed(side: int) -> bool:

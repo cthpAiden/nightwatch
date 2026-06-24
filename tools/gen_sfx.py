@@ -436,16 +436,25 @@ def vendor_bell():
     save("vendor_bell.wav", s, peak=0.55)
 
 def candle_gust():
-    # a cold draft snuffing the altar candles: an airy whoosh + a soft low "fwoomp"
-    s = buf(0.6)
-    g = bandpass(noise(0.5), 200, 1900)
+    # a cold draft snuffing the altar candles. Now leads with a sharp INHALED-breath
+    # transient (something drew the air in) before the low fwoomp, so it reads as a
+    # presence blowing the candles out, not just wind.
+    s = buf(0.8)
+    br = bandpass(noise(0.2), 380, 2600)
+    bsh = []
+    for i, x in enumerate(br):
+        t = i / SR
+        env = (t / 0.04) if t < 0.04 else max(0.0, 1.0 - (t - 0.04) / 0.16)  # fast in, quick out
+        bsh.append(x * env)
+    add(s, bsh, 0.0, 0.8)
+    g = bandpass(noise(0.45), 200, 1900)
     sh = []
     for i, x in enumerate(g):
         t = i / SR
-        env = math.sin(math.pi * min(1.0, t / 0.5))
+        env = math.sin(math.pi * min(1.0, t / 0.45))
         sh.append(x * env)
-    add(s, sh, 0.0, 0.85)
-    add(s, exp_decay(sine(90, 0.22), 0.05), 0.34, 0.45)
+    add(s, sh, 0.18, 0.75)
+    add(s, exp_decay(sine(85, 0.24), 0.05), 0.46, 0.45)
     save("candle_gust.wav", soft_clip(s), peak=0.55)
 
 def phone_ring():
@@ -461,19 +470,27 @@ def phone_ring():
     save("phone_ring.wav", soft_clip(out), peak=0.5)
 
 def phone_ring_warp():
-    # the SAME phone, but WRONG — lower, detuned, sagging pitch, slower ringer. The
-    # tell that it's Ma da imitating the call. Answering this is the mistake.
+    # the SAME phone, but WRONG — lower, detuned, sagging pitch, slower ringer, plus
+    # tape wow/flutter, a broken-intercom bitcrush, and a reversed whisper bed so
+    # something is clearly "on the line". The tell that it's Ma da imitating the call.
     n = int(SR * 1.6)
     out = []
     for i in range(n):
         t = i / SR
+        wow = 1.0 + 0.012 * math.sin(2 * math.pi * 3.0 * t)   # slow tape wow
         burst = 1.0 if (t < 0.5 or (0.8 < t < 1.4)) else 0.0
         warble = 1.0 if math.sin(2 * math.pi * 11 * t) > 0 else 0.3
         bend = 1.0 - 0.1 * t          # the pitch sags as it rings
-        v = (math.sin(2 * math.pi * 300 * bend * t)
-             + math.sin(2 * math.pi * 317 * bend * t)) * 0.5
+        v = (math.sin(2 * math.pi * 300 * bend * wow * t)
+             + math.sin(2 * math.pi * 317 * bend * wow * t)) * 0.5
         out.append(v * burst * warble)
     out = lowpass(out, 1500)
+    out = [round(v * 16) / 16 for v in out]                   # ~4-bit bitcrush grit
+    wh = bandpass(noise(1.6), 700, 3000)
+    wh = adsr(wh, a=0.3, d=0.2, s=0.6, r=0.6)
+    wh = wh[::-1]                                              # reversed whisper bed
+    for i in range(min(len(out), len(wh))):
+        out[i] += wh[i] * 0.12
     save("phone_ring_warp.wav", soft_clip(out), peak=0.5)
 
 # ---------------------------------------------------------------- tension bed
@@ -547,6 +564,195 @@ def ambience_dread():
     stereo = _cricket_bed(14.0, 0.30, 0.75, 3000, 4400, 0.20)
     save("ambience_dread.wav", stereo, folder=MUSIC_DIR, stereo=True, peak=0.7)
 
+# ---------------------------------------------------------------- horror: anticipation + body
+def pre_scare():
+    # The held breath BEFORE a jumpscare image: a rising sub swell + an air "inhale"
+    # that pulls inward, so the half-second of dread is felt, not just heard.
+    dur = 0.6
+    n = int(SR * dur)
+    out = []
+    for i in range(n):
+        t = i / SR
+        f = 38.0 + 26.0 * (t / dur)          # 38 -> 64 Hz climb
+        amp = (t / dur) ** 1.5               # swell in
+        out.append(math.sin(2 * math.pi * f * t) * amp)
+    air = bandpass(noise(dur), 200, 1700)
+    for i in range(n):
+        t = i / SR
+        out[i] += air[i] * ((t / dur) ** 2) * 0.4
+    out = lowpass(out, 800)
+    save("pre_scare.wav", soft_clip(out), peak=0.85)
+
+def ambience_sub():
+    # A continuous, near-subliminal sub-bass dread floor (felt, not heard). Two close
+    # sines (slow beating) under a slow amp LFO. Freqs chosen for a seamless 8 s loop.
+    dur = 8.0
+    n = int(SR * dur)
+    out = []
+    for i in range(n):
+        t = i / SR
+        lfo = 0.62 + 0.38 * math.sin(2 * math.pi * 0.125 * t)   # 1 cycle / 8 s
+        v = (math.sin(2 * math.pi * 36.0 * t)                    # 288 whole cycles
+             + 0.7 * math.sin(2 * math.pi * 36.5 * t))           # 292 whole cycles
+        out.append(v * lfo)
+    save("ambience_sub.wav", out, peak=0.14)
+
+# ---------------------------------------------------------------- per-threat approaches
+def approach_drag():
+    # Quỷ nhập tràng: a slow, wet drag/shuffle with irregular dragging thuds.
+    dur = 1.5
+    s = buf(dur)
+    drag = lowpass(noise(dur), 340)
+    sh = []
+    for i, x in enumerate(drag):
+        t = i / SR
+        env = 0.45 + 0.55 * max(0.0, math.sin(2 * math.pi * 1.25 * t))
+        sh.append(x * env)
+    add(s, sh, 0.0, 0.7)
+    for at in (0.18, 0.66, 1.12):
+        add(s, exp_decay(sine(68, 0.2), 0.05), at, 0.6)
+    save("approach_drag.wav", soft_clip(s), peak=0.7)
+
+def approach_heavy():
+    # Ông kẹ: three heavy, DESCENDING knocks — slow and certain.
+    s = buf(1.6)
+    def k(at, f, g):
+        imp = exp_decay(sine(f, 0.18), 0.03)
+        imp = add(imp, exp_decay(bandpass(noise(0.12), 120, 1800), 0.018), gain=0.6)
+        add(s, imp, at, g)
+    k(0.0, 150, 1.0); k(0.52, 120, 0.95); k(1.04, 92, 0.9)
+    save("approach_heavy.wav", soft_clip(s), peak=0.85)
+
+def approach_soft():
+    # The rest: a small, childlike single tap from the dark — almost shy.
+    s = buf(0.5)
+    add(s, exp_decay(sine(300, 0.1), 0.02), 0.0, 0.55)
+    add(s, exp_decay(bandpass(noise(0.06), 400, 3000), 0.01), 0.0, 0.4)
+    save("approach_soft.wav", s, peak=0.4)
+
+# ---------------------------------------------------------------- ma da water
+def water_loop():
+    # A continuous body of water: low gurgle under a slow swell, lapping wash, sparse
+    # drips. The amp dips toward the loop seam so the 4 s loop is clickless.
+    dur = 4.0
+    n = int(SR * dur)
+    base = lowpass(noise(dur), 250)
+    wash = bandpass(noise(dur), 200, 800)
+    out = []
+    for i in range(n):
+        t = i / SR
+        seam = 0.5 - 0.5 * math.cos(2 * math.pi * (t / dur))    # 0 at seams, 1 mid
+        lfo = 0.6 + 0.4 * math.sin(2 * math.pi * 0.25 * t)
+        v = base[i] * lfo * 0.7
+        v += wash[i] * 0.18 * (0.5 + 0.5 * math.sin(2 * math.pi * 0.5 * t))
+        out.append(v * (0.25 + 0.75 * seam))
+    for at in (0.35, 1.2, 2.1, 3.25):
+        add(out, exp_decay(sine(880, 0.05), 0.012), at, 0.22)
+    save("water_loop.wav", out, peak=0.42)
+
+def water_call():
+    # Ma da's lure: a drowned, almost-worded cry — low filtered whisper + a wavering
+    # sung vowel + faint gurgle. "Help me..." you can't quite make out.
+    dur = 1.8
+    n = int(SR * dur)
+    out = []
+    for i in range(n):
+        t = i / SR
+        mod = 0.5 + 0.5 * abs(math.sin(t * 4.0))
+        out.append(random.uniform(-1, 1) * mod)
+    out = bandpass(out, 380, 1700)
+    out = adsr(out, a=0.3, d=0.2, s=0.6, r=0.5)
+    for i in range(n):
+        t = i / SR
+        f = 220.0 * (1.0 - 0.05 * math.sin(2 * math.pi * 3 * t))
+        v = 0.0
+        for h, g in [(1, 1.0), (2, 0.5), (3, 0.3), (4, 0.15)]:
+            v += g * math.sin(2 * math.pi * f * h * t)
+        env = math.sin(math.pi * min(1.0, t / dur))
+        out[i] += v * env * 0.16
+    gur = lowpass(noise(dur), 250)
+    for i in range(n):
+        out[i] += gur[i] * 0.18
+    save("water_call.wav", soft_clip(out), peak=0.4)
+
+# ---------------------------------------------------------------- stinger family
+def sting_low():
+    # the original low dread hit (door arrival).
+    s = buf(1.0)
+    add(s, exp_decay(sine(110, 0.8), 0.3), 0.0, 1.0)
+    add(s, exp_decay(sine(165, 0.8), 0.25), 0.0, 0.4)
+    add(s, exp_decay(bandpass(noise(0.5), 300, 4000), 0.1), 0.0, 0.5)
+    save("sting_low.wav", soft_clip(s), peak=0.85)
+
+def sting_rise():
+    # "you took the bait" — an upward sweep (ma da lure answered / fake phone).
+    dur = 0.7
+    n = int(SR * dur)
+    out = []
+    for i in range(n):
+        t = i / SR
+        f = 120.0 + 640.0 * (t / dur) ** 2
+        out.append(math.sin(2 * math.pi * f * t))
+    out = adsr(out, a=0.005, d=0.05, s=0.7, r=0.2)
+    out = add(out, exp_decay(bandpass(noise(0.4), 500, 5000), 0.12), gain=0.4)
+    save("sting_rise.wav", soft_clip(out), peak=0.7)
+
+def sting_metal():
+    # an inharmonic metallic cluster — the risen corpse (quỷ nhập tràng).
+    s = buf(1.0)
+    base = 180
+    for mult, g, tau in [(1.0, 1.0, 0.5), (2.41, 0.6, 0.4), (3.83, 0.4, 0.3), (5.2, 0.25, 0.2)]:
+        add(s, exp_decay(sine(base * mult, 1.0), tau), 0.0, g)
+    add(s, exp_decay(bandpass(noise(0.3), 800, 6000), 0.05), 0.0, 0.4)
+    save("sting_metal.wav", soft_clip(s), peak=0.7)
+
+def sting_breath():
+    # a sharp, sudden inhaled gasp — candle gutter / oan hồn's quiet grab.
+    dur = 0.8
+    out = bandpass(noise(dur), 300, 2200)
+    sh = []
+    for i, x in enumerate(out):
+        t = i / SR
+        env = (t / 0.1) if t < 0.1 else max(0.0, 1.0 - (t - 0.1) / 0.5)
+        sh.append(x * env)
+    add(sh, exp_decay(sine(70, 0.3), 0.08), 0.0, 0.3)
+    save("sting_breath.wav", soft_clip(sh), peak=0.5)
+
+# ---------------------------------------------------------------- door-strain + altar bed
+def shutter_strain():
+    # The far side of a CLOSED shutter when something is pressing it: a low detuned
+    # groan with an intermittent metal creak. Seam-masked 4 s loop.
+    dur = 4.0
+    n = int(SR * dur)
+    out = []
+    for i in range(n):
+        t = i / SR
+        seam = 0.5 - 0.5 * math.cos(2 * math.pi * (t / dur))
+        v = (math.sin(2 * math.pi * 80 * t) + 0.7 * math.sin(2 * math.pi * 83 * t))
+        out.append(v * 0.5 * seam)
+    creak = bandpass(noise(dur), 600, 2400)
+    for i in range(n):
+        t = i / SR
+        cm = max(0.0, math.sin(2 * math.pi * 0.5 * t)) ** 3
+        seam = 0.5 - 0.5 * math.cos(2 * math.pi * (t / dur))
+        out[i] += creak[i] * cm * 0.3 * seam
+    save("shutter_strain.wav", out, peak=0.4)
+
+def incense_bed():
+    # A near-subliminal soft crackle while the altar burns — warmth you can feel
+    # slipping away when it guts out. Seam-masked 4 s loop.
+    dur = 4.0
+    n = int(SR * dur)
+    cr = bandpass(noise(dur), 1200, 5000)
+    out = []
+    for i in range(n):
+        t = i / SR
+        seam = 0.5 - 0.5 * math.cos(2 * math.pi * (t / dur))
+        gate = 1.0 if random.random() < 0.02 else 0.04
+        out.append(cr[i] * gate * seam)
+    out = lowpass(out, 6000)
+    save("incense_bed.wav", out, peak=0.1)
+
 # ---------------------------------------------------------------- run
 if __name__ == "__main__":
     print("Generating SFX ...")
@@ -560,6 +766,12 @@ if __name__ == "__main__":
     footstep_wood(); knock(); rooster(); vendor_bell()
     candle_gust(); phone_ring(); phone_ring_warp()
     drone_tension(); coin_chime()
+    print("Generating horror cues ...")
+    pre_scare(); ambience_sub()
+    approach_drag(); approach_heavy(); approach_soft()
+    water_loop(); water_call()
+    sting_low(); sting_rise(); sting_metal(); sting_breath()
+    shutter_strain(); incense_bed()
     print("Generating jumpscare ...")
     jumpscare()
     print("Generating ambience (this takes a moment) ...")

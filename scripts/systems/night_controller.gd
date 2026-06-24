@@ -19,6 +19,7 @@ var cassette
 var pause
 var _ui_layer: CanvasLayer
 var _jumpscare_rect: TextureRect
+var _scare_mat: ShaderMaterial     # chromatic-split + UV-jitter on the scare image ("hit" 1->0)
 var _flash: ColorRect              # white burst on a jumpscare
 var _jump_jitter_t := 0.0          # seconds of remaining jumpscare position-jitter
 var _vignette: TextureRect
@@ -69,6 +70,9 @@ var _crowd_level := 0.0      # Cô hồn smother (0..1) driving the view-blockin
 var _crowd_layer: CanvasLayer
 var _crowd_overlay: TextureRect
 var _hb_on := false          # heartbeat loop currently playing (ramped with danger)
+var _breath_on := false      # proximity-breathing loop (a threat looms at a door)
+var _strain_on := false      # shutter-strain loop (a closed door is being pressed)
+var _water_on := false       # ma da rising-water loop (driven by flood level)
 var _oan_petty_shown := false  # one-time Oan hồn comedic line on first high grievance
 var _post_layer: CanvasLayer
 var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
@@ -156,10 +160,12 @@ void fragment() {
 	float grain = rand(UV * vec2(800.0, 450.0) + vec2(TIME * 53.0, TIME * 29.0));
 	float scan = sin(UV.y * 900.0) * 0.5 + 0.5;
 	float edge = distance(UV, vec2(0.5));
-	float vig = clamp((edge - 0.34) * 1.6, 0.0, 1.0);
-	float base = 0.12 + 0.6 * strength;
-	float a = vig * 0.6 * base + (grain * 0.5 + scan * 0.12) * 0.16 * base;
-	COLOR = vec4(vec3(0.015, 0.015, 0.02) + vec3(grain * 0.06), a);
+	float vig = clamp((edge - 0.36) * 1.5, 0.0, 1.0);
+	// Near-invisible at rest (0.045) so the clean office keeps its colour; the film of
+	// grain + vignette + scanline only crowds in as danger (strength) rises.
+	float base = 0.045 + 0.72 * strength;
+	float a = vig * 0.55 * base + (grain * 0.5 + scan * 0.12) * 0.16 * base;
+	COLOR = vec4(vec3(0.01, 0.01, 0.014) + vec3(grain * 0.05), a);
 }
 """
 	_post_mat = ShaderMaterial.new()
@@ -214,6 +220,28 @@ void fragment() {
 	UI.full(_jumpscare_rect)
 	_jumpscare_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_jumpscare_rect.visible = false
+	# The grab image distorts on impact: a hard chromatic R/B split + a little UV jitter
+	# that decays over ~0.4s (driven from _process), so the face glitches as it lands.
+	var jsh := Shader.new()
+	jsh.code = """
+shader_type canvas_item;
+uniform float hit = 0.0;
+float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
+void fragment() {
+	float h = clamp(hit, 0.0, 1.0);
+	vec2 uv = UV;
+	uv.x += (rand(vec2(floor(UV.y * 180.0), floor(TIME * 40.0))) - 0.5) * 0.02 * h;
+	float off = 0.014 * h;
+	vec4 base = texture(TEXTURE, uv);
+	float r = texture(TEXTURE, uv + vec2(off, 0.0)).r;
+	float b = texture(TEXTURE, uv - vec2(off, 0.0)).b;
+	COLOR = vec4(r, base.g, b, base.a);
+}
+"""
+	_scare_mat = ShaderMaterial.new()
+	_scare_mat.shader = jsh
+	_scare_mat.set_shader_parameter("hit", 0.0)
+	_jumpscare_rect.material = _scare_mat
 	jl.add_child(_jumpscare_rect)
 	_flash = ColorRect.new()
 	UI.full(_flash)
@@ -226,6 +254,7 @@ func _connect_events() -> void:
 	Events.threat_at_door.connect(func(id, side): _on_threat_at_door(id, side))
 	Events.threat_left_door.connect(func(_id, side): _refresh_door_sprite(side))
 	Events.crowd_changed.connect(func(level): _crowd_level = level)
+	Events.water_level.connect(_on_water_level_audio)
 	Events.via_state_changed.connect(_on_via_state_fx)
 	# Oan hồn's petty/comedic beat — fires once when her grievance first runs high.
 	Events.grievance_changed.connect(func(level):
@@ -239,12 +268,25 @@ func _on_threat_at_door(id: String, side: int) -> void:
 	_refresh_door_sprite(side)
 	if room:
 		room.add_shake(0.32)
-	Audio.play_sfx("stinger", -16.0)
+	Audio.play_sfx("sting_low", -14.0, 1.0, Audio.VERB_BUS)
 	# First time a given rusher reaches a door this night, name its counter in context
 	# (teaching that survives past the Night-1 tutorial).
 	if not _first_door.get(id, false):
 		_first_door[id] = true
 		Events.notify.emit("COUNTER_" + id.to_upper(), [])
+
+## Ma da's flood, voiced as a body of water that swells from a distant trickle to an
+## oppressive slosh as the level rises — so the silent flood mechanic is now felt.
+func _on_water_level_audio(level: float) -> void:
+	if level > 0.02:
+		if not _water_on:
+			_water_on = true
+			Audio.start_loop("water_loop", -30.0)
+		Audio.set_loop_volume("water_loop", lerpf(-30.0, -8.0, clampf(level, 0.0, 1.0)))
+		Audio.set_loop_pitch("water_loop", lerpf(0.85, 1.05, clampf(level, 0.0, 1.0)))
+	elif _water_on:
+		_water_on = false
+		Audio.stop_loop("water_loop")
 
 ## Reactive vignette: the screen edges bruise toward red as your vía fails.
 func _on_via_state_fx(state: int) -> void:
@@ -260,6 +302,10 @@ func _on_via_state_fx(state: int) -> void:
 
 func _start_audio() -> void:
 	Audio.play_music("ambience_dread" if config.night_index >= 3 else "ambience_night")
+	# A continuous sub-bass dread floor under the whole night — felt, not heard. Its
+	# volume rises with danger in _update_atmosphere so the drone swell reads as the
+	# room tightening, not an on/off switch.
+	Audio.start_loop("ambience_sub", -34.0)
 
 func _start_sequence() -> void:
 	# Debug: NW_SKIP_TAPE=1 begins the night immediately (used for headless tests).
@@ -408,6 +454,7 @@ func _init_altar() -> void:
 	if room:
 		room.set_huong(1.0)
 		room.set_altar_lit(true)
+	Audio.start_loop("incense_bed", -28.0)   # subliminal warmth you can feel slip away
 	Events.huong_changed.emit(1.0)
 	Events.altar_lit_changed.emit(true)
 
@@ -436,8 +483,12 @@ func _process(delta: float) -> void:
 		_jump_jitter_t -= delta
 		var k := clampf(_jump_jitter_t / 0.5, 0.0, 1.0)
 		_jumpscare_rect.position = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * 16.0 * k
+		if _scare_mat:
+			_scare_mat.set_shader_parameter("hit", k)   # glitch decays with the jitter
 		if _jump_jitter_t <= 0.0:
 			_jumpscare_rect.position = Vector2.ZERO
+			if _scare_mat:
+				_scare_mat.set_shader_parameter("hit", 0.0)
 	if not _running:
 		return
 	# During the Night-1 lesson the whole sim is frozen except looking around and the
@@ -485,25 +536,32 @@ func _update_atmosphere() -> void:
 	var d := maxf(via_danger * 1.1, huong_danger * 0.6)
 	if not _powered:
 		d = maxf(d, 0.85)
+	var dread := clampf(d, 0.0, 1.0)
 	if room:
-		room.set_dread(clampf(d, 0.0, 1.0))
+		room.set_dread(dread)
 	if _post_mat:
-		_post_mat.set_shader_parameter("strength", clampf(d, 0.0, 1.0))
-	# Heartbeat swells with danger from SHAKEN onward instead of snapping on at CRITICAL.
+		_post_mat.set_shader_parameter("strength", dread)
+	# The sub floor breathes up with danger (subliminal calm -> oppressive at the edge).
+	Audio.set_loop_volume("ambience_sub", lerpf(-34.0, -12.0, dread))
+	# Heartbeat swells with danger from SHAKEN onward AND speeds up — a constant-tempo
+	# pulse is a metronome you tune out, an accelerating one makes the late game frantic.
 	if via_state == GameEnums.ViaState.NORMAL:
 		if _hb_on:
 			_hb_on = false
 			Audio.stop_loop("heartbeat")
 	else:
 		var frac := clampf(via / via_max, 0.0, 1.0)
-		var vol := lerpf(-20.0, -3.0, clampf((0.4 - frac) / 0.4, 0.0, 1.0))
+		var sev := clampf((0.4 - frac) / 0.4, 0.0, 1.0)   # 0 at SHAKEN edge -> 1 near death
+		var vol := lerpf(-20.0, -3.0, sev)
 		if not _hb_on:
 			_hb_on = true
 			Audio.start_loop("heartbeat", vol)
 		else:
 			Audio.set_loop_volume("heartbeat", vol)
-	var looming := director.threat_at_door(GameEnums.Side.LEFT) != null \
-		or director.threat_at_door(GameEnums.Side.RIGHT) != null
+		Audio.set_loop_pitch("heartbeat", lerpf(0.9, 1.5, sev))
+	var left_loom: bool = director.threat_at_door(GameEnums.Side.LEFT) != null
+	var right_loom: bool = director.threat_at_door(GameEnums.Side.RIGHT) != null
+	var looming := left_loom or right_loom
 	var want_drone := looming or via_state == GameEnums.ViaState.CRITICAL
 	if want_drone and not _drone_on:
 		_drone_on = true
@@ -511,6 +569,32 @@ func _update_atmosphere() -> void:
 	elif not want_drone and _drone_on:
 		_drone_on = false
 		Audio.stop_loop("drone_tension")
+	_update_proximity_audio(left_loom, right_loom)
+
+## The far side of the door, voiced: a wet breath when something looms (pitched toward
+## the side it's on), and a low metal strain when it's pressing a CLOSED shutter. These
+## make holding a door feel physically occupied instead of silent after the arrival sting.
+func _update_proximity_audio(left_loom: bool, right_loom: bool) -> void:
+	var loom := left_loom or right_loom
+	if loom:
+		var pitch := 0.92 if (left_loom and not right_loom) else 1.0
+		if not _breath_on:
+			_breath_on = true
+			Audio.start_loop("breathing", -15.0)
+		Audio.set_loop_pitch("breathing", pitch)
+	elif _breath_on:
+		_breath_on = false
+		Audio.stop_loop("breathing")
+	var pressed := false
+	if room:
+		pressed = (left_loom and room.is_door_closed(GameEnums.Side.LEFT)) \
+			or (right_loom and room.is_door_closed(GameEnums.Side.RIGHT))
+	if pressed and not _strain_on:
+		_strain_on = true
+		Audio.start_loop("shutter_strain", -16.0)
+	elif not pressed and _strain_on:
+		_strain_on = false
+		Audio.stop_loop("shutter_strain")
 
 func _advance_clock(delta: float) -> void:
 	var rate := 60.0 / maxf(config.seconds_per_hour, 1.0)   # game-minutes per real second
@@ -851,45 +935,93 @@ func _caught(cause: String) -> void:
 	_ending = true
 	_running = false
 	director.set_paused(true)
-	Audio.stop_loop("heartbeat")
-	Audio.stop_loop("drone_tension")
-	_drone_on = false
-	Audio.stop_music(0.2)
 	# Even a failed night still pays a little vàng mã for the hours you held — so a
 	# loss feeds the shrine meta instead of being pure wasted time.
 	if _last_hour > 0:
 		_earn_coins(_last_hour * 2)
 	_commit_best()
+	Events.game_over.emit(cause)
+	# Scariness scales with WHO caught you and how late it is: a Night-1 ông kẹ grab and a
+	# Night-6 oan hồn grab should not feel identical.
+	var t := director.get_threat(cause)
+	var fear: float = float(t.fear_factor) if t else 3.0
+	var prog := night_progress()
+	var intensity: float = clampf(0.30 + fear * 0.11 + prog * 0.34, 0.0, 1.0)
+	var is_oan: bool = cause == "oan_hon"
+
+	# --- 1) ANTICIPATION — the held breath. The whole mix ducks out, the office snaps
+	# dark, and a low sub swells for a beat where you KNOW it is coming. ----------------
+	Audio.duck(26.0, 0.04, 1.2, 0.7)
+	for lp in ["heartbeat", "drone_tension", "static_loop", "breathing", "water_loop",
+			"shutter_strain", "ambience_sub", "incense_bed"]:
+		Audio.stop_loop(lp)
+	Audio.stop_music(0.05)
+	_drone_on = false
+	_hb_on = false
+	_breath_on = false
+	_strain_on = false
+	_water_on = false
+	if room:
+		room.set_dread(1.0)
+		room.set_powered(false)   # blackout for the beat
+		room.add_shake(0.16)
+	_flash.color = Color(0, 0, 0, 0)
+	Audio.play_sfx("pre_scare", -3.0, lerpf(1.06, 0.8, intensity), Audio.VERB_BUS)
+	var pre := 0.32 + intensity * 0.22 + (0.26 if is_oan else 0.0)
+	await get_tree().create_timer(pre).timeout
+	if not is_inside_tree():
+		return
+
+	# --- 2) THE HIT ---------------------------------------------------------------------
 	var meta := ThreatRegistry.info(cause)
 	var scare_path: String = meta.get("scare", "") if not meta.is_empty() else ""
-	if Settings.allow_jumpscares() and scare_path != "" and ResourceLoader.exists(scare_path):
-		# Punch it in: a white flash, a scale-snap from oversized to fit, a few frames
-		# of position jitter, and a hard camera jolt — so the scare actually lands.
+	var has_image: bool = Settings.allow_jumpscares() and scare_path != "" and ResourceLoader.exists(scare_path)
+	if has_image:
 		_jumpscare_rect.texture = load(scare_path)
 		_jumpscare_rect.pivot_offset = _jumpscare_rect.size * 0.5
-		_jumpscare_rect.scale = Vector2(1.4, 1.4)
+		var pop := 1.18 if is_oan else 1.5
+		_jumpscare_rect.scale = Vector2(pop, pop)
+		_jumpscare_rect.modulate = Color(1, 1, 1, 1)
 		_jumpscare_rect.visible = true
+		if _scare_mat:
+			_scare_mat.set_shader_parameter("hit", 1.0)
 		var ts := create_tween()
-		ts.tween_property(_jumpscare_rect, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		_jump_jitter_t = 0.5
-		_flash.color = Color(1, 1, 1, 0.9)
-		var tf := create_tween()
-		tf.tween_property(_flash, "color:a", 0.0, 0.25)
+		ts.tween_property(_jumpscare_rect, "scale", Vector2.ONE, 0.7 if is_oan else 0.4) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_jump_jitter_t = (0.28 if is_oan else 0.5) * (0.7 + intensity)
+		_strobe_flash(is_oan)
 		if room:
-			room.add_shake(1.0)
-		Audio.play_jumpscare()
+			room.add_shake(clampf(0.85 + intensity * 0.35, 0.0, 1.2) * (0.6 if is_oan else 1.0))
+		Audio.play_jumpscare(lerpf(1.0, 0.82, intensity))
 	else:
-		# accessibility / non-lethal cause: a soft red wash + low cue, no jump image.
-		Audio.play_sfx("stinger", -6.0)
+		# accessibility / non-lethal cause: a soft red wash + a breath sting, no jump image.
+		Audio.play_sfx("sting_breath", -5.0, 1.0, Audio.VERB_BUS)
 		_flash.color = Color(0.35, 0.02, 0.02, 0.55)
 		var tfade := create_tween()
 		tfade.tween_property(_flash, "color:a", 0.0, 0.9)
 		if room:
 			room.add_shake(0.4)
-	Events.game_over.emit(cause)
-	await get_tree().create_timer(1.3).timeout
+
+	# --- 3) LINGER — hold the burned-in face in dead silence, then dissolve to black. ---
+	await get_tree().create_timer(0.9 + intensity * 0.5).timeout
+	if not is_inside_tree():
+		return
+	if has_image and _jumpscare_rect.visible:
+		var td := create_tween()
+		td.tween_property(_jumpscare_rect, "modulate:a", 0.0, 0.5)
+	await get_tree().create_timer(0.6).timeout
 	Save.record_death(cause)
 	Router.to_game_over(cause)
+
+## Multi-step flash on the grab: a hard white pop, a dark dip, a softer second pop, out —
+## reads as a strobing camera shock, not a single fade. Oan hồn gets a gentler version.
+func _strobe_flash(soft: bool) -> void:
+	var peak := 0.55 if soft else 0.92
+	_flash.color = Color(1, 1, 1, peak)
+	var tw := create_tween()
+	tw.tween_property(_flash, "color:a", 0.15, 0.06)
+	tw.tween_property(_flash, "color:a", peak * 0.7, 0.05)
+	tw.tween_property(_flash, "color:a", 0.0, 0.4)
 
 func _win() -> void:
 	if _ending:
@@ -897,11 +1029,19 @@ func _win() -> void:
 	_ending = true
 	_running = false
 	director.set_paused(true)
-	Audio.stop_loop("heartbeat")
-	Audio.stop_loop("drone_tension")
+	Audio.stop_all_loops()   # heartbeat, drone, sub, breathing, strain, water, incense...
 	_drone_on = false
+	_hb_on = false
+	_breath_on = false
+	_strain_on = false
+	_water_on = false
+	if room:
+		room.set_dread(0.0)
 	Audio.stop_music(0.2)   # let the win/ending screen start its own ambience cleanly
-	Audio.play_sfx("rooster", -3.0)
+	# Dawn relief: the rooster, a soft temple bell, and a warm swell — an exhale after
+	# the night, with the new reverb tail letting it breathe.
+	Audio.play_sfx("rooster", -3.0, 1.0, Audio.VERB_BUS)
+	Audio.play_sfx("offering_bell", -10.0, 1.0, Audio.VERB_BUS)
 	_earn_coins(25)   # survival bonus toward shrine upgrades
 	_commit_best()
 	Events.night_survived.emit()
@@ -1044,7 +1184,8 @@ func _gutter_candles() -> void:
 	altar_lit = false
 	huong = 0.0
 	Audio.play_sfx("candle_gust", -3.0)
-	Audio.play_sfx("stinger", -10.0)
+	Audio.play_sfx("sting_breath", -10.0, 1.0, Audio.VERB_BUS)
+	Audio.stop_loop("incense_bed")   # the room goes acoustically cold
 	if room:
 		room.add_shake(0.5)
 	Events.altar_lit_changed.emit(false)
@@ -1055,7 +1196,7 @@ func request_light_incense() -> void:
 	if not _running or _incense_cd > 0.0:
 		return
 	if _nhang <= 0:
-		Audio.play_sfx("stinger", -16.0)
+		Audio.play_sfx("sting_low", -18.0)
 		Events.notify.emit("ALTAR_NO_NHANG", [])
 		return
 	_nhang -= 1
@@ -1076,6 +1217,7 @@ func _light_incense(silent: bool) -> void:
 	if room:
 		room.set_huong(huong / huong_max)
 		room.set_altar_lit(true)
+	Audio.start_loop("incense_bed", -28.0)   # the altar warms back up
 	Events.altar_lit_changed.emit(true)
 	Events.huong_changed.emit(huong / huong_max)
 	if not silent:

@@ -11,3 +11,6 @@ export.cfg
 # OS
 Thumbs.db
 .DS_Store
+
+# Dev screenshot harness output
+.shots/

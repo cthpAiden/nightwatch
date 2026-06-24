@@ -46,7 +46,11 @@ func _start_lure() -> void:
 	_lure_active = true
 	_lure_t = 5.0
 	Events.water_lure.emit(true)
-	Audio.play_sfx("whisper", -6.0)
+	# Duck the night to near-silence for a beat, then a drowned, almost-worded cry rises
+	# from the water — the lure you must NOT answer. Harder/lower the more it has flooded.
+	Audio.duck(14.0, 0.15, 0.5, 0.8)
+	var p: float = lerpf(1.05, 0.82, clampf(flood / 100.0, 0.0, 1.0))
+	Audio.play_sfx("water_call", -5.0, p, Audio.VERB_BUS)
 	Events.notify.emit("MADA_LURE", [])
 
 func _end_lure() -> void:
@@ -57,7 +61,7 @@ func _end_lure() -> void:
 func _on_answer() -> void:
 	if _lure_active:
 		flood = minf(100.0, flood + 28.0)
-		Audio.play_sfx("stinger", -8.0)
+		Audio.play_sfx("sting_rise", -8.0, 1.0, Audio.VERB_BUS)   # you answered the water
 		_end_lure()
 
 func _on_action(action: String) -> void:

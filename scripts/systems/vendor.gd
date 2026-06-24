@@ -85,7 +85,7 @@ func _reset_idle() -> void:
 func _go_hostile() -> void:
 	state = GameEnums.VendorState.HOSTILE
 	_hostile_t = 12.0
-	Audio.play_sfx("stinger", -4.0)
+	Audio.play_sfx("sting_metal", -4.0, 1.0, Audio.VERB_BUS)   # the mask drops: "that isn't her"
 	Events.vendor_state_changed.emit(state)
 	Events.notify.emit("VENDOR_HOSTILE", [])
 

@@ -11,7 +11,7 @@ var _refresh_t := 0.0
 var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
 var _fx_burst := 0.0                # decaying static spike on channel change
 var _fog := 0.0                     # extra baseline static on a "fog" night
-const FX_BASE := 0.12
+const FX_BASE := 0.09
 
 ## A foggy night runs every feed heavier with static (set once at night start).
 func set_fog_level(v: float) -> void:
@@ -42,43 +42,59 @@ func setup(controller) -> void:
 	UI.full(self)
 	_build()
 
+func _notification(what: int) -> void:
+	# Re-assert a full-screen rect whenever the panel is shown (cheap insurance so the
+	# CCTV always covers the whole viewport).
+	if what == NOTIFICATION_VISIBILITY_CHANGED and is_inside_tree() and visible:
+		UI.full(self)
+
 func _build() -> void:
 	var bg := UI.color_rect(Color(0.01, 0.012, 0.02))
 	UI.full(bg)
 	add_child(bg)
 
 	# SCALE (not KEEP_ASPECT_COVERED) so the whole feed image fills the screen
-	# without being zoomed in / cropped — the bezel art frames the edges.
+	# without being zoomed in / cropped — the bezel art frames the edges. The feed's
+	# own material both GRADES the image (so it reads as a live CCTV monitor, not flat
+	# grey) and lays the CCTV noise/scanline over it in one pass.
 	_feed = UI.texture_rect("res://assets/art/cameras/cam_gate.svg", TextureRect.STRETCH_SCALE)
 	UI.place(_feed, 0, 0, 1, 1, 40, 36, -40, -36)
+	var sh := Shader.new()
+	sh.code = """
+shader_type canvas_item;
+uniform float strength = 0.10;
+float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
+void fragment() {
+	vec4 src = texture(TEXTURE, UV);
+	vec3 c = src.rgb;
+	// De-grey grade: add contrast, restore saturation the night art crushes out, give
+	// the feed a faint cold-CCTV cast, and lift the blacks so it isn't a dead grey slab.
+	c = (c - 0.5) * 1.16 + 0.5;
+	float l = dot(c, vec3(0.299, 0.587, 0.114));
+	c = mix(vec3(l), c, 1.5);
+	c *= vec3(0.93, 1.05, 1.01);
+	c += vec3(0.015, 0.024, 0.022);
+	// Animated CCTV noise + scanline; `strength` spikes on channel change.
+	float n = rand(UV * vec2(900.0, 540.0) + vec2(TIME * 41.0, TIME * 13.0));
+	c += (n - 0.5) * strength;
+	c -= (sin(UV.y * 720.0) * 0.5 + 0.5) * strength * 0.10;
+	// Soft vignette draws the eye to the centre of the frame.
+	float vig = distance(UV, vec2(0.5));
+	c *= 1.0 - smoothstep(0.55, 1.0, vig) * 0.5;
+	COLOR = vec4(clamp(c, 0.0, 1.0), src.a);
+}
+"""
+	var mat := ShaderMaterial.new()
+	mat.shader = sh
+	mat.set_shader_parameter("strength", FX_BASE)
+	_feed.material = mat
+	_fx_mat = mat
 	add_child(_feed)
 
 	_threat_host = Control.new()
 	UI.place(_threat_host, 0, 0, 1, 1, 40, 36, -40, -36)
 	_threat_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_threat_host)
-
-	# CCTV static + scanline shader overlay
-	var fx := UI.color_rect(Color(1, 1, 1, 1))
-	UI.place(fx, 0, 0, 1, 1, 40, 36, -40, -36)
-	var sh := Shader.new()
-	sh.code = """
-shader_type canvas_item;
-uniform float strength = 0.12;
-float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
-void fragment() {
-	float n = rand(UV * vec2(900.0, 540.0) + vec2(TIME * 41.0, TIME * 13.0));
-	float scan = sin(UV.y * 720.0) * 0.5 + 0.5;
-	float a = (n * 0.6 + scan * 0.18) * strength;
-	COLOR = vec4(vec3(n), a);
-}
-"""
-	var mat := ShaderMaterial.new()
-	mat.shader = sh
-	mat.set_shader_parameter("strength", FX_BASE)
-	fx.material = mat
-	_fx_mat = mat
-	add_child(fx)
 
 	var bezel := UI.texture_rect("res://assets/art/ui/monitor_bezel.svg", TextureRect.STRETCH_SCALE)
 	UI.full(bezel)
@@ -202,7 +218,9 @@ func _refresh_threats() -> void:
 		var tr_node := TextureRect.new()
 		tr_node.texture = tex
 		tr_node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		tr_node.modulate = Color(0.85, 0.87, 0.87)
+		# Keep the figure bright and present on the feed (a faint cold cast to sit in the
+		# CCTV grade) instead of the old dishwater grey that made threats hard to read.
+		tr_node.modulate = Color(0.95, 0.98, 0.97)
 		UI.place(tr_node, 0.5, 1, 0.5, 1, -hw, -(hh + 20.0) + yo, hw, -20.0 + yo)
 		_threat_host.add_child(tr_node)
 		# Click the figure to "tag" the anomaly — a reward for actually watching the

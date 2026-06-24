@@ -14,6 +14,13 @@ func _ready() -> void:
 	if OS.has_environment("NW_SHOT_DELAY"):
 		delay = float(OS.get_environment("NW_SHOT_DELAY"))
 	await get_tree().create_timer(delay).timeout
+	# Optional forced window size (NW_SHOT_W/H) to test stretch/letterbox at any aspect.
+	if OS.has_environment("NW_SHOT_W") and OS.has_environment("NW_SHOT_H"):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		DisplayServer.window_set_size(Vector2i(
+			int(OS.get_environment("NW_SHOT_W")), int(OS.get_environment("NW_SHOT_H"))))
+		for i in 6:
+			await get_tree().process_frame
 	var img := get_viewport().get_texture().get_image()
 	img.save_png(out_path)
 	await get_tree().process_frame

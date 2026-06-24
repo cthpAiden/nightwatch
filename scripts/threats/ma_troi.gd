@@ -31,7 +31,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 	# de-aggro it (or brace for the brief control-jinx). Resets once calmed.
 	if lock >= 72.0 and not _warned:
 		_warned = true
-		Audio.play_sfx("stinger", -12.0)
+		Audio.play_sfx("sting_rise", -12.0, 1.0, Audio.VERB_BUS)   # lock-on building
 		Events.notify.emit("MATROI_WARN", [])
 	elif lock < 45.0:
 		_warned = false
@@ -51,7 +51,7 @@ func _surge() -> void:
 		_controller.hex_controls(2.5)   # apply the jinx first so its cue always lands
 		_controller.add_startle(-26.0)
 		_controller.add_power(-8.0)
-	Audio.play_sfx("stinger", -4.0)
+	Audio.play_sfx("sting_low", -4.0, 1.0, Audio.VERB_BUS)
 	Events.notify.emit("MATROI_RULE", [])
 	lock = 45.0
 	_warned = false   # re-arm the telegraph so back-to-back lock-ons are also warned
