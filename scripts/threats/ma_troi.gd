@@ -35,10 +35,13 @@ func process_ai(delta: float, night_progress: float) -> void:
 		_surge()
 
 func _surge() -> void:
-	# locks on: a hard vía + light hit, then resets — never an instant kill
+	# locks on: a hard vía + light hit, then resets — never an instant kill itself, but
+	# it jinxes your doors/lights open for a moment, so panicking can get you killed by
+	# whatever is at the door right now. Teaches "don't run."
 	if _controller:
 		_controller.add_startle(-26.0)
 		_controller.add_power(-8.0)
+		_controller.hex_controls(2.5)
 	Audio.play_sfx("stinger", -4.0)
 	Events.notify.emit("MATROI_RULE", [])
 	lock = 45.0

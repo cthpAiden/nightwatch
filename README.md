@@ -32,8 +32,18 @@ It also runs from the command line:
 | Raise/lower cameras      | **C** or **Tab**, or the **CAM** button                        |
 | Left door / Left light   | **A** / **S** (or HUD buttons)                                 |
 | Right door / Right light | **L** / **K** (or HUD buttons)                                 |
+| Light incense (altar)    | **R** (a finite bundle of nhang per night)                     |
+| Ring the bell            | **B** (shoves the nearest rusher back)                         |
+| Answer the phone         | **E** (only the *real* call — a warped ring is a trap)         |
+| Use held item            | **Q** (or the item button)                                     |
+| Close the drain          | **D** (when Ma da's flood is rising)                           |
 | Place an offering        | **F** (or **Đặt mâm cúng**)                                    |
+| Controls cheat-sheet     | **H**                                                          |
 | Pause                    | **Esc**                                                        |
+
+Night 1 runs a short hands-on tutorial; on the campaign's final night, gathering
+the three Oan-hồn clues (answer the phone, search the classroom camera, tag her on
+a feed) unlocks the **siêu thoát** good ending.
 
 ### The two meters
 

@@ -476,6 +476,32 @@ def phone_ring_warp():
     out = lowpass(out, 1500)
     save("phone_ring_warp.wav", soft_clip(out), peak=0.5)
 
+# ---------------------------------------------------------------- tension bed
+def drone_tension():
+    # A low, detuned, slowly-breathing drone faded in when a threat is at the door or
+    # vía is critical. Built to loop seamlessly: the 0.5 Hz tremolo completes exactly
+    # two cycles over 4.0 s, and there is no fade in/out, so the loop point is silent.
+    dur = 4.0
+    n = int(SR * dur)
+    out = []
+    for i in range(n):
+        t = i / SR
+        lfo = 0.5 + 0.5 * math.sin(2 * math.pi * 0.5 * t)   # 2 full cycles in 4 s
+        v = (math.sin(2 * math.pi * 55.0 * t)
+             + 0.7 * math.sin(2 * math.pi * 55.5 * t)        # detune -> slow beating; 55.5*4=222 whole cycles (seamless loop)
+             + 0.5 * math.sin(2 * math.pi * 82.5 * t)
+             + 0.35 * math.sin(2 * math.pi * 110.0 * t))
+        out.append(v * (0.5 + 0.5 * lfo))
+    out = lowpass(out, 600)
+    save("drone_tension.wav", out, peak=0.5)
+
+def coin_chime():
+    # A soft two-note ding for earning vàng mã.
+    s = buf(0.4)
+    add(s, exp_decay(sine(1180, 0.25), 0.10), 0.0, 0.5)
+    add(s, exp_decay(sine(1760, 0.30), 0.12), 0.05, 0.4)
+    save("coin_chime.wav", s, peak=0.4)
+
 # ---------------------------------------------------------------- ambience (stereo)
 def _cricket(left, right, n, at, freq, pan, gain):
     # one cricket chirp (short trilled high tone), panned, summed into L/R
@@ -533,6 +559,7 @@ if __name__ == "__main__":
     offering_bell(); incense_whoosh(); item_good(); item_bad()
     footstep_wood(); knock(); rooster(); vendor_bell()
     candle_gust(); phone_ring(); phone_ring_warp()
+    drone_tension(); coin_chime()
     print("Generating jumpscare ...")
     jumpscare()
     print("Generating ambience (this takes a moment) ...")

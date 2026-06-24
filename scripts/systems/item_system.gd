@@ -17,6 +17,7 @@ func apply(def: ItemDef) -> bool:
 			_c.add_via(def.magnitude)
 			_c.start_reveal(6.0)
 			_c.broadcast_calm()   # incense actually settles ma da / cô hồn / oan hồn
+			_c.add_nhang(3)       # a fresh handful of nhang to relight the altar with
 		"salt_line":
 			_c.setback_nearest()
 			_c.broadcast_calm()   # the salt line also unsettles the meter spirits

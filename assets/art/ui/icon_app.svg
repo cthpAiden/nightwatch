@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#121a2b"/>
+      <stop offset="0.55" stop-color="#0a0e14"/>
+      <stop offset="1" stop-color="#0a0e14"/>
+    </linearGradient>
+    <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff7a2a" stop-opacity="0.85"/>
+      <stop offset="0.4" stop-color="#ff7a2a" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ff7a2a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d4ad52"/>
+      <stop offset="0.5" stop-color="#b8923a"/>
+      <stop offset="1" stop-color="#8a6c28"/>
+    </linearGradient>
+    <linearGradient id="brassRim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6c878"/>
+      <stop offset="1" stop-color="#b8923a"/>
+    </linearGradient>
+    <linearGradient id="stick" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8ead0"/>
+      <stop offset="1" stop-color="#8a6c28"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded-corner dark navy field -->
+  <rect x="0" y="0" width="256" height="256" rx="48" fill="url(#field)"/>
+  <rect x="0" y="0" width="256" height="256" rx="48" fill="none" stroke="#1e2a3d" stroke-width="4"/>
+
+  <!-- ember glow behind the tips, central -->
+  <circle cx="128" cy="78" r="78" fill="url(#emberGlow)"/>
+
+  <!-- rising smoke wisps (thin, semi-transparent) -->
+  <path d="M104 70 q-12 -22 4 -40 q14 -16 2 -34" fill="none" stroke="#e8ead0" stroke-opacity="0.16" stroke-width="4" stroke-linecap="round"/>
+  <path d="M128 64 q-10 -26 6 -46 q12 -16 0 -34" fill="none" stroke="#e8ead0" stroke-opacity="0.2" stroke-width="4" stroke-linecap="round"/>
+  <path d="M152 70 q12 -22 -4 -40 q-14 -16 -2 -34" fill="none" stroke="#e8ead0" stroke-opacity="0.16" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- three joss sticks -->
+  <g>
+    <!-- left -->
+    <rect x="101" y="74" width="6" height="84" rx="3" fill="url(#stick)" transform="rotate(-9 104 116)"/>
+    <!-- center -->
+    <rect x="125" y="68" width="6" height="92" rx="3" fill="url(#stick)"/>
+    <!-- right -->
+    <rect x="149" y="74" width="6" height="84" rx="3" fill="url(#stick)" transform="rotate(9 152 116)"/>
+  </g>
+
+  <!-- glowing ember tips -->
+  <circle cx="91" cy="74" r="8" fill="#ff7a2a"/>
+  <circle cx="91" cy="74" r="4" fill="#ffd27a"/>
+  <circle cx="128" cy="66" r="9" fill="#ff7a2a"/>
+  <circle cx="128" cy="66" r="4.5" fill="#ffd27a"/>
+  <circle cx="165" cy="74" r="8" fill="#ff7a2a"/>
+  <circle cx="165" cy="74" r="4" fill="#ffd27a"/>
+
+  <!-- brass incense bowl (bát hương) -->
+  <g>
+    <!-- ash/rim opening (dark ellipse where sticks plant) -->
+    <ellipse cx="128" cy="162" rx="58" ry="12" fill="#52120c"/>
+    <ellipse cx="128" cy="160" rx="58" ry="12" fill="url(#brassRim)"/>
+    <ellipse cx="128" cy="160" rx="46" ry="8" fill="#4a3a16"/>
+    <!-- bowl body -->
+    <path d="M72 162 q56 30 112 0 q-6 46 -56 46 q-50 0 -56 -46 z" fill="url(#brass)"/>
+    <!-- decorative band -->
+    <path d="M80 182 q48 22 96 0" fill="none" stroke="#8a6c28" stroke-width="4" stroke-opacity="0.7"/>
+    <!-- highlight on bowl left -->
+    <path d="M84 170 q6 28 22 36" fill="none" stroke="#e6c878" stroke-width="5" stroke-opacity="0.5" stroke-linecap="round"/>
+    <!-- base foot -->
+    <rect x="104" y="206" width="48" height="12" rx="4" fill="url(#brass)"/>
+    <rect x="98" y="216" width="60" height="8" rx="4" fill="#8a6c28"/>
+  </g>
+</svg>

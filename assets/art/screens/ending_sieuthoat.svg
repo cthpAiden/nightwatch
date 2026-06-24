@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <!-- pale dawn sky: cool navy crown softening to warm bone near horizon -->
+    <linearGradient id="dawnSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#121a2b"/>
+      <stop offset="0.34" stop-color="#1e2a3d"/>
+      <stop offset="0.62" stop-color="#b8923a" stop-opacity="0.4"/>
+      <stop offset="0.82" stop-color="#e8ead0" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#e8ead0"/>
+    </linearGradient>
+    <!-- big soft warm sunrise behind the roofline -->
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff7a2a" stop-opacity="0.9"/>
+      <stop offset="0.28" stop-color="#ff7a2a" stop-opacity="0.4"/>
+      <stop offset="0.6" stop-color="#b8923a" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#b8923a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunCore" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff3df"/>
+      <stop offset="0.5" stop-color="#ffd089"/>
+      <stop offset="1" stop-color="#ff7a2a" stop-opacity="0.2"/>
+    </radialGradient>
+    <!-- the column of light the spirit ascends into -->
+    <linearGradient id="ascend" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#e8ead0" stop-opacity="0"/>
+      <stop offset="0.45" stop-color="#fff3df" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#fff3df" stop-opacity="0.75"/>
+    </linearGradient>
+    <!-- gentle spirit wisp body, dissolving upward -->
+    <linearGradient id="spirit" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#e8ead0" stop-opacity="0.7"/>
+      <stop offset="0.55" stop-color="#e8ead0" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#e8ead0" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="spiritHead" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#fff3df" stop-opacity="0.85"/>
+      <stop offset="0.6" stop-color="#e8ead0" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#e8ead0" stop-opacity="0"/>
+    </radialGradient>
+    <!-- warm mist hugging the ground -->
+    <linearGradient id="mistW" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8ead0" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffcf99" stop-opacity="0.45"/>
+    </linearGradient>
+    <!-- thin incense smoke -->
+    <linearGradient id="incense" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#e8ead0" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#e8ead0" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="shrineGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff7a2a" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#b8923a" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#b8923a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" fill="url(#dawnSky)"/>
+
+  <!-- sunrise glow + sun rising behind the school -->
+  <circle cx="640" cy="455" r="430" fill="url(#sunGlow)"/>
+  <circle cx="640" cy="455" r="150" fill="url(#sunCore)"/>
+  <ellipse cx="640" cy="450" rx="92" ry="80" fill="#fff3df" fill-opacity="0.85"/>
+
+  <!-- soft warm dawn rays, low and gentle -->
+  <polygon points="640,455 560,70 612,60" fill="#ff7a2a" fill-opacity="0.10"/>
+  <polygon points="640,455 668,60 720,70" fill="#ff7a2a" fill-opacity="0.10"/>
+  <polygon points="640,455 320,150 372,120" fill="#b8923a" fill-opacity="0.08"/>
+  <polygon points="640,455 908,120 960,150" fill="#b8923a" fill-opacity="0.08"/>
+
+  <!-- distant warm treeline -->
+  <path d="M0 520 L60 490 L120 512 L180 485 L240 508 L300 490 L300 540 L0 540 Z" fill="#36473f" fill-opacity="0.5"/>
+  <path d="M980 520 L1040 492 L1100 514 L1160 488 L1220 510 L1280 492 L1280 540 L980 540 Z" fill="#36473f" fill-opacity="0.5"/>
+
+  <!-- school building silhouette (same geometry as the other dawn screens), warm-rimmed dark -->
+  <g>
+    <rect x="395" y="395" width="490" height="225" fill="#1e2a3d"/>
+    <polygon points="565,395 640,345 715,395" fill="#1e2a3d"/>
+    <rect x="600" y="368" width="80" height="30" fill="#1e2a3d"/>
+    <rect x="300" y="455" width="110" height="165" fill="#1e2a3d"/>
+    <rect x="870" y="455" width="110" height="165" fill="#1e2a3d"/>
+    <!-- warm rim light on the eaves, catching first light -->
+    <rect x="385" y="388" width="510" height="6" fill="#ff7a2a" fill-opacity="0.85"/>
+    <rect x="290" y="448" width="130" height="5" fill="#ffcf99"/>
+    <rect x="860" y="448" width="130" height="5" fill="#ffcf99"/>
+    <polygon points="565,395 640,348 715,395 705,395 640,360 575,395" fill="#ff7a2a" fill-opacity="0.9"/>
+
+    <!-- windows reflecting the warm dawn, peaceful -->
+    <rect x="450" y="455" width="32" height="42" fill="#ffcf99" fill-opacity="0.4"/>
+    <rect x="540" y="455" width="30" height="42" fill="#ffcf99" fill-opacity="0.4"/>
+    <rect x="600" y="455" width="30" height="42" fill="#fff3df" fill-opacity="0.55"/>
+    <rect x="650" y="455" width="30" height="42" fill="#fff3df" fill-opacity="0.55"/>
+    <rect x="710" y="455" width="30" height="42" fill="#ffcf99" fill-opacity="0.4"/>
+    <rect x="780" y="455" width="30" height="42" fill="#ffcf99" fill-opacity="0.4"/>
+    <!-- central doorway, open and quiet -->
+    <rect x="615" y="540" width="50" height="80" fill="#121a2b"/>
+    <rect x="623" y="552" width="34" height="68" fill="#1e2a3d"/>
+    <rect x="330" y="500" width="26" height="36" fill="#ffcf99" fill-opacity="0.35"/>
+    <rect x="900" y="500" width="26" height="36" fill="#ffcf99" fill-opacity="0.35"/>
+  </g>
+
+  <!-- column of ascending light, off-center so text crawl reads centrally -->
+  <polygon points="392,620 460,620 446,120 406,120" fill="url(#ascend)"/>
+
+  <!-- gentle ancestral spirit ascending and dissolving into the light -->
+  <g transform="translate(426,0)">
+    <!-- trailing robe streaming upward into nothing -->
+    <path d="M-26 540 q-10 -120 6 -240 q8 -60 20 -118 q12 58 20 118 q16 120 6 240 q-26 -18 -52 0 z" fill="url(#spirit)"/>
+    <!-- faint shoulders/arms rising -->
+    <path d="M-30 330 q30 -34 60 0 q-30 -14 -60 0 z" fill="#e8ead0" fill-opacity="0.28"/>
+    <!-- softly glowing head -->
+    <circle cx="0" cy="262" r="26" fill="url(#spiritHead)"/>
+    <circle cx="0" cy="262" r="13" fill="#fff3df" fill-opacity="0.7"/>
+    <!-- it breaks apart into motes near the top -->
+    <circle cx="-6" cy="210" r="4" fill="#fff3df" fill-opacity="0.6"/>
+    <circle cx="8" cy="190" r="3" fill="#fff3df" fill-opacity="0.5"/>
+    <circle cx="-2" cy="168" r="2.6" fill="#fff3df" fill-opacity="0.45"/>
+    <circle cx="6" cy="146" r="2" fill="#fff3df" fill-opacity="0.4"/>
+    <circle cx="-4" cy="128" r="1.8" fill="#fff3df" fill-opacity="0.32"/>
+  </g>
+
+  <!-- a second, fainter wisp following, farther right -->
+  <g transform="translate(848,0)" opacity="0.55">
+    <path d="M-16 560 q-6 -90 4 -180 q6 -46 12 -88 q8 42 12 88 q10 90 4 180 q-18 -12 -36 0 z" fill="url(#spirit)"/>
+    <circle cx="0" cy="316" r="17" fill="url(#spiritHead)"/>
+    <circle cx="0" cy="316" r="8" fill="#fff3df" fill-opacity="0.6"/>
+    <circle cx="-4" cy="280" r="3" fill="#fff3df" fill-opacity="0.45"/>
+    <circle cx="4" cy="258" r="2.2" fill="#fff3df" fill-opacity="0.38"/>
+    <circle cx="-2" cy="238" r="1.8" fill="#fff3df" fill-opacity="0.3"/>
+  </g>
+
+  <!-- ground -->
+  <rect x="0" y="600" width="1280" height="120" fill="#36473f"/>
+  <rect x="0" y="600" width="1280" height="6" fill="#2b3a36"/>
+
+  <!-- small roadside shrine in the foreground, left -->
+  <g transform="translate(180,512)">
+    <ellipse cx="44" cy="150" rx="120" ry="30" fill="url(#shrineGlow)"/>
+    <!-- shrine cabinet body, ox-blood -->
+    <rect x="6" y="60" width="78" height="58" fill="#52120c"/>
+    <rect x="6" y="60" width="78" height="8" fill="#821f10"/>
+    <!-- little curved roof -->
+    <path d="M-6 60 L45 30 L96 60 Z" fill="#821f10"/>
+    <path d="M-6 60 L45 30 L96 60 L86 60 L45 38 L4 60 Z" fill="#b8923a"/>
+    <!-- shrine post -->
+    <rect x="34" y="118" width="22" height="40" fill="#3a0e08"/>
+    <!-- warm offering glow inside -->
+    <rect x="22" y="74" width="46" height="40" fill="url(#shrineGlow)"/>
+    <!-- three incense sticks with ember tips -->
+    <line x1="36" y1="96" x2="32" y2="60" stroke="#3a0e08" stroke-width="2"/>
+    <line x1="45" y1="96" x2="45" y2="56" stroke="#3a0e08" stroke-width="2"/>
+    <line x1="54" y1="96" x2="58" y2="60" stroke="#3a0e08" stroke-width="2"/>
+    <circle cx="32" cy="60" r="2.6" fill="#ff7a2a"/>
+    <circle cx="45" cy="56" r="2.6" fill="#ff7a2a"/>
+    <circle cx="58" cy="60" r="2.6" fill="#ff7a2a"/>
+    <!-- thin incense smoke drifting up -->
+    <path d="M32 58 q-8 -26 4 -50 q-10 -30 2 -58" stroke="url(#incense)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M45 54 q8 -28 -3 -54 q9 -30 -2 -56" stroke="url(#incense)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M58 58 q-7 -24 5 -48 q-9 -28 1 -52" stroke="url(#incense)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- low fence across the foreground -->
+  <rect x="0" y="606" width="1280" height="4" fill="#2b3a36"/>
+  <line x1="540" y1="592" x2="540" y2="612" stroke="#2b3a36" stroke-width="4"/>
+  <line x1="600" y1="592" x2="600" y2="612" stroke="#2b3a36" stroke-width="4"/>
+  <line x1="980" y1="592" x2="980" y2="612" stroke="#2b3a36" stroke-width="4"/>
+  <line x1="1040" y1="592" x2="1040" y2="612" stroke="#2b3a36" stroke-width="4"/>
+  <line x1="1100" y1="592" x2="1100" y2="612" stroke="#2b3a36" stroke-width="4"/>
+
+  <!-- floating embers / petals carried on the warm air -->
+  <circle cx="520" cy="430" r="2.6" fill="#ff7a2a" fill-opacity="0.85"/>
+  <circle cx="600" cy="360" r="2" fill="#ffcf99" fill-opacity="0.8"/>
+  <circle cx="700" cy="500" r="2.2" fill="#ff7a2a" fill-opacity="0.7"/>
+  <circle cx="760" cy="410" r="1.8" fill="#ffcf99" fill-opacity="0.75"/>
+  <circle cx="880" cy="470" r="2.4" fill="#ff7a2a" fill-opacity="0.7"/>
+  <circle cx="500" cy="540" r="1.8" fill="#ffcf99" fill-opacity="0.7"/>
+  <circle cx="980" cy="380" r="2" fill="#ff7a2a" fill-opacity="0.6"/>
+  <circle cx="360" cy="470" r="2" fill="#ffcf99" fill-opacity="0.7"/>
+  <!-- a couple of soft petals -->
+  <path d="M650 300 q6 -6 12 0 q-6 6 -12 0 z" fill="#ffcf99" fill-opacity="0.7"/>
+  <path d="M820 540 q5 -5 10 0 q-5 5 -10 0 z" fill="#ff7a2a" fill-opacity="0.6"/>
+  <path d="M440 360 q5 -5 10 0 q-5 5 -10 0 z" fill="#ffcf99" fill-opacity="0.6"/>
+
+  <!-- clearing warm mist at the base -->
+  <rect x="0" y="548" width="1280" height="172" fill="url(#mistW)"/>
+  <ellipse cx="360" cy="636" rx="360" ry="40" fill="#ffcf99" fill-opacity="0.28"/>
+  <ellipse cx="840" cy="652" rx="400" ry="42" fill="#ffcf99" fill-opacity="0.28"/>
+  <ellipse cx="640" cy="690" rx="560" ry="46" fill="#fff3df" fill-opacity="0.3"/>
+</svg>

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0e14"/>
+      <stop offset="0.55" stop-color="#0d131f"/>
+      <stop offset="1" stop-color="#121a2b"/>
+    </linearGradient>
+
+    <!-- faint cool wash low-center, keeps the field from being flat black -->
+    <radialGradient id="lowWash" cx="0.5" cy="1" r="0.7">
+      <stop offset="0" stop-color="#1e2a3d" stop-opacity="0.30"/>
+      <stop offset="0.5" stop-color="#121a2b" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ember tip glow (warm, tiny) -->
+    <radialGradient id="ember" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff7a2a" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#ff7a2a" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#ff7a2a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="emberCore" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffd9a0" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#ff7a2a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- rising smoke column: faint, fades to nothing as it rises -->
+    <linearGradient id="smoke" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#cdd6d0" stop-opacity="0.16"/>
+      <stop offset="0.35" stop-color="#cdd6d0" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#cdd6d0" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="smokeDim" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#b9c2bd" stop-opacity="0.10"/>
+      <stop offset="0.4" stop-color="#b9c2bd" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#b9c2bd" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- edge vignette -->
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72">
+      <stop offset="0" stop-color="#0a0e14" stop-opacity="0"/>
+      <stop offset="0.62" stop-color="#0a0e14" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0.96"/>
+    </radialGradient>
+  </defs>
+
+  <!-- base field -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#field)"/>
+  <rect x="0" y="0" width="1280" height="720" fill="url(#lowWash)"/>
+
+  <!-- LEFT incense column: ember low, thin smoke rising and drifting -->
+  <g>
+    <path d="M300 648
+             C 296 600 308 560 300 512
+             C 294 472 306 436 300 392
+             C 297 360 304 332 300 300"
+          fill="none" stroke="url(#smoke)" stroke-width="9" stroke-linecap="round" opacity="0.9"/>
+    <path d="M300 650
+             C 304 612 294 576 302 536
+             C 309 502 298 470 304 432
+             C 308 404 300 380 305 352"
+          fill="none" stroke="url(#smokeDim)" stroke-width="5" stroke-linecap="round"/>
+    <!-- joss-stick ember tip -->
+    <circle cx="300" cy="652" r="30" fill="url(#ember)"/>
+    <circle cx="300" cy="652" r="7" fill="url(#emberCore)"/>
+    <circle cx="300" cy="652" r="2.4" fill="#ffe6c0"/>
+  </g>
+
+  <!-- RIGHT incense column: slightly taller, drifts the other way -->
+  <g>
+    <path d="M978 660
+             C 982 614 970 576 980 532
+             C 989 494 976 458 984 416
+             C 990 384 980 356 986 320
+             C 990 296 983 274 988 250"
+          fill="none" stroke="url(#smoke)" stroke-width="8" stroke-linecap="round" opacity="0.85"/>
+    <path d="M980 662
+             C 974 622 986 588 977 548
+             C 970 514 982 482 975 444
+             C 970 416 980 392 974 362"
+          fill="none" stroke="url(#smokeDim)" stroke-width="4.5" stroke-linecap="round"/>
+    <!-- joss-stick ember tip -->
+    <circle cx="980" cy="664" r="27" fill="url(#ember)"/>
+    <circle cx="980" cy="664" r="6" fill="url(#emberCore)"/>
+    <circle cx="980" cy="664" r="2.1" fill="#ffe6c0"/>
+  </g>
+
+  <!-- a third, very faint thread far back for depth (no visible ember) -->
+  <path d="M645 700
+           C 649 660 639 624 647 586
+           C 654 552 643 520 649 484
+           C 653 458 646 432 650 404"
+        fill="none" stroke="url(#smokeDim)" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- faint ground plane suggestion where the sticks rest -->
+  <rect x="0" y="678" width="1280" height="42" fill="#121a2b" fill-opacity="0.5"/>
+  <ellipse cx="300" cy="680" rx="60" ry="9" fill="#ff7a2a" fill-opacity="0.06"/>
+  <ellipse cx="980" cy="690" rx="56" ry="9" fill="#ff7a2a" fill-opacity="0.05"/>
+
+  <!-- edge vignette keeps center calm and dark for credit text -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vignette)"/>
+</svg>

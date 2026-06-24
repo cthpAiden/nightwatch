@@ -85,6 +85,20 @@ var _t := 0.0
 var _stutter_cd := 7.0
 var _stutter_t := 0.0
 
+# Trauma-based screen shake (jumpscare / door slam / draft / power-out / threat-at-door).
+const SHAKE_AMP := 0.055      # max pivot rotation offset (radians) at full trauma
+const SHAKE_DECAY := 1.7      # trauma units shed per second
+var _shake := 0.0             # 0..1 trauma; quadratic -> punchy then quick settle
+
+# Reactive colour grade: the whole room desaturates / contrasts up as danger rises.
+var _env: Environment
+var _dread := 0.0
+var _dread_target := 0.0
+const FOG_BASE := 0.018
+const SAT_BASE := 0.9
+const CON_BASE := 1.13
+const EXP_BASE := 1.0
+
 func _ready() -> void:
 	_build_environment()
 	_build_room()
@@ -140,6 +154,7 @@ func _build_environment() -> void:
 	env.adjustment_contrast = 1.13
 	env.adjustment_saturation = 0.9
 	we.environment = env
+	_env = env
 	add_child(we)
 
 	_pivot = Node3D.new()
@@ -723,6 +738,14 @@ func _process(delta: float) -> void:
 	_pivot.rotation.y = _yaw
 	_pivot.rotation.x = _pitch
 	_pan_speed = absf(_yaw - prev_yaw) / maxf(delta, 0.0001)
+	# Screen shake is added AFTER pan_speed is measured, so a jolt never reads as the
+	# player "running" (which would feed Ma trơi's agitation).
+	if _shake > 0.0:
+		_shake = maxf(0.0, _shake - delta * SHAKE_DECAY)
+		var s := _shake * _shake
+		_pivot.rotation.y += randf_range(-1.0, 1.0) * SHAKE_AMP * s
+		_pivot.rotation.x += randf_range(-1.0, 1.0) * SHAKE_AMP * s
+	_update_dread(delta)
 	_animate_altar(delta)
 	_animate_props(delta)
 	_animate_mains(delta)
@@ -922,6 +945,25 @@ func set_huong(frac: float) -> void:
 func set_altar_lit(lit: bool) -> void:
 	_altar_lit = lit
 
+## Add screen-shake trauma (0..1). Quadratic falloff keeps it punchy then settles fast.
+func add_shake(amount: float) -> void:
+	_shake = clampf(_shake + amount, 0.0, 1.0)
+
+## Danger grade 0..1 (driven by vía/hương). The room visibly sours as you lose control.
+func set_dread(frac: float) -> void:
+	_dread_target = clampf(frac, 0.0, 1.0)
+
+func _update_dread(delta: float) -> void:
+	if _env == null:
+		return
+	_dread = move_toward(_dread, _dread_target, delta * 0.8)
+	if _dread <= 0.0001 and _dread_target <= 0.0001:
+		return
+	_env.adjustment_saturation = lerpf(SAT_BASE, 0.5, _dread)
+	_env.adjustment_contrast = lerpf(CON_BASE, 1.32, _dread)
+	_env.tonemap_exposure = lerpf(EXP_BASE, 0.82, _dread)
+	_env.fog_density = lerpf(FOG_BASE, 0.05, _dread)
+
 func is_door_closed(side: int) -> bool:
 	return _door_closed.get(side, false)
 
@@ -937,6 +979,8 @@ func set_door(side: int, closed: bool) -> void:
 	else:
 		tw.tween_property(door, "position:y", ty, 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	Audio.play_sfx("door_slam" if closed else "door_creak", -4.0)
+	if closed:
+		add_shake(0.16)   # the roller shutter lands with a jolt
 	Events.door_toggled.emit(side, closed)
 
 func is_light_on(side: int) -> bool:

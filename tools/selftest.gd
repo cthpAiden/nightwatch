@@ -173,7 +173,9 @@ func _run(c) -> void:
 		mt.process_ai(0.2, 0.5)
 		check("ma_troi: surge resets lock (not a kill)", mt.lock <= 60.0 and mt._active)
 		check("ma_troi: surge costs via", c.via < vbefore)
+		check("ma_troi: surge jinxes the controls", c._hex_t > 0.0)
 		c._agitation = 0.0
+		c._hex_t = 0.0   # clear the lock-on jinx so it doesn't bleed into later sections
 
 	print("\n--- QUY NHAP TRANG (cat) ---")
 	var qy = d.get_threat("quy_nhap_trang")
@@ -252,16 +254,28 @@ func _run(c) -> void:
 		check("ward fully breaks ma_da flood", md2.flood <= 25.0)
 		check("ward revives ma_da (not stuck dead)", md2._active)
 
-	print("\n--- ALTAR RITUAL (hương) ---")
+	print("\n--- ALTAR RITUAL (hương — now a finite nhang resource) ---")
 	c.huong = 10.0
 	c.altar_lit = true
+	c._incense_cd = 0.0
+	c._nhang = 3
 	c.request_light_incense()
-	check("light incense refills hương", c.huong >= 99.0)
-	check("light incense keeps altar lit", c.altar_lit)
+	check("hand-lit incense tops up hương (partial, not full)", c.huong >= 60.0 and c.huong < 100.0)
+	check("hand-lit incense keeps altar lit", c.altar_lit)
+	check("hand-lit incense burns one nhang", c._nhang == 2)
+	# Out of incense: relighting does nothing — the finite stock is the real cost.
+	c._nhang = 0
+	c._incense_cd = 0.0
+	c.huong = 10.0
+	c.request_light_incense()
+	check("no nhang = no relight", c.huong <= 10.5)
+	c._nhang = 0
+	c.item_system.apply(ItemRegistry.get_def("nhang"))
+	check("held nhang item replenishes the stock", c._nhang >= 3)
 	c._gutter_candles()
 	check("cold draft guts the altar", not c.altar_lit and c.huong <= 0.1)
-	c._light_incense(true)
-	check("relight restores altar", c.altar_lit and c.huong >= 99.0)
+	c._light_incense(true)   # free/auto relight restores fully
+	check("free relight restores altar fully", c.altar_lit and c.huong >= 99.0)
 	c.huong = 100.0
 	c.altar_lit = true
 	var mult_lit: float = c.meter_mult()
@@ -321,6 +335,22 @@ func _run(c) -> void:
 	check("buy shrine upgrade persists", Save.purchase_upgrade("sturdy_doors", 34) and Save.has_upgrade("sturdy_doors"))
 	check("cannot rebuy an owned upgrade", not Save.purchase_upgrade("sturdy_doors", 34))
 	Save.upgrades.erase("sturdy_doors")   # don't pollute the real save with a test buy
+	Save.save_progress()
+
+	print("\n--- INVESTIGATION / ENDINGS ---")
+	var saved_clues: Dictionary = Save.clues.duplicate(true)
+	Save.clues = {}
+	check("no clues at start", Save.clue_count() == 0 and not Save.investigation_complete())
+	c._running = true
+	c.find_clue("clue_name", "CLUE_GOT_NAME")
+	check("find_clue records a clue", Save.has_clue("clue_name") and Save.clue_count() == 1)
+	c.find_clue("clue_name", "CLUE_GOT_NAME")
+	check("find_clue is idempotent", Save.clue_count() == 1)
+	Save.find_clue("clue_drawing")
+	check("two of three clues = still incomplete", not Save.investigation_complete())
+	Save.find_clue("clue_photo")
+	check("all three clues complete the investigation", Save.investigation_complete())
+	Save.clues = saved_clues   # restore the player's real investigation progress
 	Save.save_progress()
 
 	print("\n--- MAP (10 cameras, two wings, FNAF routes) ---")

@@ -4,6 +4,8 @@ extends Node
 ## Other systems read these values and listen to Events.settings_changed to react.
 
 const PATH := "user://settings.cfg"
+const SETTINGS_VERSION := 1
+const MIN_WINDOW_SIZE := Vector2i(960, 540)
 
 # Accessibility: how intense scares are allowed to be.
 enum Scare { FULL, REDUCED, OFF }
@@ -40,6 +42,7 @@ func load_settings() -> void:
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
+	cfg.set_value("meta", "version", SETTINGS_VERSION)
 	cfg.set_value("general", "language", language)
 	cfg.set_value("general", "first_run", first_run)
 	cfg.set_value("general", "difficulty", difficulty)
@@ -69,6 +72,7 @@ func apply(changes: Dictionary) -> void:
 	Events.settings_changed.emit()
 
 func _apply_window() -> void:
+	DisplayServer.window_set_min_size(MIN_WINDOW_SIZE)
 	var mode := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
 	if DisplayServer.window_get_mode() != mode:
 		DisplayServer.window_set_mode(mode)

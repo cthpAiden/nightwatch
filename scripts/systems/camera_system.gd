@@ -8,6 +8,10 @@ var _threat_host: Control
 var _name_lbl: Label
 var _map_buttons := {}
 var _refresh_t := 0.0
+var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
+var _fx_burst := 0.0                # decaying static spike on channel change
+const FX_BASE := 0.12
+var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
 
 func setup(controller) -> void:
 	_c = controller
@@ -47,7 +51,9 @@ void fragment() {
 """
 	var mat := ShaderMaterial.new()
 	mat.shader = sh
+	mat.set_shader_parameter("strength", FX_BASE)
 	fx.material = mat
+	_fx_mat = mat
 	add_child(fx)
 
 	var bezel := UI.texture_rect("res://assets/art/ui/monitor_bezel.svg", TextureRect.STRETCH_SCALE)
@@ -58,7 +64,30 @@ void fragment() {
 	UI.place(_name_lbl, 0, 0, 0, 0, 64, 50, 400, 86)
 	add_child(_name_lbl)
 
+	# Investigation hotspot: a faint marker over the classroom chalkboard (her drawing).
+	# Only appears on the classroom feed once the arc is in motion (night 3+).
+	_clue_btn = UI.icon_button("res://assets/art/ui/cam_dot.svg", 56)
+	UI.place(_clue_btn, 0.5, 0.5, 0.5, 0.5, -28, -40, 28, 16)
+	_clue_btn.modulate = Color(0.9, 0.8, 0.55, 0.6)
+	_clue_btn.tooltip_text = tr("ANOMALY_HINT")
+	_clue_btn.visible = false
+	_clue_btn.pressed.connect(_on_clue_pressed)
+	add_child(_clue_btn)
+
 	_build_map()
+
+func _on_clue_pressed() -> void:
+	if _c:
+		_c.find_clue("clue_drawing", "CLUE_GOT_DRAWING")
+	if _clue_btn:
+		_clue_btn.visible = false
+
+func _update_clue_hotspot(cam_id: String) -> void:
+	if _clue_btn == null:
+		return
+	_clue_btn.visible = cam_id == MapGraph.CLASSROOM \
+		and Game.current_night >= 3 \
+		and not Save.has_clue("clue_drawing")
 
 func _build_map() -> void:
 	var map := Control.new()
@@ -90,9 +119,13 @@ func show_feed(cam_id: String) -> void:
 	var path := "res://assets/art/cameras/cam_%s.svg" % cam_id
 	if ResourceLoader.exists(path):
 		_feed.texture = load(path)
+	_fx_burst = 0.5   # a burst of static as the channel resolves to the new feed
+	if _fx_mat:
+		_fx_mat.set_shader_parameter("strength", FX_BASE + _fx_burst)
 	_name_lbl.text = "%s — %s" % [_cam_code(cam_id), tr(MapGraph.name_key(cam_id))]
 	for cam in _map_buttons:
 		_map_buttons[cam].modulate = Color(1, 0.85, 0.4) if cam == cam_id else Color(1, 1, 1)
+	_update_clue_hotspot(cam_id)
 	_refresh_threats()
 
 func _cam_code(cam_id: String) -> String:
@@ -101,6 +134,10 @@ func _cam_code(cam_id: String) -> String:
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	# Ease the channel-change static burst back down to the resting noise level.
+	if _fx_burst > 0.0 and _fx_mat:
+		_fx_burst = maxf(0.0, _fx_burst - delta * 3.0)
+		_fx_mat.set_shader_parameter("strength", FX_BASE + _fx_burst)
 	_refresh_t -= delta
 	if _refresh_t <= 0.0:
 		_refresh_t = 0.25

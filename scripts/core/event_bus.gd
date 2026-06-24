@@ -58,6 +58,7 @@ signal taboo_broken(taboo_id: String)             # vía penalty + flavor
 signal grievance_changed(level: float)            # Oan hồn agro 0..1
 signal huong_changed(level: float)                # altar incense protection 0..1
 signal altar_lit_changed(lit: bool)               # candles lit vs guttered (draft)
+signal incense_changed(stock: int)                # remaining nhang sticks to relight
 signal phone_ring(active: bool, fake: bool)       # desk phone (fake = ma da lure)
 signal anomaly_tagged(threat_id: String)          # player spotted a cam anomaly
 signal coins_changed(amount: int)                 # spirit-money / vàng mã balance

@@ -30,6 +30,7 @@ var _door_btn := {}
 var _light_btn := {}
 var _toast_t := 0.0
 var _huong_danger := false
+var _water_lure := false
 var _vendor_state := GameEnums.VendorState.IDLE
 
 func setup(controller) -> void:
@@ -87,21 +88,11 @@ func _build() -> void:
 	rbox.add_child(_coins_lbl)
 	_offerings_lbl = UI.text_label("", 18, UI.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 	rbox.add_child(_offerings_lbl)
-	_crowd_bar = UI.progress(1.0, Color(0.7, 0.66, 0.5))
-	_crowd_bar.custom_minimum_size = Vector2(220, 14)
-	_crowd_bar.value = 0
-	_crowd_bar.visible = false
-	rbox.add_child(_crowd_bar)
-	_water_bar = UI.progress(1.0, Color(0.43, 0.6, 0.65))
-	_water_bar.custom_minimum_size = Vector2(220, 14)
-	_water_bar.value = 0
-	_water_bar.visible = false
-	rbox.add_child(_water_bar)
-	_grievance_bar = UI.progress(1.0, Color(0.85, 0.86, 0.9))
-	_grievance_bar.custom_minimum_size = Vector2(220, 14)
-	_grievance_bar.value = 0
-	_grievance_bar.visible = false
-	rbox.add_child(_grievance_bar)
+	# Each conditional meter gets a short label so a new player can tell what the bar
+	# that just popped in is actually tracking (no more anonymous coloured bars).
+	_crowd_bar = _bar_row(rbox, "HUD_CROWD", Color(0.7, 0.66, 0.5))
+	_water_bar = _bar_row(rbox, "HUD_WATER", Color(0.43, 0.6, 0.65))
+	_grievance_bar = _bar_row(rbox, "HUD_GRIEVANCE", Color(0.85, 0.86, 0.9))
 
 	# left controls
 	var lbox := UI.vbox(8)
@@ -170,6 +161,20 @@ func _build() -> void:
 	UI.place(_warn, 0.5, 1, 0.5, 1, -300, -190, 300, -156)
 	add_child(_warn)
 
+## A labelled conditional meter (icon-free, just a short name + bar). The whole row
+## is hidden until the threat it tracks is active; toggle via bar.get_parent().visible.
+func _bar_row(parent: VBoxContainer, label_key: String, color: Color) -> ProgressBar:
+	var row := UI.hbox(6)
+	row.alignment = BoxContainer.ALIGNMENT_END
+	row.add_child(UI.label(label_key, 13, color))
+	var bar := UI.progress(1.0, color)
+	bar.custom_minimum_size = Vector2(168, 14)
+	bar.value = 0
+	row.add_child(bar)
+	row.visible = false
+	parent.add_child(row)
+	return bar
+
 func _ctrl_btn(key: String, cb: Callable, w: float = 180.0) -> Button:
 	var b := UI.button(key, w, 46)
 	b.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -197,7 +202,7 @@ func _build_help() -> void:
 	col.add_child(hdr)
 	_help_lines = UI.vbox(2)
 	col.add_child(_help_lines)
-	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_RITUAL", "HELP_PHONE", "HELP_OFFERING2", "HELP_PAUSE"]:
+	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_RITUAL", "HELP_ITEM", "HELP_DRAIN", "HELP_PHONE", "HELP_OFFERING2", "HELP_PAUSE"]:
 		_help_lines.add_child(UI.label(k, 15, UI.COL_DIM))
 
 func toggle_help() -> void:
@@ -217,12 +222,18 @@ func _connect() -> void:
 	Events.crowd_changed.connect(_on_crowd)
 	Events.grievance_changed.connect(_on_grievance)
 	Events.huong_changed.connect(_on_huong)
+	Events.incense_changed.connect(_on_incense)
 	Events.phone_ring.connect(_on_phone_ring)
 	Events.coins_changed.connect(_on_coins)
 	Events.vendor_state_changed.connect(_on_vendor_state)
 	_night.text = tr("NIGHT_LABEL").format([str(Game.current_night)])
 	_offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings]
 	_coins_lbl.text = "%s: %d" % [tr("HUD_COINS"), _c.coins]
+	# Seed the door/light buttons with their written state from the start.
+	_update_door(GameEnums.Side.LEFT, false)
+	_update_door(GameEnums.Side.RIGHT, false)
+	_update_light(GameEnums.Side.LEFT, false)
+	_update_light(GameEnums.Side.RIGHT, false)
 	Events.offering_placed.connect(func(_l): _offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings])
 
 func _process(delta: float) -> void:
@@ -261,10 +272,17 @@ func _on_via_state(state: int) -> void:
 
 func _update_door(side: int, closed: bool) -> void:
 	var b: Button = _door_btn[side]
+	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var base := "DOOR_LEFT" if side == GameEnums.Side.LEFT else "DOOR_RIGHT"
+	# Pair the colour with a written state so it's readable under pressure / colour-blind.
+	b.text = "%s · %s" % [tr(base), tr("DOOR_SHUT") if closed else tr("DOOR_OPEN")]
 	b.modulate = Color(0.5, 1.0, 0.6) if closed else Color(1, 1, 1)
 
 func _update_light(side: int, on: bool) -> void:
 	var b: Button = _light_btn[side]
+	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var base := "LIGHT_LEFT" if side == GameEnums.Side.LEFT else "LIGHT_RIGHT"
+	b.text = "%s · %s" % [tr(base), tr("LIGHT_ON") if on else tr("LIGHT_OFF")]
 	b.modulate = Color(1.0, 0.95, 0.5) if on else Color(1, 1, 1)
 
 func _on_notify(key: String, args: Array) -> void:
@@ -275,21 +293,25 @@ func _on_notify(key: String, args: Array) -> void:
 func _on_water_lure(active: bool) -> void:
 	# The lure also makes the drain action relevant; the phone's answer button is
 	# driven separately by phone_ring (the lure rings the phone with a warped tone).
-	if active:
-		_drain_btn.visible = true
+	_water_lure = active
+	_refresh_drain()
 
 func _on_water_level(level: float) -> void:
-	_water_bar.visible = level > 0.01
+	_water_bar.get_parent().visible = level > 0.01
 	_water_bar.value = level
-	if level > 0.01:
-		_drain_btn.visible = true
+	_refresh_drain()
+
+func _refresh_drain() -> void:
+	# Show the "close drain" action only while the flood is rising or the lure cries;
+	# hide it again once the water recedes so it isn't a permanent dead button.
+	_drain_btn.visible = _water_lure or _water_bar.value > 0.01
 
 func _on_crowd(level: float) -> void:
-	_crowd_bar.visible = level > 0.01
+	_crowd_bar.get_parent().visible = level > 0.01
 	_crowd_bar.value = level
 
 func _on_grievance(level: float) -> void:
-	_grievance_bar.visible = level > 0.01
+	_grievance_bar.get_parent().visible = level > 0.01
 	_grievance_bar.value = level
 
 func _on_huong(level: float) -> void:
@@ -305,8 +327,17 @@ func _on_huong(level: float) -> void:
 	sb.set_corner_radius_all(5)
 	_huong_bar.add_theme_stylebox_override("fill", sb)
 
+func _on_incense(stock: int) -> void:
+	# Surface the finite nhang count on the incense button; red when you're out.
+	if _incense_btn:
+		_incense_btn.text = "%s (%d)" % [tr("HUD_INCENSE"), stock]
+		_incense_btn.modulate = Color(1, 1, 1) if stock > 0 else Color(0.95, 0.45, 0.4)
+
 func _on_phone_ring(active: bool, fake: bool) -> void:
 	_answer_btn.visible = active
+	# A warped ring is conveyed by text, not just the red tint (colour-blind safe).
+	_answer_btn.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	_answer_btn.text = tr("ACTION_ANSWER") + ("  (?!)" if fake else "")
 	_answer_btn.modulate = Color(0.95, 0.4, 0.35) if fake else Color(0.6, 0.9, 0.7)
 
 func _on_coins(amount: int) -> void:

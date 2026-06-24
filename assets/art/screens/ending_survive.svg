@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <!-- cold pre-dawn sky: dark void up top stays calm for text, thin cold light at horizon -->
+    <linearGradient id="coldSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0e14"/>
+      <stop offset="0.5" stop-color="#121a2b"/>
+      <stop offset="0.82" stop-color="#1e2a3d"/>
+      <stop offset="1" stop-color="#2b3a4d"/>
+    </linearGradient>
+    <!-- thin sliver of cold morning light hugging the horizon -->
+    <linearGradient id="horizonLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7d93a6" stop-opacity="0"/>
+      <stop offset="0.7" stop-color="#7d93a6" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#9fb1bf" stop-opacity="0.5"/>
+    </linearGradient>
+    <radialGradient id="dawnSmear" cx="0.5" cy="1" r="0.7">
+      <stop offset="0" stop-color="#b8c4cd" stop-opacity="0.4"/>
+      <stop offset="0.4" stop-color="#8a9cab" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#8a9cab" stop-opacity="0"/>
+    </radialGradient>
+    <!-- the one soul-window still lit: muted cold-warm, unresolved -->
+    <radialGradient id="soulWindow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#cdae72" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#b8923a" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#b8923a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="coldMist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3a4d" stop-opacity="0"/>
+      <stop offset="1" stop-color="#3a4a5c" stop-opacity="0.6"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.46" r="0.72">
+      <stop offset="0" stop-color="#0a0e14" stop-opacity="0"/>
+      <stop offset="0.62" stop-color="#0a0e14" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#0a0e14" stop-opacity="0.85"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" fill="url(#coldSky)"/>
+
+  <!-- a few last cold stars, fading -->
+  <circle cx="210" cy="110" r="1.6" fill="#9fb1bf" fill-opacity="0.5"/>
+  <circle cx="430" cy="80" r="1.4" fill="#9fb1bf" fill-opacity="0.4"/>
+  <circle cx="980" cy="100" r="1.6" fill="#9fb1bf" fill-opacity="0.45"/>
+  <circle cx="1120" cy="160" r="1.3" fill="#9fb1bf" fill-opacity="0.35"/>
+  <circle cx="700" cy="70" r="1.2" fill="#9fb1bf" fill-opacity="0.3"/>
+
+  <!-- thin cold dawn smear low on the horizon, behind the building -->
+  <ellipse cx="640" cy="565" rx="640" ry="120" fill="url(#dawnSmear)"/>
+
+  <!-- distant cold treeline -->
+  <path d="M0 548 L40 522 L90 540 L140 514 L190 536 L250 510 L300 532 L300 580 L0 580 Z" fill="#121a2b" fill-opacity="0.85"/>
+  <path d="M980 552 L1030 524 L1080 544 L1130 516 L1180 538 L1230 512 L1280 534 L1280 582 L980 582 Z" fill="#121a2b" fill-opacity="0.85"/>
+
+  <!-- dark school building silhouette behind the gate (same shape as title/win) -->
+  <g>
+    <rect x="395" y="395" width="490" height="225" fill="#0a0e14"/>
+    <polygon points="565,395 640,345 715,395" fill="#0a0e14"/>
+    <rect x="600" y="368" width="80" height="30" fill="#0a0e14"/>
+    <rect x="300" y="455" width="110" height="165" fill="#0a0e14"/>
+    <rect x="870" y="455" width="110" height="165" fill="#0a0e14"/>
+    <!-- faint cold rim on the eaves, no warmth -->
+    <rect x="290" y="448" width="130" height="6" fill="#1e2a3d"/>
+    <rect x="385" y="388" width="510" height="6" fill="#1e2a3d"/>
+    <rect x="860" y="448" width="130" height="6" fill="#1e2a3d"/>
+    <polygon points="565,395 640,348 715,395 705,395 640,360 575,395" fill="#1e2a3d"/>
+
+    <!-- the ONE upstairs window still faintly lit: a soul still watching -->
+    <circle cx="725" cy="472" r="58" fill="url(#soulWindow)"/>
+    <rect x="710" y="455" width="30" height="42" fill="#b8923a" fill-opacity="0.55"/>
+    <line x1="725" y1="455" x2="725" y2="497" stroke="#0a0e14" stroke-width="2.5"/>
+    <line x1="710" y1="476" x2="740" y2="476" stroke="#0a0e14" stroke-width="2.5"/>
+
+    <!-- all other windows dark and cold -->
+    <rect x="450" y="455" width="32" height="42" fill="#1e2a3d"/>
+    <rect x="540" y="455" width="30" height="42" fill="#1e2a3d"/>
+    <rect x="600" y="455" width="30" height="42" fill="#1e2a3d"/>
+    <rect x="650" y="455" width="30" height="42" fill="#1e2a3d"/>
+    <rect x="780" y="455" width="30" height="42" fill="#1e2a3d"/>
+    <!-- central doorway, dark -->
+    <rect x="615" y="540" width="50" height="80" fill="#121a2b"/>
+    <rect x="623" y="552" width="34" height="68" fill="#1e2a3d"/>
+    <!-- wing windows, dark -->
+    <rect x="330" y="500" width="26" height="36" fill="#1e2a3d"/>
+    <rect x="900" y="500" width="26" height="36" fill="#1e2a3d"/>
+  </g>
+
+  <!-- the school gate: two masonry pillars + an open iron gate, foreground frame -->
+  <g>
+    <!-- left pillar -->
+    <rect x="468" y="500" width="38" height="140" fill="#121a2b"/>
+    <rect x="464" y="492" width="46" height="12" fill="#1e2a3d"/>
+    <rect x="472" y="478" width="30" height="16" fill="#121a2b"/>
+    <!-- right pillar -->
+    <rect x="774" y="500" width="38" height="140" fill="#121a2b"/>
+    <rect x="770" y="492" width="46" height="12" fill="#1e2a3d"/>
+    <rect x="778" y="478" width="30" height="16" fill="#121a2b"/>
+    <!-- gate arch sign between pillars -->
+    <path d="M506 500 q134 -34 268 0 l0 -12 q-134 -34 -268 0 z" fill="#121a2b"/>
+    <rect x="556" y="476" width="168" height="3" fill="#1e2a3d" fill-opacity="0.6"/>
+
+    <!-- left iron gate leaf, swung partly open (angled in) -->
+    <g stroke="#0a0e14" stroke-width="4">
+      <line x1="506" y1="512" x2="566" y2="556"/>
+      <line x1="506" y1="638" x2="566" y2="638"/>
+      <line x1="506" y1="575" x2="572" y2="597"/>
+      <line x1="514" y1="512" x2="520" y2="638"/>
+      <line x1="528" y1="514" x2="534" y2="638"/>
+      <line x1="542" y1="520" x2="548" y2="638"/>
+      <line x1="556" y1="528" x2="562" y2="638"/>
+    </g>
+    <!-- right iron gate leaf, swung partly open -->
+    <g stroke="#0a0e14" stroke-width="4">
+      <line x1="774" y1="512" x2="714" y2="556"/>
+      <line x1="774" y1="638" x2="714" y2="638"/>
+      <line x1="774" y1="575" x2="708" y2="597"/>
+      <line x1="766" y1="512" x2="760" y2="638"/>
+      <line x1="752" y1="514" x2="746" y2="638"/>
+      <line x1="738" y1="520" x2="732" y2="638"/>
+      <line x1="724" y1="528" x2="718" y2="638"/>
+    </g>
+  </g>
+
+  <!-- low fence stretching to the gate -->
+  <rect x="0" y="616" width="1280" height="4" fill="#121a2b"/>
+  <line x1="120" y1="604" x2="120" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="200" y1="604" x2="200" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="300" y1="604" x2="300" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="400" y1="604" x2="400" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="880" y1="604" x2="880" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="980" y1="604" x2="980" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="1080" y1="604" x2="1080" y2="622" stroke="#121a2b" stroke-width="4"/>
+  <line x1="1160" y1="604" x2="1160" y2="622" stroke="#121a2b" stroke-width="4"/>
+
+  <!-- cold ground -->
+  <rect x="0" y="616" width="1280" height="104" fill="#1a2330"/>
+  <!-- faint cold path leading out through the gate toward us -->
+  <polygon points="630,616 650,616 720,720 560,720" fill="#2b3a4d" fill-opacity="0.4"/>
+
+  <!-- the lone night guard: small silhouette, back to us, walking out, shoulders low -->
+  <g fill="#0a0e14">
+    <!-- mid-stride legs -->
+    <path d="M633 690 l-7 26 l8 0 l7 -22 z"/>
+    <path d="M644 690 l9 25 l8 0 l-6 -26 z"/>
+    <!-- slumped torso, slightly hunched forward -->
+    <path d="M626 642 q14 -8 30 0 l5 50 q-20 6 -40 0 z"/>
+    <!-- low, sagging shoulders -->
+    <path d="M624 646 q18 -12 38 0 l-3 9 q-16 -8 -32 0 z"/>
+    <!-- arms hanging tired at sides -->
+    <path d="M625 650 l-6 38 l5 1 l8 -36 z"/>
+    <path d="M657 650 l8 37 l5 -1 l-7 -38 z"/>
+    <!-- head, tilted down -->
+    <ellipse cx="641" cy="634" rx="11" ry="13"/>
+  </g>
+  <!-- faint cold highlight on the guard's shoulders/back, pre-dawn light -->
+  <path d="M625 645 q16 -10 34 0 l-2 6 q-15 -7 -30 0 z" fill="#3a4a5c" fill-opacity="0.5"/>
+  <!-- long thin shadow cast back toward the gate -->
+  <polygon points="636,716 648,716 638,690 644,690" fill="#0a0e14" fill-opacity="0.5"/>
+
+  <!-- thin sliver of cold morning light, only at the very horizon line -->
+  <rect x="0" y="560" width="1280" height="60" fill="url(#horizonLight)"/>
+
+  <!-- cold clearing mist at base -->
+  <rect x="0" y="580" width="1280" height="140" fill="url(#coldMist)"/>
+  <ellipse cx="330" cy="660" rx="320" ry="36" fill="#3a4a5c" fill-opacity="0.3"/>
+  <ellipse cx="950" cy="668" rx="360" ry="40" fill="#3a4a5c" fill-opacity="0.3"/>
+  <ellipse cx="640" cy="700" rx="520" ry="42" fill="#3a4a5c" fill-opacity="0.35"/>
+
+  <!-- vignette to hold the calm dark upper-center for text -->
+  <rect x="0" y="0" width="1280" height="720" fill="url(#vignette)"/>
+</svg>

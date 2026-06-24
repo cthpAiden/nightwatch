@@ -24,7 +24,12 @@ func _ready() -> void:
 		_report("res://scenes/screens/GameOver.tscn", "death -> GameOver")
 	else:
 		await _frames(3200)
-		_report("res://scenes/screens/WinScreen.tscn", "win -> WinScreen")
+		# Clearing the final story night routes to the campaign ending, not the
+		# per-night win screen.
+		var expect := "res://scenes/screens/WinScreen.tscn"
+		if not Game.is_custom and Game.current_night >= Game.MAX_NIGHTS:
+			expect = "res://scenes/screens/EndingScreen.tscn"
+		_report(expect, "win -> " + expect.get_file())
 
 func _report(expect: String, label: String) -> void:
 	var cur = get_tree().current_scene

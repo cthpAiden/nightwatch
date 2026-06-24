@@ -67,6 +67,25 @@ WIN_SIGN,— Ban Giám Hiệu,— The School Board
 WIN_AGAIN,...Thử đêm khó hơn không?,...Try a harder night?
 WIN_NEXT_NIGHT,Đêm Tiếp Theo,Next Night
 WIN_ALL_DONE,Anh đã qua hết các đêm. Anh là bảo vệ thật sự.,You cleared every night. You are a true guard.
+WIN_SIEU_TITLE,Siêu Thoát,Release
+ENDING_GOOD_L1,"Đêm thứ sáu tàn. Nhưng lần này, anh không chỉ sống sót.","The sixth night ends. But this time, you did more than survive."
+ENDING_GOOD_L2,"Anh đã ghép lại câu chuyện của em — cái tên, bức vẽ, gương mặt.","You pieced her story together — the name, the drawing, the face."
+ENDING_GOOD_L3,"Anh thắp nén nhang cuối, gọi đúng tên em. Oan tình được gỡ.","You light the last incense and call her true name. The grievance unwinds."
+ENDING_GOOD_L4,"Bóng trắng tan vào ánh bình minh. Ngôi trường, cuối cùng, được ngủ yên.","The pale shape melts into the dawn. The school, at last, can rest."
+ENDING_GOOD_SIGN,"Em đã siêu thoát. Bác Tư hẳn sẽ tự hào.","She is free. Bác Tư would be proud."
+EPILOGUE_TITLE,Bình Minh,Daybreak
+ENDING_SURV_L1,"Đêm thứ sáu tàn. Anh còn sống. Tay vẫn run.","The sixth night ends. You're alive. Your hands still shake."
+ENDING_SURV_L2,"Nhưng có thứ gì đó vẫn chưa xong. Một ô cửa trên lầu còn sáng.","But something is unfinished. One upstairs window is still lit."
+ENDING_SURV_L3,"Em vẫn ở đó, đợi ai đó chịu lắng nghe câu chuyện của em.","She is still there, waiting for someone willing to hear her story."
+ENDING_SURV_L4,"Có lẽ, nếu anh để ý kỹ hơn... anh sẽ gỡ được cho em.","Perhaps, if you look closer... you could set her free."
+ENDING_CLUE_HINT,Manh mối đã tìm: %d/3,Clues found: %d/3
+CREDITS_TITLE,Đội Ngũ,Credits
+CREDITS_FONT,Font: Be Vietnam Pro (SIL OFL 1.1),Font: Be Vietnam Pro (SIL OFL 1.1)
+CREDITS_THANKS,Cảm ơn anh đã chơi. Ngủ ngon.,Thank you for playing. Sleep well.
+MENU_EXTRAS,Thêm,Extras
+CLUE_GOT_NAME,Bác Tư cho anh biết tên em... (manh mối),Bác Tư tells you her name... (a clue)
+CLUE_GOT_DRAWING,Trên bảng lớp — bức vẽ của em. (manh mối),On the classroom board — her drawing. (a clue)
+CLUE_GOT_PHOTO,Anh thấy rõ gương mặt em trên camera. (manh mối),You see her face clearly on the camera. (a clue)
 GO_TITLE,ĐÊM NAY KHÔNG QUA ĐƯỢC,YOU DIDN'T MAKE IT
 GO_RETRY,Thử Lại,Try Again
 GO_MENU,Về Menu,Main Menu
@@ -116,6 +135,40 @@ EXTRAS_BESTIARY,Hồ Sơ Ma,Bestiary
 EXTRAS_STATS,Thống Kê,Statistics
 BESTIARY_UNKNOWN,???,???
 BESTIARY_LOCKED,Chưa gặp,Not yet encountered
+EXTRAS_TITLE,Thêm,Extras
+BESTIARY_TITLE,Hồ Sơ Ma,Bestiary
+BESTIARY_HINT,Gặp ma trong lúc trực để mở khóa hồ sơ.,Encounter the spirits on shift to unlock their files.
+STATS_TITLE,Thống Kê,Statistics
+STATS_WON,Số đêm sống sót,Nights survived
+STATS_DEATHS,Số lần bị bắt,Times caught
+STATS_OUTAGES,Số lần mất điện,Power outages
+STATS_OFFERINGS,Số lần cúng,Offerings made
+STATS_CLUES,Manh mối đã tìm,Clues found
+TAPE_ARCHIVE_TITLE,Kho Băng,Tape Archive
+TAPE_NIGHT_LABEL,Đêm %d,Night %d
+TAPE_LOCKED,Chưa mở khóa,Not yet unlocked
+TAPE_PICK,Chọn một cuốn băng để nghe lại.,Pick a tape to replay.
+CUSTOM_TITLE,Đêm Tùy Chỉnh,Custom Night
+CUSTOM_HINT,Chỉnh mức độ từng con ma (0–20) rồi bắt đầu.,Set each spirit's level (0–20), then begin.
+CUSTOM_START,Bắt Đầu,Begin
+CUSTOM_PRESET_CALM,Dịu,Calm
+CUSTOM_PRESET_HARD,Khó,Hard
+CUSTOM_PRESET_MAX,Cực Đại,Max
+TUT_LOOK,Đưa chuột ra mép màn hình để nhìn quanh phòng.,Move your mouse to the screen edges to look around.
+TUT_INCENSE,Thắp nhang giữ bàn thờ luôn sáng — bấm R.,Light incense to keep the altar lit — press R.
+TUT_DOOR,Đóng một cánh cửa lại — bấm A hoặc L.,Shut a door — press A or L.
+TUT_CAM,Mở camera quan sát trường — bấm C.,Raise the cameras to watch the school — press C.
+TUT_DONE,Tốt. Ca trực bắt đầu — cầm cự tới 6 giờ sáng.,Good. Your shift begins — hold out until 6 AM.
+DOOR_OPEN,mở,open
+DOOR_SHUT,đóng,shut
+LIGHT_ON,bật,on
+LIGHT_OFF,tắt,off
+HUD_CROWD,Cô hồn,Crowd
+HUD_WATER,Nước,Water
+HUD_GRIEVANCE,Oán,Grievance
+HELP_ITEM,Dùng vật phẩm: Q,Use item: Q
+HELP_DRAIN,Khóa cống nước: D,Close drain: D
+LANG_CHOOSE,Chọn ngôn ngữ / Choose language,Chọn ngôn ngữ / Choose language
 CREDITS_MADE_BY,Thực hiện bởi,Made by
 CREDITS_BUILT_WITH,Làm bằng Godot + Claude Code,Built with Godot + Claude Code
 PROMPT_ANY_KEY,Nhấn phím bất kỳ để tiếp tục,Press any key to continue
@@ -219,6 +272,8 @@ HELP_PHONE,Nghe điện thoại: E,Answer phone: E
 ALTAR_LIT,"Nhang đã thắp. Khói lên, vong lùi.",Incense lit. The smoke rises; spirits draw back.
 ALTAR_DRAFT,Gió lạnh lùa... nến tắt rồi! Thắp lại mau!,A cold draft... the candles went out! Relight them!
 ALTAR_AUTORELIGHT,Bàn thờ tự bén lửa lại.,The altar rekindles itself.
+ALTAR_NO_NHANG,Hết nhang rồi... phải dành mà thắp.,Out of incense... you must spend it wisely.
+CONTROLS_HEXED,"Tay chân cứng đờ! Cửa tự bung ra!","Your hands won't obey! The doors swing open!"
 BELL_RUNG,Tiếng chuông ngân... mọi thứ chững lại.,The bell rings out... everything stills.
 ANOMALY_TAGGED,Đã đánh dấu. Anh thấy nó rồi.,Tagged. You've spotted it.
 ANOMALY_HINT,Bấm vào bóng dáng để đánh dấu,Click the figure to tag it

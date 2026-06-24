@@ -13,14 +13,14 @@ const SFX_NAMES := [
 	"static_loop", "camera_up", "camera_down", "heartbeat", "breathing", "whisper",
 	"stinger", "power_down", "low_power_beep", "offering_bell", "incense_whoosh",
 	"item_good", "item_bad", "footstep_wood", "knock", "rooster", "vendor_bell",
-	"candle_gust", "phone_ring", "phone_ring_warp",
+	"candle_gust", "phone_ring", "phone_ring_warp", "drone_tension", "coin_chime",
 ]
 const MUSIC_NAMES := ["ambience_night", "ambience_dread"]
 # NOTE: "whisper" is intentionally NOT here. It is played as a one-shot lure
 # (ma_da / counterfeit vendor); if its WAV had loop_mode set it would play
 # forever in the SFX pool — that was the "windy/sawing" bug.
 const LOOPING := ["fluorescent_hum", "static_loop", "heartbeat", "breathing",
-	"ambience_night", "ambience_dread"]
+	"ambience_night", "ambience_dread", "drone_tension"]
 
 const MUSIC_BUS := "Music"
 const SFX_BUS := "SFX"

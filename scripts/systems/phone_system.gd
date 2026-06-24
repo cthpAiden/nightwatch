@@ -81,6 +81,10 @@ func answer() -> void:
 		_c.add_via(8.0)
 		_c.start_reveal(5.0)        # bác Tư tells you where they're lurking
 		Audio.play_sfx("offering_bell", -12.0)
+		# From night 2 on, bác Tư's calls carry the girl's story — the first one you
+		# pick up gives you her name (investigation clue 1 of 3).
+		if Game.current_night >= 2:
+			_c.find_clue("clue_name", "CLUE_GOT_NAME")
 		_stop()
 		_next_real = _rng.randf_range(48.0, 78.0)
 
