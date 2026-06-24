@@ -79,9 +79,10 @@ void fragment(){
 	// Moon: a small soft disc with a contained halo (aspect-corrected so it's round).
 	vec2 ar = vec2(1.0, 0.5625);
 	float md = distance(uv * ar, moon_pos * ar);
-	float disc = smoothstep(0.072, 0.006, md);
-	float halo = smoothstep(0.24, 0.0, md);
-	col += (vec3(0.80, 0.83, 0.78) * disc + vec3(0.20, 0.24, 0.30) * halo * halo) * moon_amt;
+	float disc = smoothstep(0.066, 0.05, md);              // filled disc, soft rim
+	float surf = 0.82 + 0.18 * fbm(uv * 26.0);             // faint maria so it isn't a blob
+	float halo = smoothstep(0.26, 0.0, md);
+	col += (vec3(0.62, 0.66, 0.63) * disc * surf + vec3(0.17, 0.21, 0.27) * halo * halo) * moon_amt;
 	// Drifting fog, pooled toward the lower half of the frame.
 	float t = TIME * 0.012;
 	float f = fbm(uv * vec2(3.0, 2.0) + vec2(t, t * 0.3));
@@ -101,6 +102,10 @@ void fragment(){
 		float e = smoothstep(0.0055, 0.0, ed);
 		col += vec3(1.0, 0.62, 0.28) * e * ember_amt * (0.5 + 0.5 * sin(TIME * 3.0 + fi));
 	}
+	// A low, ragged tree-line / rooftop silhouette across the foot of the frame so the
+	// menu reads as a place — the dark grounds of the school — not an abstract gradient.
+	float ridge = 0.9 + 0.045 * fbm(vec2(uv.x * 7.0, 1.3)) + 0.02 * fbm(vec2(uv.x * 23.0, 4.0));
+	col = mix(col, vec3(0.008, 0.009, 0.014), smoothstep(ridge - 0.012, ridge + 0.012, uv.y));
 	// Vignette + a whisper of film grain to match the in-game grade.
 	float vig = distance(uv, vec2(0.5));
 	col *= 1.0 - smoothstep(0.5, 1.1, vig) * 0.7;
