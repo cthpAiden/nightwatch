@@ -4,9 +4,7 @@ extends Control
 
 func _ready() -> void:
 	UI.full(self)
-	var bg := UI.texture_rect("res://assets/art/screens/credits_bg.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED)
-	UI.full(bg)
-	add_child(bg)
+	add_child(UI.backdrop("dawn"))
 
 	var vb := UI.vbox(12)
 	UI.place(vb, 0.5, 0.5, 0.5, 0.5, -320, -230, 320, 250)

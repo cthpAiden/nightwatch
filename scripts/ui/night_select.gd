@@ -3,9 +3,8 @@ extends Control
 
 func _ready() -> void:
 	UI.full(self)
-	add_child(UI.texture_rect("res://assets/art/intro/title_bg.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED))
-	UI.full(get_child(0))
-	add_child(UI.color_rect(Color(0, 0, 0, 0.55)))
+	add_child(UI.backdrop("menu"))
+	add_child(UI.color_rect(Color(0, 0, 0, 0.38)))
 	UI.full(get_child(1))
 
 	var vb := UI.vbox(14)

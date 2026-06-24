@@ -3,9 +3,7 @@ extends Control
 
 func _ready() -> void:
 	UI.full(self)
-	var bg := UI.texture_rect("res://assets/art/intro/win_bg.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED)
-	UI.full(bg)
-	add_child(bg)
+	add_child(UI.backdrop("dawn"))
 	# Dawn warm-up: a cold pre-dawn wash that melts into warm amber, so surviving the
 	# night reads as relief rather than a static card.
 	var dawn := UI.color_rect(Color(0.15, 0.2, 0.32, 0.55))

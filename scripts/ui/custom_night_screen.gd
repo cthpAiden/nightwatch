@@ -7,10 +7,8 @@ var _sliders := {}
 
 func _ready() -> void:
 	UI.full(self)
-	var bg := UI.texture_rect("res://assets/art/intro/title_bg.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED)
-	UI.full(bg)
-	add_child(bg)
-	var dim := UI.color_rect(Color(0, 0, 0, 0.66))
+	add_child(UI.backdrop("menu"))
+	var dim := UI.color_rect(Color(0, 0, 0, 0.45))
 	UI.full(dim)
 	add_child(dim)
 

@@ -3,8 +3,7 @@ extends Control
 
 func _ready() -> void:
 	UI.full(self)
-	add_child(_bg("res://assets/art/intro/title_bg.svg"))
-	add_child(UI.texture_rect("res://assets/art/ui/vignette.svg", TextureRect.STRETCH_SCALE))
+	add_child(UI.backdrop("menu"))
 
 	var title := UI.text_label(tr("GAME_TITLE"), 72, Color(0.93, 0.9, 0.82), HORIZONTAL_ALIGNMENT_CENTER)
 	UI.place(title, 0.5, 0, 0.5, 0, -500, 70, 500, 170)

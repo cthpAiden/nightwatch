@@ -108,3 +108,10 @@ static func center(c: Control) -> CenterContainer:
 	full(cc)
 	cc.add_child(c)
 	return cc
+
+## An animated atmospheric night backdrop for any screen (moon, fog, embers, vignette).
+## mood: "menu" (cold night), "dark" (game-over red), "dawn" (survival/ending warmth).
+static func backdrop(mood: String = "menu") -> Control:
+	var b: Control = load("res://scripts/ui/menu_backdrop.gd").new()
+	b.mood = mood
+	return b

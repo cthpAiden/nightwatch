@@ -12,7 +12,21 @@ const CREDITS := "res://scenes/screens/CreditsScreen.tscn"
 var _layer: CanvasLayer
 var _fade: ColorRect
 var _brightness: ColorRect
+var _bright_mat: ShaderMaterial
 var _busy := false
+
+# Brightness as a true screen MULTIPLY (not a white wash): black * 1.5 is still black,
+# so cranking the slider brightens mid-tones/highlights without greying the dark — the
+# old white-overlay turned the whole horror game to dishwater at high settings.
+const BRIGHT_SHADER := """
+shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
+uniform float mul = 1.0;
+void fragment() {
+	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
+	COLOR = vec4(c * mul, 1.0);
+}
+"""
 var _pending: Array = []   # [path, fade_time] requested while a transition was running
 
 func _ready() -> void:
@@ -21,9 +35,14 @@ func _ready() -> void:
 	add_child(_layer)
 
 	_brightness = ColorRect.new()
-	_brightness.color = Color(0, 0, 0, 0)
+	_brightness.color = Color(1, 1, 1, 1)
 	_brightness.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_brightness.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bright_mat = ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = BRIGHT_SHADER
+	_bright_mat.shader = sh
+	_brightness.material = _bright_mat
 	_layer.add_child(_brightness)
 
 	_fade = ColorRect.new()
@@ -36,14 +55,12 @@ func _ready() -> void:
 	_apply_brightness()
 
 func _apply_brightness() -> void:
-	# Slider 0.5..1.5. Below 1.0 darkens via a black overlay; above 1.0 lifts the image
-	# with a faint white wash so the top half of the slider isn't dead travel (a player
-	# on a dim monitor can actually brighten).
-	var b := Settings.brightness
-	if b < 1.0:
-		_brightness.color = Color(0, 0, 0, clampf(1.0 - b, 0.0, 0.6))
-	else:
-		_brightness.color = Color(1, 1, 1, clampf((b - 1.0) * 0.5, 0.0, 0.5))
+	# Slider 0.5..1.5 applied as a straight multiply on the rendered frame. Hidden at the
+	# 1.0 neutral so it costs nothing (and skips the screen-grab) unless actually in use.
+	var b: float = clampf(Settings.brightness, 0.5, 1.5)
+	_brightness.visible = absf(b - 1.0) > 0.001
+	if _bright_mat:
+		_bright_mat.set_shader_parameter("mul", b)
 
 func change_scene(path: String, fade_time: float = 0.5) -> void:
 	if _busy:
