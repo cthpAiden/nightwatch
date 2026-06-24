@@ -13,6 +13,10 @@ var _toast: Label
 var _warn: Label
 var _offerings_lbl: Label
 var _coins_lbl: Label
+var _clue_lbl: Label
+var _clue_flash := 0.0
+var _tut_panel: Control
+var _tut_label: Label
 var _crowd_bar: ProgressBar
 var _water_bar: ProgressBar
 var _huong_bar: ProgressBar
@@ -79,6 +83,11 @@ func _build() -> void:
 	cbox.add_child(_clock)
 	_night = UI.label("HUD_NIGHT", 18, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER)
 	cbox.add_child(_night)
+	# Investigation tracker — the visible spine of the two-ending arc. Hidden until the
+	# first clue is found, then persists (Save.clue_count) so the goal is always legible.
+	_clue_lbl = UI.text_label("", 16, Color(0.86, 0.78, 0.55), HORIZONTAL_ALIGNMENT_CENTER)
+	_clue_lbl.visible = false
+	cbox.add_child(_clue_lbl)
 
 	# coins + offerings + crowd/water/grievance (top-right)
 	var rbox := UI.vbox(6)
@@ -161,6 +170,21 @@ func _build() -> void:
 	UI.place(_warn, 0.5, 1, 0.5, 1, -300, -190, 300, -156)
 	add_child(_warn)
 
+	# Persistent tutorial prompt: a banner that names the exact key for the current
+	# Night-1 step and stays put until the action is done (no more 2.6s blink-and-miss).
+	_tut_panel = Control.new()
+	_tut_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UI.place(_tut_panel, 0.5, 0.5, 0.5, 0.5, -360, -52, 360, 8)
+	_tut_panel.visible = false
+	add_child(_tut_panel)
+	var tbg := UI.color_rect(Color(0.05, 0.06, 0.09, 0.82))
+	UI.full(tbg)
+	_tut_panel.add_child(tbg)
+	_tut_label = UI.label("", 22, Color(1.0, 0.92, 0.7), HORIZONTAL_ALIGNMENT_CENTER)
+	_tut_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.place(_tut_label, 0, 0, 1, 1, 12, 8, -12, -8)
+	_tut_panel.add_child(_tut_label)
+
 ## A labelled conditional meter (icon-free, just a short name + bar). The whole row
 ## is hidden until the threat it tracks is active; toggle via bar.get_parent().visible.
 func _bar_row(parent: VBoxContainer, label_key: String, color: Color) -> ProgressBar:
@@ -209,6 +233,16 @@ func toggle_help() -> void:
 	if _help_lines:
 		_help_lines.visible = not _help_lines.visible
 
+## Drive the persistent Night-1 tutorial banner. Empty key hides it.
+func set_tutorial_prompt(key: String) -> void:
+	if _tut_panel == null:
+		return
+	if key == "":
+		_tut_panel.visible = false
+		return
+	_tut_panel.visible = true
+	_tut_label.text = tr(key)
+
 func _connect() -> void:
 	Events.power_changed.connect(func(c, m): _power_bar.value = c)
 	Events.via_changed.connect(func(c, m): _via_bar.value = (c / m) * 100.0)
@@ -226,6 +260,9 @@ func _connect() -> void:
 	Events.phone_ring.connect(_on_phone_ring)
 	Events.coins_changed.connect(_on_coins)
 	Events.vendor_state_changed.connect(_on_vendor_state)
+	Events.investigation_updated.connect(_on_investigation)
+	Events.anomaly_tagged.connect(func(_id): _clue_flash = 1.0)
+	_on_investigation(Save.clue_count())   # show progress carried in from earlier nights
 	_night.text = tr("NIGHT_LABEL").format([str(Game.current_night)])
 	_offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings]
 	_coins_lbl.text = "%s: %d" % [tr("HUD_COINS"), _c.coins]
@@ -240,6 +277,10 @@ func _process(delta: float) -> void:
 	if _toast_t > 0.0:
 		_toast_t -= delta
 		_toast.modulate.a = clampf(_toast_t, 0.0, 1.0)
+	if _clue_flash > 0.0 and _clue_lbl:
+		_clue_flash = maxf(0.0, _clue_flash - delta * 1.5)
+		_clue_lbl.modulate = Color(1, 1, 1).lerp(Color(1.0, 0.92, 0.5), _clue_flash)
+		_clue_lbl.scale = Vector2.ONE * (1.0 + 0.12 * _clue_flash)
 	# persistent warnings
 	var w := ""
 	if _c.power <= 20.0 and _c.power > 0.0:
@@ -342,6 +383,13 @@ func _on_phone_ring(active: bool, fake: bool) -> void:
 
 func _on_coins(amount: int) -> void:
 	_coins_lbl.text = "%s: %d" % [tr("HUD_COINS"), amount]
+
+func _on_investigation(count: int) -> void:
+	if _clue_lbl == null:
+		return
+	_clue_lbl.text = tr("HUD_CLUES") % count
+	_clue_lbl.visible = count > 0
+	_clue_flash = 1.0
 
 func _on_vendor_state(state: int) -> void:
 	_vendor_state = state

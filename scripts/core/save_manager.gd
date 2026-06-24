@@ -21,6 +21,7 @@ var coins: int = 0                            # vàng mã: shop + shrine-upgrade
 var upgrades: Dictionary = {}                 # upgrade_id(String) -> true (purchased)
 var clues: Dictionary = {}                    # clue_id(String) -> true (Oan hồn investigation)
 var endings_seen: Dictionary = {}             # ending_id(String) -> true
+var night_best_coins: Dictionary = {}         # night key -> best gross coins earned (anti-farm)
 var stats: Dictionary = {
 	"deaths": 0,
 	"deaths_by": {},                          # threat_id -> count
@@ -65,6 +66,7 @@ func load_progress() -> void:
 	upgrades = cfg.get_value("progress", "upgrades", {})
 	clues = cfg.get_value("progress", "clues", {})
 	endings_seen = cfg.get_value("progress", "endings_seen", {})
+	night_best_coins = cfg.get_value("progress", "night_best_coins", {})
 	stats = cfg.get_value("stats", "data", stats)
 	_migrate(ver)
 
@@ -86,6 +88,7 @@ func save_progress() -> void:
 	cfg.set_value("progress", "upgrades", upgrades)
 	cfg.set_value("progress", "clues", clues)
 	cfg.set_value("progress", "endings_seen", endings_seen)
+	cfg.set_value("progress", "night_best_coins", night_best_coins)
 	cfg.set_value("stats", "data", stats)
 	_atomic_write(cfg)
 
@@ -198,5 +201,6 @@ func reset_all() -> void:
 	upgrades = {}
 	clues = {}
 	endings_seen = {}
+	night_best_coins = {}
 	stats = {"deaths": 0, "deaths_by": {}, "nights_won": 0, "power_outages": 0, "offerings_made": 0}
 	save_progress()

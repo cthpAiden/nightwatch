@@ -14,16 +14,18 @@ func _ready() -> void:
 	vb.add_child(UI.label("MENU_NIGHTS", 40, Color(0.93, 0.9, 0.82), HORIZONTAL_ALIGNMENT_CENTER))
 
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	vb.add_child(grid)
 	for n in range(1, Game.MAX_NIGHTS + 1):
-		var b := UI.button("", 150, 64)
+		var b := UI.button("", 234, 56)
 		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		b.add_theme_font_size_override("font_size", 18)
+		var title := tr("NIGHT_TITLE_%d" % n)
 		var unlocked := Save.is_night_unlocked(n)
 		if unlocked:
-			b.text = tr("NIGHT_LABEL").format([str(n)])
+			b.text = "%s · %s" % [tr("NIGHT_LABEL").format([str(n)]), title]
 			b.pressed.connect(func(): Game.start_story_night(n))
 		else:
 			b.text = "🔒 " + tr("NIGHT_LABEL").format([str(n)])

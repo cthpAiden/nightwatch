@@ -10,8 +10,32 @@ var _map_buttons := {}
 var _refresh_t := 0.0
 var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
 var _fx_burst := 0.0                # decaying static spike on channel change
+var _fog := 0.0                     # extra baseline static on a "fog" night
 const FX_BASE := 0.12
+
+## A foggy night runs every feed heavier with static (set once at night start).
+func set_fog_level(v: float) -> void:
+	_fog = maxf(0.0, v)
+	if _fx_mat:
+		_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
 var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
+var _clue_pulse := 0.0              # animates the unclaimed hotspot so the eye catches it
+var _oan_hint_shown := false        # one-time "tag her" hint on first oan_hon sighting
+
+## Per-camera depth tier for the threat billboard: deeper rooms render the figure
+## smaller and higher up the frame, near rooms larger and lower — sells the 2.5D space.
+const CAM_DEPTH := {
+	"gate": {"s": 1.0, "y": 0.0},
+	"courtyard": {"s": 0.86, "y": -30.0},
+	"canteen": {"s": 0.86, "y": -24.0},
+	"classroom": {"s": 0.74, "y": -54.0},
+	"library": {"s": 0.72, "y": -60.0},
+	"left_hall": {"s": 0.95, "y": -8.0},
+	"gym": {"s": 0.86, "y": -24.0},
+	"restroom": {"s": 0.78, "y": -46.0},
+	"infirmary": {"s": 0.72, "y": -60.0},
+	"right_hall": {"s": 0.95, "y": -8.0},
+}
 
 func setup(controller) -> void:
 	_c = controller
@@ -121,7 +145,7 @@ func show_feed(cam_id: String) -> void:
 		_feed.texture = load(path)
 	_fx_burst = 0.5   # a burst of static as the channel resolves to the new feed
 	if _fx_mat:
-		_fx_mat.set_shader_parameter("strength", FX_BASE + _fx_burst)
+		_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
 	_name_lbl.text = "%s — %s" % [_cam_code(cam_id), tr(MapGraph.name_key(cam_id))]
 	for cam in _map_buttons:
 		_map_buttons[cam].modulate = Color(1, 0.85, 0.4) if cam == cam_id else Color(1, 1, 1)
@@ -137,7 +161,12 @@ func _process(delta: float) -> void:
 	# Ease the channel-change static burst back down to the resting noise level.
 	if _fx_burst > 0.0 and _fx_mat:
 		_fx_burst = maxf(0.0, _fx_burst - delta * 3.0)
-		_fx_mat.set_shader_parameter("strength", FX_BASE + _fx_burst)
+		_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
+	# Pulse the unclaimed clue hotspot so a player actually notices it.
+	if _clue_btn and _clue_btn.visible:
+		_clue_pulse += delta * 3.0
+		var a := 0.55 + 0.4 * (0.5 + 0.5 * sin(_clue_pulse))
+		_clue_btn.modulate = Color(1.0, 0.88, 0.5, a)
 	_refresh_t -= delta
 	if _refresh_t <= 0.0:
 		_refresh_t = 0.25
@@ -161,11 +190,20 @@ func _refresh_threats() -> void:
 		var tex: Texture2D = t.current_texture()
 		if tex == null:
 			continue
+		# First time the wronged soul appears on a feed (and her face isn't logged yet),
+		# tell the player she can be tagged — the one clue most likely to be missed.
+		if t.id == "oan_hon" and not _oan_hint_shown and not Save.has_clue("clue_photo"):
+			_oan_hint_shown = true
+			Events.notify.emit("CLUE_HINT_TAG", [])
+		var d: Dictionary = CAM_DEPTH.get(_c.current_cam, {"s": 1.0, "y": 0.0})
+		var hw: float = 180.0 * float(d["s"])
+		var hh: float = 420.0 * float(d["s"])
+		var yo: float = float(d["y"])
 		var tr_node := TextureRect.new()
 		tr_node.texture = tex
 		tr_node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		tr_node.modulate = Color(0.85, 0.87, 0.87)
-		UI.place(tr_node, 0.5, 1, 0.5, 1, -180, -440, 180, -20)
+		UI.place(tr_node, 0.5, 1, 0.5, 1, -hw, -(hh + 20.0) + yo, hw, -20.0 + yo)
 		_threat_host.add_child(tr_node)
 		# Click the figure to "tag" the anomaly — a reward for actually watching the
 		# cameras (sets a rusher back / settles a meter spirit + a brief reveal).
@@ -174,7 +212,7 @@ func _refresh_threats() -> void:
 		tag.focus_mode = Control.FOCUS_NONE
 		tag.mouse_filter = Control.MOUSE_FILTER_STOP
 		tag.tooltip_text = tr("ANOMALY_HINT")
-		UI.place(tag, 0.5, 1, 0.5, 1, -180, -440, 180, -20)
+		UI.place(tag, 0.5, 1, 0.5, 1, -hw, -(hh + 20.0) + yo, hw, -20.0 + yo)
 		var tid: String = t.id
 		tag.pressed.connect(func(): _c.tag_anomaly(tid))
 		_threat_host.add_child(tag)

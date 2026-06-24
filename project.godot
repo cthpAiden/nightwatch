@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/bg_color=Color(0.03, 0.03, 0.05, 1)
 boot_splash/show_image=false
 config/icon="res://assets/art/ui/icon_app.svg"
+config/version="1.0.0"
 
 [autoload]
 
@@ -34,10 +35,6 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-
-[dotnet]
-
-project/assembly_name="Bao Ve Dem"
 
 [gui]
 

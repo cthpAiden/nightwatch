@@ -39,6 +39,10 @@ func _process_attack(delta: float) -> void:
 			repel()
 		return
 	_behave_t = 0.0
+	# While Ma trơi's panic-hex jams the controls (doors flung open), ông kẹ does
+	# nothing — no grab, no vía drain — so the hex is never a death by itself.
+	if _controller and _controller.has_method("is_hexed") and _controller.is_hexed():
+		return
 	_attack_accum += delta
 	if _controller:
 		_controller.add_via(-via_drain_at_door * delta)

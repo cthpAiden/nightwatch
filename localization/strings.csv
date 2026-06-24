@@ -67,7 +67,7 @@ WIN_SIGN,— Ban Giám Hiệu,— The School Board
 WIN_AGAIN,...Thử đêm khó hơn không?,...Try a harder night?
 WIN_NEXT_NIGHT,Đêm Tiếp Theo,Next Night
 WIN_ALL_DONE,Anh đã qua hết các đêm. Anh là bảo vệ thật sự.,You cleared every night. You are a true guard.
-WIN_SIEU_TITLE,Siêu Thoát,Release
+WIN_SIEU_TITLE,Siêu Thoát,At Rest
 ENDING_GOOD_L1,"Đêm thứ sáu tàn. Nhưng lần này, anh không chỉ sống sót.","The sixth night ends. But this time, you did more than survive."
 ENDING_GOOD_L2,"Anh đã ghép lại câu chuyện của em — cái tên, bức vẽ, gương mặt.","You pieced her story together — the name, the drawing, the face."
 ENDING_GOOD_L3,"Anh thắp nén nhang cuối, gọi đúng tên em. Oan tình được gỡ.","You light the last incense and call her true name. The grievance unwinds."
@@ -79,10 +79,16 @@ ENDING_SURV_L2,"Nhưng có thứ gì đó vẫn chưa xong. Một ô cửa trên
 ENDING_SURV_L3,"Em vẫn ở đó, đợi ai đó chịu lắng nghe câu chuyện của em.","She is still there, waiting for someone willing to hear her story."
 ENDING_SURV_L4,"Có lẽ, nếu anh để ý kỹ hơn... anh sẽ gỡ được cho em.","Perhaps, if you look closer... you could set her free."
 ENDING_CLUE_HINT,Manh mối đã tìm: %d/3,Clues found: %d/3
+HUD_CLUES,Hồ Sơ: %d/3,Case file: %d/3
+INVEST_GOAL,"Bác Tư dặn: tìm tên em, bức vẽ, và gương mặt em — rồi mới siêu thoát được.","Bác Tư's words: find her name, her drawing, and her face — only then can she rest."
+CLUE_HINT_TAG,Có bóng người trên camera — bấm vào để nhận diện em.,A figure on the camera — click it to identify her.
+CLUE_NAME_LABEL,tên em,her name
+CLUE_DRAWING_LABEL,bức vẽ của em,her drawing
+CLUE_PHOTO_LABEL,gương mặt em,her face
+ENDING_MISSING,"Còn thiếu: %s. Chơi lại để tìm cho đủ.","Still missing: %s. Replay to find them."
 CREDITS_TITLE,Đội Ngũ,Credits
 CREDITS_FONT,Font: Be Vietnam Pro (SIL OFL 1.1),Font: Be Vietnam Pro (SIL OFL 1.1)
 CREDITS_THANKS,Cảm ơn anh đã chơi. Ngủ ngon.,Thank you for playing. Sleep well.
-MENU_EXTRAS,Thêm,Extras
 CLUE_GOT_NAME,Bác Tư cho anh biết tên em... (manh mối),Bác Tư tells you her name... (a clue)
 CLUE_GOT_DRAWING,Trên bảng lớp — bức vẽ của em. (manh mối),On the classroom board — her drawing. (a clue)
 CLUE_GOT_PHOTO,Anh thấy rõ gương mặt em trên camera. (manh mối),You see her face clearly on the camera. (a clue)
@@ -155,10 +161,29 @@ CUSTOM_PRESET_CALM,Dịu,Calm
 CUSTOM_PRESET_HARD,Khó,Hard
 CUSTOM_PRESET_MAX,Cực Đại,Max
 TUT_LOOK,Đưa chuột ra mép màn hình để nhìn quanh phòng.,Move your mouse to the screen edges to look around.
-TUT_INCENSE,Thắp nhang giữ bàn thờ luôn sáng — bấm R.,Light incense to keep the altar lit — press R.
+TUT_INCENSE,Thắp nhang giữ bàn thờ luôn sáng — bấm R. (Nhang có hạn mỗi đêm!),Light incense to keep the altar lit — press R. (Your nhang is limited each night!)
+TUT_BELL,Thỉnh chuông xua kẻ đứng trước cửa — bấm B.,Ring the bell to shove back whoever's at the door — press B.
 TUT_DOOR,Đóng một cánh cửa lại — bấm A hoặc L.,Shut a door — press A or L.
 TUT_CAM,Mở camera quan sát trường — bấm C.,Raise the cameras to watch the school — press C.
 TUT_DONE,Tốt. Ca trực bắt đầu — cầm cự tới 6 giờ sáng.,Good. Your shift begins — hold out until 6 AM.
+COUNTER_ONG_KE,"Ông kẹ: đóng cửa lại, hoặc bật đèn rồi ngồi im.","Ông kẹ: shut the door, or light it and sit still."
+COUNTER_QUY_NHAP_TRANG,Quỷ nhập tràng: đóng cửa bên đó để chặn con mèo.,Quỷ nhập tràng: shut that door to block the cat.
+COUNTER_MA_DA,"Ma da: đừng nghe tiếng dưới nước — khóa cống (D).","Ma da: don't answer the water — close the drain (D)."
+COUNTER_CO_HON,"Cô hồn: đặt mâm cúng (F) cho họ, đừng chống lại.","Cô hồn: lay out an offering (F) — feed them, don't fight."
+COUNTER_MA_TROI,"Ma trơi: ngừng quơ camera, ngồi yên cho nó tan.","Ma trơi: stop whipping the cameras around — be still."
+COUNTER_OAN_HON,"Oan hồn: liếc nhanh thôi, thắp nhang; đi tìm manh mối về em.","Oan hồn: brief glances + incense; gather her clues."
+COUNTER_BA_HANG_RONG,"Hàng rong giả: đừng mua của kẻ giả; đóng cửa nếu nó hung.","Fake vendor: don't buy from the impostor; shut the door if hostile."
+NIGHT_TITLE_1,Làm Quen,First Watch
+NIGHT_TITLE_2,Tiếng Dưới Nước,The Voice in the Water
+NIGHT_TITLE_3,Mất Điện,Blackout
+NIGHT_TITLE_4,Màn Sương,The Fog
+NIGHT_TITLE_5,Đêm Đom Đóm Ma,Night of Wisps
+NIGHT_TITLE_6,Oan Hồn,The Wronged Soul
+MOD_BLACKOUT,Lưới điện chập chờn... điện tụt nhanh!,The grid sags... power is draining fast!
+GO_OVERWHELMED_TITLE,Đêm Nuốt Chửng,The Night Swallows You
+GO_OVERWHELMED,Vía anh cạn kiệt... bóng tối phủ lên.,Your vía gave out... the dark closes over you.
+GO_TIP_VIA,"Mẹo: giữ bàn thờ luôn sáng và cúng kịp lúc để vía hồi.","Tip: keep the altar lit and make offerings in time to recover vía."
+OAN_HON_PETTY,"Em ấy giận rồi... đừng nhìn em lâu nữa, thắp cho em nén nhang đi.","She's furious now... stop staring at her — light her some incense."
 DOOR_OPEN,mở,open
 DOOR_SHUT,đóng,shut
 LIGHT_ON,bật,on
@@ -184,6 +209,7 @@ ACTION_ANSWER,Trả lời?,Answer?
 MADA_LURE,"Cứu... cứu tôi với...","Help... please, help me..."
 MADA_RESIST,"Kệ tiếng dưới nước. Đừng trả lời.","Ignore the voice in the water. Don't answer."
 MATROI_RULE,"Thấy đốm xanh thì đi chậm. Đừng chạy.","See the blue flame? Walk slow. Don't run."
+MATROI_WARN,"Đèn chớp... đốm xanh đang dò theo anh — ngừng cuống lại!","The lights flicker... the wisp is locking on — stop panicking!"
 CAT_WARN,Con Mun nhảy qua rồi! Coi chừng!,Mun jumped over it! Watch out!
 THREAT_NEARBY,"Có tiếng động đâu đó... kiểm tra đèn cửa đi.","A noise somewhere... check the doorway lights."
 HELP_TITLE,Phím tắt  (H để ẩn/hiện),Controls  (H to show/hide)

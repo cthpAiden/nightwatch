@@ -38,7 +38,19 @@ func _ready() -> void:
 		crawl.add_child(l)
 		fade_targets.append(l)
 	if not good:
-		var hint := UI.text_label(tr("ENDING_CLUE_HINT") % Save.clue_count(), 18, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER)
+		# Name exactly which clues she still needs, so the player knows what to chase
+		# on a replay instead of guessing why the good ending didn't trigger.
+		var missing: Array = []
+		if not Save.has_clue("clue_name"): missing.append(tr("CLUE_NAME_LABEL"))
+		if not Save.has_clue("clue_drawing"): missing.append(tr("CLUE_DRAWING_LABEL"))
+		if not Save.has_clue("clue_photo"): missing.append(tr("CLUE_PHOTO_LABEL"))
+		var hint_text := tr("ENDING_CLUE_HINT") % Save.clue_count()
+		if not missing.is_empty():
+			hint_text += "\n" + (tr("ENDING_MISSING") % ", ".join(missing))
+		var hint := UI.text_label(hint_text, 18, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER)
+		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint.custom_minimum_size = Vector2(880, 0)
 		hint.modulate.a = 0.0
 		crawl.add_child(hint)
 		fade_targets.append(hint)

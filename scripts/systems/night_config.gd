@@ -5,6 +5,9 @@ extends Resource
 
 @export var night_index: int = 1
 @export var title_key: String = "NIGHT_LABEL"
+## Optional per-night flavor modifiers (e.g. "blackout", "fog", "wisp_storm") that
+## change the night mechanically, not just by bigger numbers. Read by NightController.
+@export var mods: Array = []
 
 ## threat_id -> starting AI level (0..20, FNAF-style). Missing/0 = inactive tonight.
 @export var threat_levels: Dictionary = {}

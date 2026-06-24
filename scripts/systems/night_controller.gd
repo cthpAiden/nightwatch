@@ -51,6 +51,7 @@ var huong := 100.0
 var huong_max := 100.0
 var altar_lit := true        # false = candles guttered by a cold draft; relight!
 var coins := 0               # vàng mã (spirit money): shop + shrine-upgrade currency
+var _run_earned := 0         # gross coins earned this run (for the anti-farm best check)
 var phone                    # phone_system.gd
 var _aggro_mult := 1.0       # global threat aggression (bánh lạ curse) read by meters
 var _huong_decay := 1.3      # incense burn rate /s (set per night + upgrades at begin)
@@ -67,6 +68,10 @@ var _hex_t := 0.0            # Ma trơi lock-on jinx: doors/lights flail open br
 var _crowd_level := 0.0      # Cô hồn smother (0..1) driving the view-blocking overlay
 var _crowd_layer: CanvasLayer
 var _crowd_overlay: TextureRect
+var _hb_on := false          # heartbeat loop currently playing (ramped with danger)
+var _oan_petty_shown := false  # one-time Oan hồn comedic line on first high grievance
+var _post_layer: CanvasLayer
+var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
 
 var _running := false
 var _ending := false
@@ -74,10 +79,19 @@ var _powered := true
 var _low_power_warned := false
 var _tut_step := -1          # -1 = no tutorial running; otherwise index into TUT_STEPS
 var _tut_incense := false    # set when the player hand-lights incense (tutorial step)
+var _tut_bell := false       # set when the player rings the bell (tutorial step)
+var _first_door := {}        # threat_id -> true once it has reached a door (first-contact hint)
+# Per-night flavor modifiers (config.mods): blackout windows, foggy cameras, wisp storm.
+var _mod_blackout := false
+var _mod_fog := false
+var _mod_wisp := false
+var _blk_cd := 0.0           # seconds until the next blackout window
+var _blk_t := 0.0            # seconds remaining in the current blackout window
 
 func _ready() -> void:
 	if OS.has_environment("NW_NIGHT"):
 		Game.current_night = int(OS.get_environment("NW_NIGHT"))
+		Game.is_custom = false   # env-launched story night must not inherit a prior custom run
 		Game.active_config = null
 	config = Game.active_config if Game.active_config else Game.get_night_config(Game.current_night)
 	if OS.has_environment("NW_FASTWIN"):   # debug: race to 06:00 with no threats
@@ -124,6 +138,35 @@ func _build_ui() -> void:
 	_ui_layer = CanvasLayer.new()
 	_ui_layer.layer = 10
 	add_child(_ui_layer)
+
+	# Full-screen post pass over the live 3D office (layer 8 = above the 3D, below the
+	# HUD/monitor at 10): subtle film grain + scanline + vignette so the office matches
+	# the grainy CCTV feeds instead of looking too clean. Intensity rises with dread.
+	_post_layer = CanvasLayer.new()
+	_post_layer.layer = 8
+	add_child(_post_layer)
+	var post_rect := UI.color_rect(Color(1, 1, 1, 1))
+	UI.full(post_rect)
+	var psh := Shader.new()
+	psh.code = """
+shader_type canvas_item;
+uniform float strength = 0.0;
+float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
+void fragment() {
+	float grain = rand(UV * vec2(800.0, 450.0) + vec2(TIME * 53.0, TIME * 29.0));
+	float scan = sin(UV.y * 900.0) * 0.5 + 0.5;
+	float edge = distance(UV, vec2(0.5));
+	float vig = clamp((edge - 0.34) * 1.6, 0.0, 1.0);
+	float base = 0.12 + 0.6 * strength;
+	float a = vig * 0.6 * base + (grain * 0.5 + scan * 0.12) * 0.16 * base;
+	COLOR = vec4(vec3(0.015, 0.015, 0.02) + vec3(grain * 0.06), a);
+}
+"""
+	_post_mat = ShaderMaterial.new()
+	_post_mat.shader = psh
+	_post_mat.set_shader_parameter("strength", 0.0)
+	post_rect.material = _post_mat
+	_post_layer.add_child(post_rect)
 
 	_vignette = UI.texture_rect("res://assets/art/ui/vignette.svg", TextureRect.STRETCH_SCALE)
 	UI.full(_vignette)
@@ -180,18 +223,28 @@ func _build_ui() -> void:
 
 func _connect_events() -> void:
 	Events.jumpscare_started.connect(_on_jumpscare)
-	Events.threat_at_door.connect(func(_id, side): _on_threat_at_door(side))
+	Events.threat_at_door.connect(func(id, side): _on_threat_at_door(id, side))
 	Events.threat_left_door.connect(func(_id, side): _refresh_door_sprite(side))
 	Events.crowd_changed.connect(func(level): _crowd_level = level)
 	Events.via_state_changed.connect(_on_via_state_fx)
+	# Oan hồn's petty/comedic beat — fires once when her grievance first runs high.
+	Events.grievance_changed.connect(func(level):
+		if level > 0.7 and not _oan_petty_shown:
+			_oan_petty_shown = true
+			Events.notify.emit("OAN_HON_PETTY", []))
 
 ## A figure arriving at the door: refresh its sprite, and land a small scare beat
 ## (jolt + low sting) so the doorway threat has weight instead of a silent pop-in.
-func _on_threat_at_door(side: int) -> void:
+func _on_threat_at_door(id: String, side: int) -> void:
 	_refresh_door_sprite(side)
 	if room:
 		room.add_shake(0.32)
 	Audio.play_sfx("stinger", -16.0)
+	# First time a given rusher reaches a door this night, name its counter in context
+	# (teaching that survives past the Night-1 tutorial).
+	if not _first_door.get(id, false):
+		_first_door[id] = true
+		Events.notify.emit("COUNTER_" + id.to_upper(), [])
 
 ## Reactive vignette: the screen edges bruise toward red as your vía fails.
 func _on_via_state_fx(state: int) -> void:
@@ -237,6 +290,9 @@ func _begin_night() -> void:
 		var nhang := ItemRegistry.get_def("nhang")
 		if nhang:
 			acquire_item(nhang)
+	_apply_mods()
+	if not Game.is_custom and not OS.has_environment("NW_SKIP_TAPE"):
+		_show_title_card()
 	# Night 1 runs a short, safe, hands-on lesson (no threats act until it's done);
 	# every other night (and headless tests) goes live immediately.
 	if not OS.has_environment("NW_SKIP_TAPE") and not Game.is_custom and Game.current_night == 1:
@@ -253,34 +309,91 @@ func _engage_night() -> void:
 	if phone:
 		phone.begin()
 	Events.notify.emit("NIGHT_BEGIN", [])
+	# Remind the player the investigation exists (a few seconds in, after the begin toast)
+	# until it's complete — so the good ending is a goal they can pursue, not a secret.
+	if not Game.is_custom and Game.current_night >= 2 and not Save.investigation_complete():
+		get_tree().create_timer(5.0).timeout.connect(func():
+			if _running:
+				Events.notify.emit("INVEST_GOAL", []))
+
+# --- per-night flavor modifiers --------------------------------------------
+func _apply_mods() -> void:
+	var m: Array = config.mods if config else []
+	_mod_blackout = m.has("blackout")
+	_mod_fog = m.has("fog")
+	_mod_wisp = m.has("wisp_storm")
+	if _mod_fog and monitor and monitor.has_method("set_fog_level"):
+		monitor.set_fog_level(0.22)   # the cameras run heavy with static tonight
+	if _mod_blackout:
+		_blk_cd = randf_range(45.0, 75.0)
+
+## Rolling-blackout windows: periodically the grid sags, draining power faster and
+## rattling the room, until you ride it out.
+func _update_mods(delta: float) -> void:
+	if not _mod_blackout or not _powered:
+		return
+	if _blk_t > 0.0:
+		_blk_t -= delta
+		return
+	_blk_cd -= delta
+	if _blk_cd <= 0.0:
+		_blk_cd = randf_range(45.0, 75.0)
+		_blk_t = randf_range(9.0, 14.0)
+		Audio.play_sfx("power_down", -12.0)
+		if room:
+			room.add_shake(0.45)
+		Events.notify.emit("MOD_BLACKOUT", [])
+
+## A brief title card (night number + flavor name) at the start of each story night.
+func _show_title_card() -> void:
+	if config == null:
+		return
+	var layer := CanvasLayer.new()
+	layer.layer = 45
+	add_child(layer)
+	var box := UI.vbox(6)
+	UI.place(box, 0.5, 0.5, 0.5, 0.5, -380, -70, 380, 70)
+	layer.add_child(box)
+	box.add_child(UI.text_label(tr("NIGHT_LABEL").format([str(Game.current_night)]), 22, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
+	box.add_child(UI.label(config.title_key, 52, Color(0.93, 0.88, 0.78), HORIZONTAL_ALIGNMENT_CENTER))
+	box.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(box, "modulate:a", 1.0, 0.6)
+	tw.tween_interval(1.7)
+	tw.tween_property(box, "modulate:a", 0.0, 0.7)
+	tw.tween_callback(layer.queue_free)
 
 # --- Night-1 hands-on tutorial ---------------------------------------------
-const TUT_STEPS := ["TUT_LOOK", "TUT_INCENSE", "TUT_DOOR", "TUT_CAM"]
+const TUT_STEPS := ["TUT_LOOK", "TUT_INCENSE", "TUT_BELL", "TUT_DOOR", "TUT_CAM"]
 
 func _begin_tutorial() -> void:
 	_tut_step = 0
 	_tut_incense = false
+	_tut_bell = false
 	director.set_paused(true)
-	Events.notify.emit(TUT_STEPS[0], [])
+	hud.set_tutorial_prompt(TUT_STEPS[0])
 
 ## Advance the lesson when the current step's action is performed. The rest of the
-## sim is frozen (see _process) so nothing can hurt the player mid-lesson.
+## sim is frozen (see _process) so nothing can hurt the player mid-lesson. The prompt
+## is a persistent banner (hud.set_tutorial_prompt) naming the exact key, not a toast.
 func _check_tutorial() -> void:
 	var done := false
 	match _tut_step:
 		0: done = get_pan_speed() > 0.5            # look around (mouse to edges)
 		1: done = _tut_incense                     # press R to light incense
-		2: done = room.is_door_closed(GameEnums.Side.LEFT) or room.is_door_closed(GameEnums.Side.RIGHT)
-		3: done = monitor_open                      # press C to raise the cameras
+		2: done = _tut_bell                        # press B to ring the bell
+		3: done = room.is_door_closed(GameEnums.Side.LEFT) or room.is_door_closed(GameEnums.Side.RIGHT)
+		4: done = monitor_open                      # press C to raise the cameras
 	if not done:
 		return
 	_tut_step += 1
 	if _tut_step >= TUT_STEPS.size():
 		_tut_step = -1
+		hud.set_tutorial_prompt("")
 		Events.notify.emit("TUT_DONE", [])
 		_engage_night()
 	else:
-		Events.notify.emit(TUT_STEPS[_tut_step], [])
+		hud.set_tutorial_prompt(TUT_STEPS[_tut_step])
 
 func _init_altar() -> void:
 	huong = huong_max
@@ -339,9 +452,15 @@ func _process(delta: float) -> void:
 	_update_timers(delta)
 	# Panic/agitation: fast panning raises it (rapid cam-switching does too, in
 	# on_camera_changed); it decays over time. Drives Ma trơi.
+	# A wisp-storm night makes agitation build faster and fade slower (Ma trơi is wild).
+	var agit_gain := 2.8 if _mod_wisp else 2.0
+	var agit_decay := 0.6 if _mod_wisp else 1.0
 	if room.get_pan_speed() > 0.7:
-		_agitation = minf(1.0, _agitation + delta * 2.0)
-	_agitation = maxf(0.0, _agitation - delta * 0.7)
+		_agitation = minf(1.0, _agitation + delta * agit_gain)
+	# Decays a bit quicker than it builds so that simply STOPPING (not panning, not
+	# flipping channels) reliably calms Ma trơi down — "don't run" is always an out.
+	_agitation = maxf(0.0, _agitation - delta * agit_decay)
+	_update_mods(delta)
 	# Look-pan only during free play — not on the monitor or behind a modal overlay.
 	room.set_look_enabled(not monitor_open and not shop.visible and not pause.visible and not cassette.visible)
 	director.night_progress = night_progress()
@@ -368,6 +487,21 @@ func _update_atmosphere() -> void:
 		d = maxf(d, 0.85)
 	if room:
 		room.set_dread(clampf(d, 0.0, 1.0))
+	if _post_mat:
+		_post_mat.set_shader_parameter("strength", clampf(d, 0.0, 1.0))
+	# Heartbeat swells with danger from SHAKEN onward instead of snapping on at CRITICAL.
+	if via_state == GameEnums.ViaState.NORMAL:
+		if _hb_on:
+			_hb_on = false
+			Audio.stop_loop("heartbeat")
+	else:
+		var frac := clampf(via / via_max, 0.0, 1.0)
+		var vol := lerpf(-20.0, -3.0, clampf((0.4 - frac) / 0.4, 0.0, 1.0))
+		if not _hb_on:
+			_hb_on = true
+			Audio.start_loop("heartbeat", vol)
+		else:
+			Audio.set_loop_volume("heartbeat", vol)
 	var looming := director.threat_at_door(GameEnums.Side.LEFT) != null \
 		or director.threat_at_door(GameEnums.Side.RIGHT) != null
 	var want_drone := looming or via_state == GameEnums.ViaState.CRITICAL
@@ -412,6 +546,8 @@ func _update_power(delta: float) -> void:
 		drain += config.power_drain_per_light
 	if monitor_open:
 		drain += config.power_drain_camera
+	if _mod_blackout and _blk_t > 0.0:
+		drain += 0.5   # the grid sags during a blackout window
 	power = maxf(0.0, power - drain * delta)
 	Events.power_changed.emit(power, 100.0)
 	# One-shot warning beep the first time power dips into the red.
@@ -469,10 +605,7 @@ func _update_via_state() -> void:
 		via_state = st
 		Events.via_state_changed.emit(st)
 		director.broadcast_via_state(st)
-		if st == GameEnums.ViaState.CRITICAL:
-			Audio.start_loop("heartbeat", -6.0)
-		else:
-			Audio.stop_loop("heartbeat")
+		# Heartbeat is ramped continuously in _update_atmosphere (not snapped on here).
 
 func _via_zero() -> void:
 	if try_block_death("via"):
@@ -582,15 +715,24 @@ func request_toggle_light(side: int) -> void:
 ## Ma trơi lock-on: the wisp's panic jinx flails your doors/lights open and jams them
 ## for a moment, leaving you exposed to whatever is approaching. Punishes running.
 func hex_controls(d: float) -> void:
-	if not _running or not _powered:
+	if not _running:
 		return
+	# Runs even at zero power (doors already open in a blackout): keeps the kill-pause
+	# guard + the CONTROLS_HEXED cue consistent so the surge never lands silently.
 	_hex_t = maxf(_hex_t, d)
 	room.set_door(GameEnums.Side.LEFT, false)
 	room.set_door(GameEnums.Side.RIGHT, false)
 	director.broadcast_door(GameEnums.Side.LEFT, false)
 	director.broadcast_door(GameEnums.Side.RIGHT, false)
+	if room:
+		room.add_shake(0.5)
 	Audio.play_sfx("power_down", -10.0)
 	Events.notify.emit("CONTROLS_HEXED", [])
+
+## True while Ma trơi's lock-on jinx has the controls jammed. Threats read this and
+## pause their kill timer so the hex can never be a death the player couldn't prevent.
+func is_hexed() -> bool:
+	return _hex_t > 0.0
 
 func request_toggle_monitor() -> void:
 	if not _running or shop.visible or cassette.visible:
@@ -646,7 +788,7 @@ func request_offering() -> void:
 	Events.notify.emit("OFFERING_DONE", [])
 
 func request_use_item() -> void:
-	if item_held == null or not _running:
+	if item_held == null or not _running or _tut_step >= 0:
 		return
 	var def := item_held
 	item_held = null
@@ -717,6 +859,7 @@ func _caught(cause: String) -> void:
 	# loss feeds the shrine meta instead of being pure wasted time.
 	if _last_hour > 0:
 		_earn_coins(_last_hour * 2)
+	_commit_best()
 	var meta := ThreatRegistry.info(cause)
 	var scare_path: String = meta.get("scare", "") if not meta.is_empty() else ""
 	if Settings.allow_jumpscares() and scare_path != "" and ResourceLoader.exists(scare_path):
@@ -760,6 +903,7 @@ func _win() -> void:
 	Audio.stop_music(0.2)   # let the win/ending screen start its own ambience cleanly
 	Audio.play_sfx("rooster", -3.0)
 	_earn_coins(25)   # survival bonus toward shrine upgrades
+	_commit_best()
 	Events.night_survived.emit()
 	Game.notify_night_survived()
 	await get_tree().create_timer(0.6).timeout
@@ -880,10 +1024,11 @@ func _update_altar(delta: float) -> void:
 				_gutter_candles()
 	# When the altar is dark — or the incense is nearly out — the spirits press in.
 	# Routed through add_via_drain so vía regen can still fight it (no hard lockout).
+	# A guttered altar bites HARD now: incense is a high-stakes resource you can't ignore.
 	if not altar_lit:
-		add_via_drain(-3.0 * delta)
+		add_via_drain(-5.5 * delta)
 	elif huong <= 20.0:
-		add_via_drain(-1.2 * delta)
+		add_via_drain(-2.6 * delta)
 	if room:
 		room.set_huong(huong / huong_max)
 		room.set_altar_lit(altar_lit)
@@ -945,6 +1090,7 @@ func add_nhang(n: int) -> void:
 func request_ring_bell() -> void:
 	if not _running or _bell_cd > 0.0:
 		return
+	_tut_bell = true
 	_bell_cd = _bell_cd_max
 	Audio.play_sfx("offering_bell", -2.0)
 	# The bell now does ONE job — shove the nearest rusher back from the door — so it's
@@ -959,11 +1105,11 @@ func request_ring_bell() -> void:
 func meter_mult() -> float:
 	var m := _aggro_mult
 	if not altar_lit:
-		m *= 1.35
+		m *= 1.7
 	elif huong >= 60.0:
 		m *= (0.4 if _bright_altar else 0.5)
 	elif huong <= 25.0:
-		m *= 1.3
+		m *= 1.5
 	return m
 
 # --- phone ------------------------------------------------------------------
@@ -1018,11 +1164,28 @@ func add_via_drain(amount: float) -> void:
 	Events.via_changed.emit(via, via_max)
 
 func _earn_coins(n: int) -> void:
-	coins += n
+	# No-farming: only the part of this run's gross earnings that exceeds the night's
+	# previous best is banked. Replaying a night you've already milked pays nothing new,
+	# so careful first clears — not grinding deaths/retries — drive the shrine economy.
+	_run_earned += n
+	var best := int(Save.night_best_coins.get(_night_key(), 0))
+	var creditable: int = clampi(_run_earned - best, 0, n)
+	if creditable <= 0:
+		return
+	coins += creditable
 	Save.coins = coins
 	Save.save_progress()
 	Events.coins_changed.emit(coins)
 	Audio.play_sfx("coin_chime", -16.0)
+
+func _night_key() -> String:
+	return "custom" if Game.is_custom else str(Game.current_night)
+
+## Lock in this run's gross earnings as the night's best, so future runs only pay the delta.
+func _commit_best() -> void:
+	var k := _night_key()
+	Save.night_best_coins[k] = maxi(int(Save.night_best_coins.get(k, 0)), _run_earned)
+	Save.save_progress()
 
 func try_spend_coins(n: int) -> bool:
 	if coins < n:

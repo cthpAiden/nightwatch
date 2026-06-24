@@ -166,6 +166,11 @@ func _process_attack(delta: float) -> void:
 	if _is_repelled_now():
 		repel()
 		return
+	# While Ma trơi's panic-hex has the guard's hands jammed (doors flung open), a
+	# looming rusher does NOTHING — no grab AND no vía drain — so the hex can never be
+	# a death by itself, by any route (the kill timer and bleed both pause).
+	if _controller and _controller.has_method("is_hexed") and _controller.is_hexed():
+		return
 	if _controller:
 		_controller.add_via(-via_drain_at_door * delta)
 	_attack_accum += delta

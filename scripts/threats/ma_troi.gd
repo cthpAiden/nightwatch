@@ -5,6 +5,7 @@ extends ThreatBase
 ## it bleeds you toward a via-zero loss if you panic. Teaches "don't run."
 
 var lock := 0.0
+var _warned := false   # one telegraph per lock-on cycle before the surge
 
 func _configure() -> void:
 	movement_model = MODEL_WANDER
@@ -26,6 +27,14 @@ func process_ai(delta: float, night_progress: float) -> void:
 		lock = maxf(0.0, lock - 8.0 * delta)
 	if lock > 40.0:
 		_bleed_via(-(lock - 40.0) * 0.05 * delta)
+	# Telegraph: well before the surge, flicker a warning so the player can STOP and
+	# de-aggro it (or brace for the brief control-jinx). Resets once calmed.
+	if lock >= 72.0 and not _warned:
+		_warned = true
+		Audio.play_sfx("stinger", -12.0)
+		Events.notify.emit("MATROI_WARN", [])
+	elif lock < 45.0:
+		_warned = false
 	_move_accum += delta
 	if _move_accum >= move_interval:
 		_move_accum = 0.0
@@ -39,12 +48,13 @@ func _surge() -> void:
 	# it jinxes your doors/lights open for a moment, so panicking can get you killed by
 	# whatever is at the door right now. Teaches "don't run."
 	if _controller:
+		_controller.hex_controls(2.5)   # apply the jinx first so its cue always lands
 		_controller.add_startle(-26.0)
 		_controller.add_power(-8.0)
-		_controller.hex_controls(2.5)
 	Audio.play_sfx("stinger", -4.0)
 	Events.notify.emit("MATROI_RULE", [])
 	lock = 45.0
+	_warned = false   # re-arm the telegraph so back-to-back lock-ons are also warned
 
 func current_texture() -> Texture2D:
 	return tex_move if lock > 45.0 else tex_idle

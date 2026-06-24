@@ -59,8 +59,14 @@ func _card(id: String) -> Control:
 		col.add_child(UI.label(info.get("tag_key", ""), 13, Color(0.72, 0.7, 0.5)))
 		var d := UI.label(info.get("desc_key", ""), 14, UI.COL_DIM)
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		d.custom_minimum_size = Vector2(272, 64)
+		d.custom_minimum_size = Vector2(272, 44)
 		col.add_child(d)
+		# Actionable "how to counter" line in real-button terms (the poetic desc above
+		# is flavor; this tells the player what to actually do).
+		var counter := UI.label("COUNTER_" + id.to_upper(), 13, Color(0.62, 0.82, 0.66))
+		counter.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		counter.custom_minimum_size = Vector2(272, 0)
+		col.add_child(counter)
 	else:
 		col.add_child(UI.label("BESTIARY_UNKNOWN", 22, UI.COL_TEXT))
 		col.add_child(UI.label("BESTIARY_LOCKED", 14, UI.COL_DIM))

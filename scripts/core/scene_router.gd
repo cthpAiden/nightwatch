@@ -36,11 +36,14 @@ func _ready() -> void:
 	_apply_brightness()
 
 func _apply_brightness() -> void:
-	# Slider 0.5..1.5. Below 1.0 darkens via a black overlay; 1.0+ is "normal"
-	# (a horror game leans dark, so we don't force-brighten the scene).
+	# Slider 0.5..1.5. Below 1.0 darkens via a black overlay; above 1.0 lifts the image
+	# with a faint white wash so the top half of the slider isn't dead travel (a player
+	# on a dim monitor can actually brighten).
 	var b := Settings.brightness
-	var a := clampf(1.0 - b, 0.0, 0.6) if b < 1.0 else 0.0
-	_brightness.color = Color(0, 0, 0, a)
+	if b < 1.0:
+		_brightness.color = Color(0, 0, 0, clampf(1.0 - b, 0.0, 0.6))
+	else:
+		_brightness.color = Color(1, 1, 1, clampf((b - 1.0) * 0.5, 0.0, 0.5))
 
 func change_scene(path: String, fade_time: float = 0.5) -> void:
 	if _busy:

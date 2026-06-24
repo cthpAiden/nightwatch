@@ -27,26 +27,41 @@ Globally-registered (via `class_name`, not autoloads): `GameEnums`, `NightConfig
 
 ## The camera / location graph
 
-Locations are string ids. Six are camera-viewable; two are door thresholds; one is
-the office (you). Threats traverse this graph.
+Locations are string ids. **Ten are camera-viewable**; two are door thresholds; one is
+the office (you). The map is a **symmetric two-wing FNAF-style approach**: a left and a
+right wing, each descending toward its door, both converging on the office. A PATH threat
+steps node-by-node down a wing and is only "at the door" once it reaches `left_door` /
+`right_door`.
 
 ```
-            gate (CAM1)
-           /    |     \
-   left_hall  courtyard  right_hall
-   (CAM2)    (CAM6)      (CAM3)
-     |    \   /   \       |
- left_door classroom    restroom
-     |     (CAM5)        (CAM4)
-     |                     |
-   OFFICE  <----------  right_door
+                    gate (CAM1)
+               /         |          \
+       canteen      courtyard        gym
+       (CAM3)        (CAM2)         (CAM7)
+          |         /       \         |
+     classroom               restroom
+       (CAM4)                 (CAM8)
+          |                      |
+       library               infirmary
+       (CAM5)                 (CAM9)
+          |                      |
+      left_hall              right_hall
+       (CAM6)                (CAM10)
+          |                      |
+      left_door             right_door
+              \             /
+                 OFFICE (you)
 ```
 
-- Camera feeds: `gate, left_hall, right_hall, restroom, classroom, courtyard`
-- Door thresholds (not on cameras; seen via door lights): `left_door, right_door`
+- Camera feeds, in CAM order (index+1): `gate, courtyard, canteen, classroom, library,
+  left_hall, gym, restroom, infirmary, right_hall`.
+- Door thresholds (not on cameras; seen via door lights): `left_door, right_door`.
 - `office` = game over if a threat reaches it uncountered.
-- `Locations` (in `scripts/systems/map_graph.gd`, `class_name MapGraph`) holds the
-  adjacency, the camera list, and which side each door is.
+- The left/right wings mirror (`MapGraph.MIRROR`: canteen↔gym, classroom↔restroom,
+  library↔infirmary, left_hall↔right_hall) so a PATH threat can approach from either side.
+- `MapGraph` (in `scripts/systems/map_graph.gd`, `class_name MapGraph`) holds the
+  adjacency, the ordered camera list, name keys, map-panel positions, the wing mirror,
+  and a BFS `distance()` used by "reset the nearest threat".
 
 ## ThreatBase contract (`scripts/threats/threat_base.gd`, `class_name ThreatBase`)
 
@@ -59,7 +74,9 @@ Configured by the director via `setup(def, ai_level, controller)`.
 Movement models (`movement_model`):
 - `PATH` — fixed ordered route to a door (e.g. Ma da, Ông kẹ).
 - `WANDER` — random walk along adjacency (Cô hồn).
-- `FLYER` — like PATH but `ignores_doors = true`; countered by light/offering (Ma lai).
+- `FLYER` — like PATH but `ignores_doors = true`; countered by light/offering. Defined
+  in code but **unused by any shipped threat** (reserved for the v2 *Ma lai* flying-head
+  legend, which is debated and **not implemented** — see DESIGN §2.7).
 - `STALKER` — only advances while the player is NOT viewing its camera (view-gated).
 - `CREEPER` — freezes while the player holds still / doesn't pan (Quỷ nhập tràng).
 
@@ -95,7 +112,12 @@ Root script of `scenes/Night.tscn`. Owns the night:
 - Spawns threats from `NightConfig.threat_levels`, owns the `ThreatDirector`.
 - Spawns the Vendor if enabled. Holds `ItemSystem` + `OfferingSystem`.
 - Listens for `Events.game_over` → `Router.to_game_over(cause)`;
-  `Events.night_survived` → record + `Router.to_win()`.
+  `Events.night_survived` → record + `Router.to_win()`, except clearing the final story
+  night routes to `Router.to_ending()` — **siêu thoát** if `Save.investigation_complete()`
+  (all three Oan hồn clues), otherwise the **survive** epilogue (`ending_screen.gd`).
+- Also owns the living-altar ritual (finite "nhang" incense, cold-draft guttering, bell,
+  shrine upgrades), the phone, the Night-1 tutorial, and the 3-clue investigation hooks
+  (`find_clue`, `tag_anomaly`).
 
 Node paths inside `Night.tscn` (views read these):
 ```
@@ -160,11 +182,17 @@ vía. Limited count per night (`NightConfig.offerings_start` + shop).
 - `data/nights/night_<n>.tres` (optional; else `Game.STORY` table builds it).
 - `data/threats/<id>.tres` (`ThreatDef`: identity + scene + spawn).
 - `data/items/<id>.tres` (`ItemDef`).
-- Lore/cassette text: `data/lore/tape_<n>.json` (bilingual lines).
+- Lore/cassette + live-phone scripts: `scripts/systems/lore.gd` (`class_name Lore`)
+  maps each night to a list of string **keys** for its tape and phone lines; the
+  bilingual text those keys resolve to lives in `localization/strings.csv`. (There is
+  no `data/lore/*.json`.)
 
 ## Conventions
 
 - Player-facing strings live in `localization/strings.csv` only; code uses keys via
   `tr()` / `Locale.t()`. Never hardcode display text.
 - Code identifiers in English; comments concise. Threat ids are snake_case folklore
-  names (`co_hon`, `ma_da`, `ong_ke`, `ma_lai`, `quy_nhap_trang`, `ba_hang_rong`).
+  names. The **six shipped** threats are `ong_ke`, `ma_da`, `co_hon`, `quy_nhap_trang`,
+  `ma_troi`, `oan_hon`, plus the counterfeit vendor `ba_hang_rong` (handled by
+  `vendor.gd`, not the director). `ma_lai` is a **v2 debated legend, not implemented** —
+  it has no script and no `ThreatRegistry` entry.

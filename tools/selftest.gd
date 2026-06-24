@@ -326,6 +326,11 @@ func _run(c) -> void:
 	check("tagging briefly reveals the map", c.is_revealed())
 
 	print("\n--- COINS + SHRINE UPGRADES ---")
+	# Reset this night's anti-farm best so the basic earn/spend checks are deterministic
+	# regardless of any best banked by a prior win/flow-test (restored afterwards).
+	var saved_best0: Dictionary = Save.night_best_coins.duplicate(true)
+	Save.night_best_coins[c._night_key()] = 0
+	c._run_earned = 0
 	var c0: int = c.coins
 	c._earn_coins(5)
 	check("earning coins adds + persists", c.coins == c0 + 5 and Save.coins == c.coins)
@@ -335,6 +340,7 @@ func _run(c) -> void:
 	check("buy shrine upgrade persists", Save.purchase_upgrade("sturdy_doors", 34) and Save.has_upgrade("sturdy_doors"))
 	check("cannot rebuy an owned upgrade", not Save.purchase_upgrade("sturdy_doors", 34))
 	Save.upgrades.erase("sturdy_doors")   # don't pollute the real save with a test buy
+	Save.night_best_coins = saved_best0
 	Save.save_progress()
 
 	print("\n--- INVESTIGATION / ENDINGS ---")
@@ -352,6 +358,45 @@ func _run(c) -> void:
 	check("all three clues complete the investigation", Save.investigation_complete())
 	Save.clues = saved_clues   # restore the player's real investigation progress
 	Save.save_progress()
+
+	print("\n--- NO-FARM ECONOMY ---")
+	var saved_best: Dictionary = Save.night_best_coins.duplicate(true)
+	var nkey: String = c._night_key()
+	Save.night_best_coins[nkey] = 999   # pretend this night was already milked dry
+	c._run_earned = 0
+	var farm0: int = c.coins
+	c._earn_coins(10)
+	check("no coins credited past the night's best", c.coins == farm0)
+	Save.night_best_coins[nkey] = 0
+	c._run_earned = 0
+	farm0 = c.coins
+	c._earn_coins(10)
+	check("a fresh-best night credits full earnings", c.coins == farm0 + 10)
+	Save.night_best_coins = saved_best   # restore real progress
+	Save.save_progress()
+
+	print("\n--- MA TROI HEX IS NON-LETHAL ---")
+	c._hex_t = 0.0
+	if c.is_door_closed(GameEnums.Side.LEFT):   # ensure the door is OPEN so the rusher looms
+		c.request_toggle_door(GameEnums.Side.LEFT)
+	var hx = d.get_threat("ong_ke")
+	hx.reset_to_spawn()
+	hx._arrive_at_door(GameEnums.Side.LEFT)
+	c._hex_t = 3.0
+	hx._process_attack(2.0)   # door is open + hexed: the kill timer must NOT advance
+	check("hex pauses the kill timer", hx._attack_accum == 0.0 and hx.is_at_door())
+	c._hex_t = 0.0
+	hx._process_attack(0.5)   # unhexed: timer resumes (but not enough to kill)
+	check("kill timer resumes after the hex clears", hx._attack_accum > 0.0)
+	hx.reset_to_spawn()
+	c._ending = false
+
+	print("\n--- DIFFICULTY FLOOR ---")
+	var prev_diff: int = Game.difficulty
+	Game.difficulty = GameEnums.Difficulty.EASY
+	var fcfg = Game._build_config(2, {"ong_ke": 1}, false, 60.0)
+	check("a present threat is never scaled to 0", int(fcfg.threat_levels.get("ong_ke", 0)) >= 1)
+	Game.difficulty = prev_diff
 
 	print("\n--- MAP (10 cameras, two wings, FNAF routes) ---")
 	check("10 camera locations", MapGraph.CAMERAS.size() == 10)

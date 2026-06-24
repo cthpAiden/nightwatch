@@ -10,6 +10,24 @@ offerings for the wandering souls, and — above all — **don't answer the wate
 > never on the beliefs. The folklore is used **authentically and respectfully**
 > (see `docs/DESIGN.md` §1 for the binding cultural rules this project follows).
 
+> ⚠️ **Content warning:** this game contains jump-scares. They can be reduced or
+> turned off entirely in **Settings** (the accessibility scare-off option).
+
+---
+
+## ✨ Features
+
+- **10 security cameras** across two symmetric wings of the school (left and right),
+  converging on your office.
+- **Living-altar ritual** — tend a **finite bundle of incense (nhang)** as your primary
+  active defense; relight before the candles gutter.
+- **Two endings via a 3-clue investigation** — uncover the wronged soul's name, drawing,
+  and face to free her (**siêu thoát**), or merely survive to dawn.
+- **6-night story campaign** plus a **Custom Night** (set each threat's AI 0–20).
+- **Extras hub** — a **Bestiary (Hồ Sơ Ma)**, a **Tape Archive**, and **Stats**.
+- **Bilingual VI / EN** with proper diacritics (Be Vietnam Pro).
+- **Accessibility** — a scare-off option, plus volume, brightness, and difficulty settings.
+
 ---
 
 ## ▶ How to play / develop

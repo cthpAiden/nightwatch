@@ -15,6 +15,8 @@ func setup(controller) -> void:
 	UI.place(vb, 0.5, 0.5, 0.5, 0.5, -160, -160, 160, 160)
 	dim.add_child(vb)
 	vb.add_child(UI.label("PAUSE_TITLE", 34, Color(0.95, 0.8, 0.5), HORIZONTAL_ALIGNMENT_CENTER))
+	if Save.clue_count() > 0 and not Save.investigation_complete():
+		vb.add_child(UI.text_label(tr("HUD_CLUES") % Save.clue_count(), 18, Color(0.86, 0.78, 0.55), HORIZONTAL_ALIGNMENT_CENTER))
 	var resume := UI.button("PAUSE_RESUME", 280, 50)
 	resume.pressed.connect(func(): _c.request_pause())
 	vb.add_child(resume)

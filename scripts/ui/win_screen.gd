@@ -6,6 +6,13 @@ func _ready() -> void:
 	var bg := UI.texture_rect("res://assets/art/intro/win_bg.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED)
 	UI.full(bg)
 	add_child(bg)
+	# Dawn warm-up: a cold pre-dawn wash that melts into warm amber, so surviving the
+	# night reads as relief rather than a static card.
+	var dawn := UI.color_rect(Color(0.15, 0.2, 0.32, 0.55))
+	UI.full(dawn)
+	add_child(dawn)
+	var dtw := create_tween()
+	dtw.tween_property(dawn, "color", Color(0.95, 0.72, 0.4, 0.0), 2.2).set_trans(Tween.TRANS_SINE)
 	var vb := UI.vbox(14)
 	UI.place(vb, 0.5, 0.5, 0.5, 0.5, -260, -200, 260, 220)
 	add_child(vb)

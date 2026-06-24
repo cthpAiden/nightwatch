@@ -34,6 +34,12 @@ func _ready() -> void:
 	_add(vb, "MENU_SETTINGS", func(): Router.change_scene("res://scenes/screens/SettingsMenu.tscn"))
 	_add(vb, "MENU_QUIT", func(): get_tree().quit())
 
+	# Version stamp (dim, bottom-right) — sourced from project settings.
+	var ver := "v" + str(ProjectSettings.get_setting("application/config/version", "1.0.0"))
+	var ver_lbl := UI.text_label(ver, 14, Color(0.5, 0.55, 0.52), HORIZONTAL_ALIGNMENT_RIGHT)
+	UI.place(ver_lbl, 1, 1, 1, 1, -160, -34, -16, -12)
+	add_child(ver_lbl)
+
 	Audio.play_music("ambience_night")
 
 	# First launch ever: let the (possibly non-Vietnamese) player choose a language
