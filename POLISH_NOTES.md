@@ -104,6 +104,28 @@ culturally-sensitive prose (tapes, phone, endings, ritual/taboo lines).
 
 ---
 
+## 10. Second-pass re-check (regressions found & fixed)
+A focused adversarial re-audit of the polish diff (plus a deep integrity sweep — every
+screen scene + N1–N6 + a custom night, run headless) caught **three regressions the polish
+pass had itself introduced**; all three are now fixed and covered by new tests:
+- **Counterfeit vendor stuck in `LEAVING`** — the idempotent `_attack()` now parks her in
+  `LEAVING` *before* emitting the grab, but `repel_to_idle()` only reset from `HOSTILE`/`SHOP`,
+  so a warded vendor save left her inert (no shop) for the rest of the night. Fixed by adding
+  `LEAVING` to `repel_to_idle`'s guard. (`vendor.gd`)
+- **Monitor look-lock** — the new lower-fade hid the panel via a deferred tween callback;
+  a close-then-open within 0.10 s let the stale callback blank a reopened monitor, locking
+  controls on a black screen. Fixed by storing/killing the monitor tween and re-checking
+  `monitor_open` in the callback. (`night_controller.gd`)
+- **Save recovery vs. forward-version guard** — recovering from a *newer* `.bak` then
+  re-persisting would downgrade it, defeating the forward guard. Fixed by gating the
+  recovery re-save on `ver <= SAVE_VERSION`. (`save_manager.gd`)
+
+The critical-path sweep (death/win routing, power-out, kill path, director tick,
+end-of-night transition) found **no critical or major latent bug**, and re-verified the N6
+retune stays winnable but non-trivial. Self-test grew **100 → 103** (vendor `LEAVING` path +
+monitor toggle race); integrity sweep **36/36**; both flow tests still green. New deep-check
+harness: `tools/IntegrityCheck.tscn` (spec in [`docs/INTEGRITY_CHECK.md`](docs/INTEGRITY_CHECK.md)).
+
 ## Remaining risks / not done (honest)
 - **Balance numbers are judgment calls**, validated by the audit's math + a green self-test, **not
   by extended human playtesting.** All values are one-line and easy to revert/retune — start with

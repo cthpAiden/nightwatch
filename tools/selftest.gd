@@ -243,6 +243,13 @@ func _run(c) -> void:
 	c._on_jumpscare("ba_hang_rong")
 	check("ward blocks vendor grab (night alive)", not c._ending)
 	check("ward sends hostile vendor back to idle", ve.state == GameEnums.VendorState.IDLE)
+	# The REAL grab goes through _attack(), which self-disables to LEAVING before emitting;
+	# a ward save must still send her home from LEAVING (regression guard).
+	ve.state = GameEnums.VendorState.HOSTILE
+	c.ward_tokens = 1
+	c._ending = false
+	ve._attack()   # -> LEAVING, emits jumpscare -> _on_jumpscare -> repel_to_idle
+	check("ward resets vendor even via the real _attack/LEAVING path", ve.state == GameEnums.VendorState.IDLE and not c._ending)
 	# Meter threat: a ward must actually break the meter's hold, not just dent it.
 	var md2 = d.get_threat("ma_da")
 	if md2:
@@ -253,6 +260,18 @@ func _run(c) -> void:
 		c._on_jumpscare("ma_da")
 		check("ward fully breaks ma_da flood", md2.flood <= 25.0)
 		check("ward revives ma_da (not stuck dead)", md2._active)
+
+	print("\n--- MONITOR TOGGLE RACE ---")
+	# Close-then-open within the 0.10s lower-fade must not let the stale hide callback
+	# blank a reopened panel (look-lock regression guard).
+	c._set_monitor(true)
+	c._set_monitor(false)   # starts the 0.10s close fade
+	c._set_monitor(true)    # reopen — must kill the pending close fade
+	await get_tree().create_timer(0.2).timeout
+	check("reopening the monitor mid-close keeps it visible", c.monitor.visible and c.monitor_open)
+	c._set_monitor(false)
+	await get_tree().create_timer(0.2).timeout
+	check("a normal close still hides the monitor", not c.monitor.visible and not c.monitor_open)
 
 	print("\n--- ALTAR RITUAL (hương — now a finite nhang resource) ---")
 	c.huong = 10.0

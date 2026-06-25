@@ -34,6 +34,7 @@ var _last_minute := -1
 var _last_hour := -1
 
 var monitor_open := false
+var _monitor_tw: Tween         # raise/lower alpha tween; killed on re-toggle to avoid a stale hide
 var current_cam := MapGraph.GATE
 var offerings := 0
 var item_held: ItemDef = null
@@ -828,11 +829,15 @@ func request_toggle_monitor() -> void:
 func _set_monitor(open: bool) -> void:
 	monitor_open = open
 	room.set_look_enabled(not open)
+	# Kill any in-flight raise/lower tween so a quick close-then-open can't let the close
+	# fade's deferred hide fire after the panel has already been reopened (look-lock bug).
+	if _monitor_tw and _monitor_tw.is_valid():
+		_monitor_tw.kill()
 	if open:
 		monitor.visible = true
 		monitor.modulate.a = 0.0
-		var tw := create_tween()
-		tw.tween_property(monitor, "modulate:a", 1.0, 0.12)
+		_monitor_tw = create_tween()
+		_monitor_tw.tween_property(monitor, "modulate:a", 1.0, 0.12)
 		Audio.play_sfx("camera_up", -6.0)
 		Audio.start_loop("static_loop", -22.0)
 		monitor.show_feed(current_cam)
@@ -841,10 +846,11 @@ func _set_monitor(open: bool) -> void:
 	else:
 		Audio.play_sfx("camera_down", -6.0)
 		# Fade the panel out to match the raise, then hide it on completion. The next open
-		# resets modulate.a to 0, so leaving a=0 after a faded close is fine.
-		var tw := create_tween()
-		tw.tween_property(monitor, "modulate:a", 0.0, 0.10)
-		tw.tween_callback(func(): monitor.visible = false)
+		# resets modulate.a to 0, so leaving a=0 after a faded close is fine. The callback
+		# re-checks monitor_open so a reopen mid-fade is never stomped invisible.
+		_monitor_tw = create_tween()
+		_monitor_tw.tween_property(monitor, "modulate:a", 0.0, 0.10)
+		_monitor_tw.tween_callback(func(): if not monitor_open: monitor.visible = false)
 		Audio.stop_loop("static_loop")
 		director.broadcast_view("")
 		room.set_desk_idle()                # back to the idle slideshow

@@ -71,8 +71,10 @@ func load_progress() -> void:
 	stats = cfg.get_value("stats", "data", stats)
 	_migrate(ver)
 	# Recovered from .bak: immediately rewrite a healthy progress.cfg, otherwise the next
-	# routine save would rotate the still-corrupt cfg over our only good backup.
-	if recovered:
+	# routine save would rotate the still-corrupt cfg over our only good backup. But never
+	# re-persist a backup from a NEWER build — that would downgrade it (the forward-version
+	# guard in _migrate already refused to touch it).
+	if recovered and ver <= SAVE_VERSION:
 		save_progress()
 
 ## Forward-migration hook. Bump SAVE_VERSION and add a branch per schema change.

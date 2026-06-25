@@ -98,7 +98,9 @@ func _repelled() -> void:
 ## otherwise she stays frozen mid-lunge with her timer already spent and re-fires
 ## the grab on the very next frame, silently wasting the ward.
 func repel_to_idle() -> void:
-	if state == GameEnums.VendorState.HOSTILE or state == GameEnums.VendorState.SHOP:
+	# Include LEAVING: _attack() now self-disables to LEAVING before emitting the grab,
+	# so a same-frame ward save reaches us already in LEAVING — still send her home.
+	if state == GameEnums.VendorState.HOSTILE or state == GameEnums.VendorState.SHOP or state == GameEnums.VendorState.LEAVING:
 		_reset_idle()
 
 func _attack() -> void:
