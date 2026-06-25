@@ -64,6 +64,17 @@ hub (Bestiary, Tape Archive, Stats, Custom Night) is wired off the main menu.
 Validated: parses clean, runs headless with no errors (incl. Night 6 / all threats /
 both endings), and renders correctly on the real D3D12/Forward+ path. See `docs/shots/`.
 
+> **Polish & hardening pass (2026-06-26).** An audit-driven shippability pass (no new
+> mechanics) landed 36 fixes across balance (smoothed the N6 cliff, made offerings a real
+> ongoing cost, fixed custom-night double-scaling), game feel (pause now ducks the audio
+> bed; monitor lower fades; loop gain trims), transitions (door-tween lifecycle, fade input
+> blocking), save robustness (.bak recovery now persists; `nights_won` no longer double-counts;
+> forward-version guard), accessibility (scare-OFF now suppresses all shake/flash; REDUCED tier
+> genuinely gentler), code health, and presentation. The headless self-test grew **96→100**
+> checks (added save-robustness coverage) and stays **0 failed**. Full per-axis writeup +
+> remaining-risk checklist in [`POLISH_NOTES.md`](POLISH_NOTES.md); native-speaker review list
+> in [`docs/L10N_REVIEW.md`](docs/L10N_REVIEW.md).
+
 ---
 
 ## 3. Threat roster (summary — full design in DESIGN §2)
