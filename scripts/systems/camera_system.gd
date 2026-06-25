@@ -59,7 +59,7 @@ func _build() -> void:
 	# STRETCH_SCALE gave under `expand`. The material also grades the feed (live CCTV, not
 	# flat grey) and lays the noise/scanline over it in one pass.
 	_feed = UI.texture_rect("res://assets/art/cameras/cam_gate.svg", TextureRect.STRETCH_SCALE)
-	UI.place(_feed, 0, 0, 1, 1, 14, 12, -14, -12)
+	UI.full(_feed)   # fill the whole screen edge-to-edge — the shader vignette is the frame
 	var sh := Shader.new()
 	sh.code = """
 shader_type canvas_item;
@@ -99,13 +99,16 @@ void fragment() {
 	add_child(_feed)
 
 	_threat_host = Control.new()
-	UI.place(_threat_host, 0, 0, 1, 1, 14, 12, -14, -12)
+	UI.full(_threat_host)
 	_threat_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_threat_host)
 
-	var bezel := UI.texture_rect("res://assets/art/ui/monitor_bezel.svg", TextureRect.STRETCH_SCALE)
-	UI.full(bezel)
-	add_child(bezel)
+	# A faint REC dot keeps the CCTV cue the old bezel used to provide (top-left, by the
+	# camera name) now that the heavy frame — which boxed the feed in — is gone.
+	var rec := UI.color_rect(Color(0.78, 0.16, 0.18, 0.9))
+	UI.place(rec, 0, 0, 0, 0, 36, 58, 50, 72)
+	rec.pivot_offset = Vector2(7, 7)
+	add_child(rec)
 
 	_name_lbl = UI.text_label("", 24, Color(0.8, 0.95, 0.85), HORIZONTAL_ALIGNMENT_LEFT)
 	UI.place(_name_lbl, 0, 0, 0, 0, 64, 50, 400, 86)
@@ -136,26 +139,90 @@ func _update_clue_hotspot(cam_id: String) -> void:
 		and Game.current_night >= 3 \
 		and not Save.has_clue("clue_drawing")
 
+# The map art is authored in a MAP_W x MAP_H viewBox; MapGraph.MAP_POS is in the same
+# space. Dots are anchored PROPORTIONALLY (pos / MAP_W,H) and the bg uses STRETCH_SCALE,
+# so both fill the panel identically and the dots land dead-centre on the drawn rooms no
+# matter the panel's actual rendered size — the old KEEP_ASPECT + absolute-pixel combo
+# drifted the rooms away from the dots whenever the panel wasn't exactly 420x340.
+const MAP_W := 420.0
+const MAP_H := 340.0
+
+# Office + door nodes aren't camera positions, but the corridors wire home to them.
+const _OFFICE_POS := Vector2(210, 313)
+const _LEFT_DOOR_POS := Vector2(183, 303)
+const _RIGHT_DOOR_POS := Vector2(237, 303)
+
 func _build_map() -> void:
 	var map := Control.new()
-	map.custom_minimum_size = Vector2(420, 340)
-	UI.place(map, 1, 1, 1, 1, -452, -372, -32, -32)
+	map.custom_minimum_size = Vector2(MAP_W, MAP_H)
+	UI.place(map, 1, 1, 1, 1, -MAP_W - 32.0, -MAP_H - 32.0, -32, -32)
 	add_child(map)
-	var bg := UI.texture_rect("res://assets/art/ui/map_panel.svg", TextureRect.STRETCH_KEEP_ASPECT)
-	UI.full(bg)
-	map.add_child(bg)
-	# Click target is deliberately larger than the drawn dot so you don't have to
-	# hit the circle exactly; the icon stays centered at a comfortable visual size.
-	const DOT_HIT := 48.0   # clickable square (smaller now there are 10 cameras)
+	# Rounded panel backing.
+	var panel := Panel.new()
+	UI.full(panel)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.043, 0.063, 0.094, 0.94)
+	sb.border_color = Color(0.17, 0.21, 0.27)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(10)
+	panel.add_theme_stylebox_override("panel", sb)
+	map.add_child(panel)
+	# Corridors + rooms are DRAWN from MapGraph.MAP_POS/ADJ — the very same coordinates
+	# the dots use — so they can never drift apart (the old SVG floor-plan rasterised
+	# off-register from the dots). A draw-layer Control renders under the dot buttons.
+	var layer := Control.new()
+	UI.full(layer)
+	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.draw.connect(_draw_map.bind(layer))
+	map.add_child(layer)
+	layer.queue_redraw()
+	# Clickable camera dots (larger hit box than the drawn circle).
+	const DOT_HIT := 48.0
 	for cam in MapGraph.CAMERAS:
 		var pos: Vector2 = MapGraph.MAP_POS[cam]
+		var nx: float = pos.x / MAP_W
+		var ny: float = pos.y / MAP_H
 		var b := UI.icon_button("res://assets/art/ui/cam_dot.svg", DOT_HIT)
-		b.size = Vector2(DOT_HIT, DOT_HIT)
-		b.position = pos - Vector2(DOT_HIT * 0.5, DOT_HIT * 0.5)
+		UI.place(b, nx, ny, nx, ny, -DOT_HIT * 0.5, -DOT_HIT * 0.5, DOT_HIT * 0.5, DOT_HIT * 0.5)
 		b.tooltip_text = tr(MapGraph.name_key(cam))
 		b.pressed.connect(_select.bind(cam))
 		map.add_child(b)
 		_map_buttons[cam] = b
+
+## Draw the floor plan (corridors, room plates, the doors and the you-are-here office)
+## directly from the graph, so every element shares the dots' coordinate space.
+func _draw_map(layer: Control) -> void:
+	var extra := {
+		MapGraph.OFFICE: _OFFICE_POS,
+		MapGraph.LEFT_DOOR: _LEFT_DOOR_POS,
+		MapGraph.RIGHT_DOOR: _RIGHT_DOOR_POS,
+	}
+	var pos_of := func(id: String) -> Vector2:
+		return MapGraph.MAP_POS[id] if MapGraph.MAP_POS.has(id) else extra.get(id, Vector2.ZERO)
+	# corridors — each undirected edge once
+	var seen := {}
+	for a in MapGraph.ADJ:
+		for b in MapGraph.ADJ[a]:
+			var key: String = (a + "|" + b) if a < b else (b + "|" + a)
+			if seen.has(key):
+				continue
+			seen[key] = true
+			layer.draw_line(pos_of.call(a), pos_of.call(b), Color(0.17, 0.22, 0.30), 5.0)
+	# room plates, centred on each camera's MAP_POS
+	for cam in MapGraph.CAMERAS:
+		var p: Vector2 = MapGraph.MAP_POS[cam]
+		var r := Rect2(p - Vector2(27, 17), Vector2(54, 34))
+		layer.draw_rect(r, Color(0.086, 0.125, 0.18))
+		layer.draw_rect(r, Color(0.20, 0.28, 0.38), false, 2.0)
+	# door squares
+	for d in [_LEFT_DOOR_POS, _RIGHT_DOOR_POS]:
+		layer.draw_rect(Rect2(d - Vector2(7, 7), Vector2(14, 14)), Color(0.15, 0.21, 0.29))
+	# the office (you are here)
+	var orc := Rect2(_OFFICE_POS - Vector2(28, 15), Vector2(56, 30))
+	layer.draw_rect(orc, Color(0.227, 0.184, 0.102))
+	layer.draw_rect(orc, Color(0.604, 0.478, 0.173), false, 2.0)
+	layer.draw_circle(_OFFICE_POS, 6.0, Color(0.949, 0.757, 0.306))
 
 func _select(cam_id: String) -> void:
 	_c.on_camera_changed(cam_id)
