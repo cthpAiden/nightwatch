@@ -7,6 +7,7 @@ extends ThreatBase
 
 var agro := 0.0
 var _viewing := false
+var _taught := false   # teach the counter once, the first time the grievance starts hurting
 
 func _configure() -> void:
 	movement_model = MODEL_WANDER
@@ -34,6 +35,10 @@ func process_ai(delta: float, night_progress: float) -> void:
 		if _rng.randf() * 20.0 < lvl * 0.7:
 			_wander()
 	if agro > 80.0:
+		# Teach the counter the first time the grievance actually starts bleeding you.
+		if not _taught:
+			_taught = true
+			Events.notify.emit("COUNTER_OAN_HON", [])
 		_bleed_via(-(agro - 80.0) * 0.06 * delta)
 	if agro >= 100.0:
 		_attack()

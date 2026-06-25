@@ -27,7 +27,7 @@ func setup(controller) -> void:
 func begin() -> void:
 	_lines = Lore.phone_lines(Game.current_night)
 	_real_idx = 0
-	_next_real = _rng.randf_range(16.0, 26.0)   # an early first call eases you in
+	_next_real = _rng.randf_range(13.0, 22.0)   # an early first call eases you in (wider chances)
 
 func is_ringing() -> bool:
 	return _ringing
@@ -36,7 +36,10 @@ func is_fake() -> bool:
 	return _fake
 
 func _process(delta: float) -> void:
-	if _c == null or not _c._running:
+	if _c == null:
+		return
+	# Use the controller's accessor (guarded) instead of touching _running directly.
+	if _c.has_method("is_running") and not _c.is_running():
 		return
 	if _ringing:
 		_ring_t -= delta
@@ -86,7 +89,7 @@ func answer() -> void:
 		if Game.current_night >= 2:
 			_c.find_clue("clue_name", "CLUE_GOT_NAME")
 		_stop()
-		_next_real = _rng.randf_range(48.0, 78.0)
+		_next_real = _rng.randf_range(40.0, 64.0)   # tighter re-arm: more genuine calls per night
 
 func _missed() -> void:
 	if _fake:
@@ -95,7 +98,7 @@ func _missed() -> void:
 	_c.add_via(-4.0)
 	Events.notify.emit("PHONE_MISSED", [])
 	_stop()
-	_next_real = _rng.randf_range(44.0, 68.0)
+	_next_real = _rng.randf_range(37.0, 56.0)   # tighter re-arm after a miss: another chance sooner
 
 func _stop() -> void:
 	_ringing = false

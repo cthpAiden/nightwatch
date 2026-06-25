@@ -5,6 +5,8 @@ extends ThreatBase
 ## your view and draining vía. You feed them, you never "kill" them.
 
 var crowd := 0.0
+var _taught := false   # teach the counter once, the first time the crowd starts hurting
+var _warned := false   # one-shot telegraph when the crowd first crosses ~70
 
 func _configure() -> void:
 	spawn_location = MapGraph.GATE
@@ -19,7 +21,22 @@ func process_ai(delta: float, night_progress: float) -> void:
 	Events.crowd_changed.emit(crowd / 100.0)
 	current_location = MapGraph.GATE if crowd < 50.0 else MapGraph.CANTEEN
 	if crowd > 60.0:
-		_bleed_via(-(crowd - 60.0) * 0.05 * delta)
+		# Teach the counter the first time the crowd actually starts bleeding you.
+		if not _taught:
+			_taught = true
+			Events.notify.emit("COUNTER_CO_HON", [])
+		# The bleed bites harder near full — neglect is a real via-zero threat, not a flat trickle.
+		var coef := 0.05 if crowd <= 85.0 else 0.11
+		_bleed_via(-(crowd - 60.0) * coef * delta)
+	# Telegraph: when the crowd first crosses ~70, a one-shot murmur + a re-emit of the
+	# counter prompt so the player can react before the bleed deepens. Mirrors ma_troi's
+	# _warned one-shot (reuses COUNTER_CO_HON — no new string).
+	if crowd >= 70.0 and not _warned:
+		_warned = true
+		Audio.play_sfx("whisper", -10.0, 1.0, Audio.VERB_BUS)   # the murmuring crowd presses in
+		Events.notify.emit("COUNTER_CO_HON", [])
+	elif crowd < 55.0:
+		_warned = false
 
 func on_offering(_location: String) -> void:
 	crowd = maxf(0.0, crowd - 30.0)   # one tray thins the crowd, but won't fully scatter it

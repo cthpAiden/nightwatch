@@ -88,7 +88,9 @@ var _stutter_t := 0.0
 
 # Trauma-based screen shake (jumpscare / door slam / draft / power-out / threat-at-door).
 const SHAKE_AMP := 0.055      # max pivot rotation offset (radians) at full trauma
+const SHAKE_POS := 0.04       # max positional kick (units) at full trauma — adds weight to slams
 const SHAKE_DECAY := 1.7      # trauma units shed per second
+const PIVOT_BASE := Vector3(0, 1.6, 0.5)   # rest pose the shake offset returns to
 var _shake := 0.0             # 0..1 trauma; quadratic -> punchy then quick settle
 
 # Reactive colour grade: the whole room desaturates / contrasts up as danger rises.
@@ -161,7 +163,7 @@ func _build_environment() -> void:
 	add_child(we)
 
 	_pivot = Node3D.new()
-	_pivot.position = Vector3(0, 1.6, 0.5)
+	_pivot.position = PIVOT_BASE
 	add_child(_pivot)
 	_cam = Camera3D.new()
 	_cam.fov = 74.0
@@ -635,8 +637,9 @@ func _update_apparition(delta: float) -> void:
 			_appar_t = 0.0
 			# Next sighting sooner in a blackout, rarer while the lights hold.
 			_appar_cd = _rng_range(20.0, 45.0) * (0.5 if not _powered else 1.0)
-		# a slow drift + breathing so it never looks like a static decal
+		# a slow drift + a faint vertical breath so it never looks like a static decal
 		_apparition.position.x = 0.4 + sin(_t * 0.7) * 0.25
+		_apparition.position.y = 1.75 + sin(_t * 0.9) * 0.04
 		_apparition.modulate.a = a * _appar_peak
 	else:
 		_appar_cd -= delta
@@ -645,7 +648,9 @@ func _update_apparition(delta: float) -> void:
 			_appar_dur = _rng_range(1.2, 2.2)
 
 func _rng_range(a: float, b: float) -> float:
-	return a + (b - a) * fmod(absf(sin(_t * 12.9898) * 43758.5453), 1.0)
+	# Real RNG (as used elsewhere in this file) so the apparition's cadence isn't pinned
+	# to a deterministic _t-keyed pattern.
+	return randf_range(a, b)
 
 func _build_window() -> void:
 	var frame := _mat("", Color(0.1, 0.11, 0.13), 1.0, false, 0.5, 0.4)
@@ -748,6 +753,15 @@ func _process(delta: float) -> void:
 		var s := _shake * _shake
 		_pivot.rotation.y += randf_range(-1.0, 1.0) * SHAKE_AMP * s
 		_pivot.rotation.x += randf_range(-1.0, 1.0) * SHAKE_AMP * s
+		# Also kick the pivot off its rest pose so a slam has weight, not just a wobble.
+		# Quadratic on _shake (like the rotation) and gated by the same trauma, so REDUCED/
+		# OFF stay calm; it self-settles as _shake decays back to its base below.
+		_pivot.position = PIVOT_BASE + Vector3(
+			randf_range(-1.0, 1.0),
+			randf_range(-1.0, 1.0),
+			randf_range(-1.0, 1.0)) * SHAKE_POS * s
+	elif _pivot.position != PIVOT_BASE:
+		_pivot.position = PIVOT_BASE
 	_update_dread(delta)
 	_animate_altar(delta)
 	_animate_props(delta)
@@ -855,7 +869,9 @@ func set_desk_threat(tex: Texture2D) -> void:
 		_desk_threat.modulate.a = 0.0
 		return
 	_desk_threat.texture = tex
-	_desk_threat.modulate.a = 0.85
+	# Sit the figure INTO the glass: lower alpha and pull the cast toward the CRT's green
+	# phosphor so it reads as part of the feed instead of floating off the screen.
+	_desk_threat.modulate = Color(0.66, 0.92, 0.8, 0.7)
 
 func _update_threat_sprites() -> void:
 	# A visible threat sways/breathes around its rest pose so the billboard reads as
@@ -1011,12 +1027,15 @@ func show_threat(side: int, tex: Texture2D, hostile: bool = false) -> void:
 		spr.visible = false
 		return
 	spr.texture = tex
-	spr.modulate = Color(0.85, 0.3, 0.3) if hostile else Color(0.72, 0.74, 0.74)
+	# Hostile reads as a hot rim/glow (these sprites are shaded + lit by the doorway
+	# spotlight); the old dark-red multiply crushed the silhouette to mud.
+	spr.modulate = Color(1.0, 0.45, 0.4) if hostile else Color(0.72, 0.74, 0.74)
 	spr.visible = _light_on.get(side, false)
 
 func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null, hostile: bool = false) -> void:
 	var spr: Sprite3D = _threat_sprites[side]
 	if has_threat and tex:
 		spr.texture = tex
-	spr.modulate = Color(0.85, 0.3, 0.3) if hostile else Color(0.72, 0.74, 0.74)
+	# Hostile reads as a hot rim/glow rather than a mud-dark multiply (sprites are lit).
+	spr.modulate = Color(1.0, 0.45, 0.4) if hostile else Color(0.72, 0.74, 0.74)
 	spr.visible = has_threat and _light_on.get(side, false)

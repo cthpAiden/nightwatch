@@ -27,7 +27,7 @@ var randomize_side: bool = false           # PATH: re-roll left/right on each ap
 var move_interval: float = 5.0             # seconds between movement opportunities
 var attack_time: float = 6.0               # seconds at a door before it kills
 var via_drain_at_door: float = 6.0         # vía/sec drained while looming at a door
-var approach_sfx: String = "knock"         # diegetic cue when it reaches a door (per threat)
+var approach_sfx: String = "approach_soft"  # diegetic cue when it reaches a door (per threat)
 
 # How it is countered
 var counter_door: bool = true

@@ -9,6 +9,9 @@ var flood := 0.0
 var _lure_active := false
 var _lure_t := 0.0
 var _lure_cd := 6.0
+var _lure_answered := false   # was the current lure answered? (resisting earns a relief cue)
+var _taught := false          # teach the counter once, the first time the flood starts hurting
+var _warned := false          # one-shot rising-water telegraph when flood first crosses ~85
 
 func _configure() -> void:
 	spawn_location = MapGraph.RESTROOM
@@ -38,12 +41,25 @@ func process_ai(delta: float, night_progress: float) -> void:
 	current_location = MapGraph.RESTROOM if flood < 55.0 else MapGraph.COURTYARD
 
 	if flood > 70.0:
+		# Teach the counter the first time the flood actually starts bleeding you.
+		if not _taught:
+			_taught = true
+			Events.notify.emit("COUNTER_MA_DA", [])
 		_bleed_via(-(flood - 70.0) * 0.05 * delta)
+	# Telegraph: when the flood first crosses ~85, a one-shot rising-water cue + notify
+	# so the kill is signalled before it lands. Mirrors ma_troi's _warned one-shot.
+	if flood >= 85.0 and not _warned:
+		_warned = true
+		Audio.play_sfx("water_call", -4.0, 0.78, Audio.VERB_BUS)   # the water is rising
+		Events.notify.emit("COUNTER_MA_DA", [])
+	elif flood < 70.0:
+		_warned = false
 	if flood >= 100.0:
 		_kill()
 
 func _start_lure() -> void:
 	_lure_active = true
+	_lure_answered = false
 	_lure_t = 5.0
 	Events.water_lure.emit(true)
 	# Duck the night to near-silence for a beat, then a drowned, almost-worded cry rises
@@ -54,12 +70,19 @@ func _start_lure() -> void:
 	Events.notify.emit("MADA_LURE", [])
 
 func _end_lure() -> void:
+	# A lure that timed out WITHOUT being answered = the player resisted correctly.
+	# Reward it: a soft recede/relief cue + a brief positive notify so doing nothing reads as right.
+	var resisted := not _lure_answered
 	_lure_active = false
 	_lure_cd = _rng.randf_range(8.0, 14.0)
 	Events.water_lure.emit(false)
+	if resisted:
+		Audio.play_sfx("incense_whoosh", -12.0)   # the water recedes — you held steady
+		Events.notify.emit("MADA_RESIST", [])
 
 func _on_answer() -> void:
 	if _lure_active:
+		_lure_answered = true   # mark answered BEFORE _end_lure so it skips the resist reward
 		flood = minf(100.0, flood + 28.0)
 		Audio.play_sfx("sting_rise", -8.0, 1.0, Audio.VERB_BUS)   # you answered the water
 		_end_lure()

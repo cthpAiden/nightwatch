@@ -11,6 +11,7 @@ var _clock: Label
 var _night: Label
 var _toast: Label
 var _warn: Label
+var _warn_panel: Control
 var _offerings_lbl: Label
 var _coins_lbl: Label
 var _clue_lbl: Label
@@ -33,6 +34,8 @@ var _help_lines: VBoxContainer
 var _door_btn := {}
 var _light_btn := {}
 var _toast_t := 0.0
+var _toast_pending := ""        # one-slot queue: a notify buffered while one is on screen
+var _toast_pending_key := ""    # its key, kept so the dwell floor still applies on flush
 var _huong_danger := false
 var _water_lure := false
 var _vendor_state := GameEnums.VendorState.IDLE
@@ -109,6 +112,8 @@ func _build() -> void:
 	add_child(lbox)
 	_light_btn[GameEnums.Side.LEFT] = _ctrl_btn("LIGHT_LEFT", func(): _c.request_toggle_light(GameEnums.Side.LEFT))
 	_door_btn[GameEnums.Side.LEFT] = _ctrl_btn("DOOR_LEFT", func(): _c.request_toggle_door(GameEnums.Side.LEFT))
+	_light_btn[GameEnums.Side.LEFT].clip_text = true
+	_door_btn[GameEnums.Side.LEFT].clip_text = true
 	lbox.add_child(_light_btn[GameEnums.Side.LEFT])
 	lbox.add_child(_door_btn[GameEnums.Side.LEFT])
 
@@ -118,6 +123,8 @@ func _build() -> void:
 	add_child(rcbox)
 	_light_btn[GameEnums.Side.RIGHT] = _ctrl_btn("LIGHT_RIGHT", func(): _c.request_toggle_light(GameEnums.Side.RIGHT))
 	_door_btn[GameEnums.Side.RIGHT] = _ctrl_btn("DOOR_RIGHT", func(): _c.request_toggle_door(GameEnums.Side.RIGHT))
+	_light_btn[GameEnums.Side.RIGHT].clip_text = true
+	_door_btn[GameEnums.Side.RIGHT].clip_text = true
 	rcbox.add_child(_light_btn[GameEnums.Side.RIGHT])
 	rcbox.add_child(_door_btn[GameEnums.Side.RIGHT])
 
@@ -125,17 +132,24 @@ func _build() -> void:
 	var center := UI.hbox(10)
 	UI.place(center, 0.5, 1, 0.5, 1, -380, -86, 380, -26)
 	add_child(center)
-	center.add_child(_ctrl_btn("HUD_CAM", func(): _c.request_toggle_monitor(), 100))
-	_incense_btn = _ctrl_btn("HUD_INCENSE", func(): _c.request_light_incense(), 130)
+	var cam_btn := _ctrl_btn("HUD_CAM", func(): _c.request_toggle_monitor(), 100)
+	cam_btn.clip_text = true
+	center.add_child(cam_btn)
+	_incense_btn = _ctrl_btn("HUD_INCENSE", func(): _c.request_light_incense(), 160)
+	_incense_btn.clip_text = true
 	center.add_child(_incense_btn)
 	_bell_btn = _ctrl_btn("HUD_BELL", func(): _c.request_ring_bell(), 100)
+	_bell_btn.clip_text = true
 	center.add_child(_bell_btn)
-	center.add_child(_ctrl_btn("OFFERING_PROMPT", func(): _c.request_offering(), 130))
+	var offering_btn := _ctrl_btn("OFFERING_PROMPT", func(): _c.request_offering(), 150)
+	offering_btn.clip_text = true
+	center.add_child(offering_btn)
 	var slot := UI.hbox(4)
 	_item_icon = UI.texture_rect("res://assets/art/ui/item_slot.svg", TextureRect.STRETCH_KEEP_ASPECT)
 	_item_icon.custom_minimum_size = Vector2(48, 48)
 	slot.add_child(_item_icon)
 	_use_btn = _ctrl_btn("HUD_ITEM", func(): _c.request_use_item(), 120)
+	_use_btn.clip_text = true
 	_use_btn.disabled = true
 	slot.add_child(_use_btn)
 	center.add_child(slot)
@@ -166,9 +180,21 @@ func _build() -> void:
 	UI.place(_toast, 0.5, 0, 0.5, 0, -400, 112, 400, 150)
 	_toast.modulate.a = 0.0
 	add_child(_toast)
+	# A dark plate behind the persistent red warning so it always has contrast (like the
+	# tutorial banner's tbg). Sits low-centre, clear of the mid-screen tutorial banner;
+	# the plate only shows while there's warning text (driven in _process).
+	_warn_panel = Control.new()
+	_warn_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UI.place(_warn_panel, 0.5, 1, 0.5, 1, -300, -192, 300, -152)
+	_warn_panel.visible = false
+	add_child(_warn_panel)
+	var wbg := UI.color_rect(Color(0.06, 0.03, 0.04, 0.6))
+	UI.full(wbg)
+	_warn_panel.add_child(wbg)
 	_warn = UI.label("", 20, UI.COL_DANGER, HORIZONTAL_ALIGNMENT_CENTER)
-	UI.place(_warn, 0.5, 1, 0.5, 1, -300, -190, 300, -156)
-	add_child(_warn)
+	_warn.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	UI.place(_warn, 0, 0, 1, 1, 8, 2, -8, -2)
+	_warn_panel.add_child(_warn)
 
 	# Persistent tutorial prompt: a banner that names the exact key for the current
 	# Night-1 step and stays put until the action is done (no more 2.6s blink-and-miss).
@@ -199,6 +225,25 @@ func _bar_row(parent: VBoxContainer, label_key: String, color: Color) -> Progres
 	parent.add_child(row)
 	return bar
 
+var _bar_tween := {}   # per-bar value tween, killed before retweening so they don't stack
+
+## Smoothly move a meter to a new value; on a meaningful drop, flash it to signal damage.
+func _set_bar(bar: ProgressBar, new_value: float) -> void:
+	if bar == null:
+		return
+	var old: float = bar.value
+	var prev = _bar_tween.get(bar)
+	if prev != null and prev.is_valid():
+		prev.kill()
+	var tw := create_tween()
+	tw.tween_property(bar, "value", new_value, 0.18)
+	_bar_tween[bar] = tw
+	if old - new_value > 2.0:
+		# brief red/white flash on a hit, then back to normal
+		var ft := create_tween()
+		ft.tween_property(bar, "modulate", Color(1.4, 0.7, 0.7), 0.06)
+		ft.tween_property(bar, "modulate", Color(1, 1, 1), 0.15)
+
 func _ctrl_btn(key: String, cb: Callable, w: float = 180.0) -> Button:
 	var b := UI.button(key, w, 46)
 	b.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -210,9 +255,9 @@ func _ctrl_btn(key: String, cb: Callable, w: float = 180.0) -> Button:
 func _build_help() -> void:
 	_help_panel = Control.new()
 	_help_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UI.place(_help_panel, 1, 0, 1, 0, -288, 196, -22, 440)
+	UI.place(_help_panel, 1, 0, 1, 0, -288, 210, -22, 454)
 	add_child(_help_panel)
-	var bg := UI.color_rect(Color(0.04, 0.05, 0.07, 0.62))
+	var bg := UI.color_rect(Color(0.04, 0.05, 0.07, 0.75))
 	UI.full(bg)
 	_help_panel.add_child(bg)
 	var col := UI.vbox(3)
@@ -244,10 +289,11 @@ func set_tutorial_prompt(key: String) -> void:
 	_tut_label.text = tr(key)
 
 func _connect() -> void:
-	Events.power_changed.connect(func(c, m): _power_bar.value = c)
-	Events.via_changed.connect(func(c, m): _via_bar.value = (c / m) * 100.0)
+	Events.power_changed.connect(func(c, m): _set_bar(_power_bar, c))
+	Events.via_changed.connect(func(c, m): _set_bar(_via_bar, (c / m) * 100.0))
 	Events.via_state_changed.connect(_on_via_state)
 	Events.clock_advanced.connect(_refresh_clock)
+	Events.hour_reached.connect(_on_hour_reached)
 	Events.door_toggled.connect(func(s, closed): _update_door(s, closed))
 	Events.light_toggled.connect(func(s, on): _update_light(s, on))
 	Events.notify.connect(_on_notify)
@@ -264,19 +310,31 @@ func _connect() -> void:
 	Events.anomaly_tagged.connect(func(_id): _clue_flash = 1.0)
 	_on_investigation(Save.clue_count())   # show progress carried in from earlier nights
 	_night.text = tr("NIGHT_LABEL").format([str(Game.current_night)])
-	_offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings]
+	_refresh_offerings()
 	_coins_lbl.text = "%s: %d" % [tr("HUD_COINS"), _c.coins]
 	# Seed the door/light buttons with their written state from the start.
 	_update_door(GameEnums.Side.LEFT, false)
 	_update_door(GameEnums.Side.RIGHT, false)
 	_update_light(GameEnums.Side.LEFT, false)
 	_update_light(GameEnums.Side.RIGHT, false)
-	Events.offering_placed.connect(func(_l): _offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), _c.offerings])
+	Events.offering_placed.connect(func(_l): _refresh_offerings())
+
+## Refresh the offerings count, tinting it red when only 1-2 remain (mirrors the
+## incense-out tint) so a player notices they're nearly out of altar fuel.
+func _refresh_offerings() -> void:
+	var n: int = _c.offerings
+	_offerings_lbl.text = "%s: %d" % [tr("HUD_OFFERINGS"), n]
+	_offerings_lbl.modulate = Color(0.95, 0.45, 0.4) if (n >= 1 and n <= 2) else Color(1, 1, 1)
 
 func _process(delta: float) -> void:
 	if _toast_t > 0.0:
 		_toast_t -= delta
 		_toast.modulate.a = clampf(_toast_t, 0.0, 1.0)
+		# When the current toast finishes, flush a buffered one (if any).
+		if _toast_t <= 0.0 and _toast_pending != "":
+			_show_toast(_toast_pending_key, _toast_pending)
+			_toast_pending = ""
+			_toast_pending_key = ""
 	if _clue_flash > 0.0 and _clue_lbl:
 		_clue_flash = maxf(0.0, _clue_flash - delta * 1.5)
 		_clue_lbl.modulate = Color(1, 1, 1).lerp(Color(1.0, 0.92, 0.5), _clue_flash)
@@ -292,12 +350,29 @@ func _process(delta: float) -> void:
 	if not _c._powered:
 		w = tr("POWER_OUT")
 	_warn.text = w
+	if _warn_panel:
+		_warn_panel.visible = w != ""
 
 func _refresh_clock(m: int) -> void:
 	var h := int(float(m) / 60.0)
 	var mm := m % 60
 	var disp_h := 12 if h == 0 else h
 	_clock.text = "%d:%02d %s" % [disp_h, mm, tr("CLOCK_AM")]
+
+## Each in-game hour, briefly pulse the clock toward warm gold so time passing reads
+## as a beat (same flash feel as the clue tracker).
+func _on_hour_reached(_hour: int) -> void:
+	if _clock == null:
+		return
+	_clock.pivot_offset = _clock.size * 0.5
+	var gold := Color(1.0, 0.86, 0.45)
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(_clock, "modulate", gold, 0.18)
+	tw.tween_property(_clock, "scale", Vector2.ONE * 1.12, 0.18)
+	tw.chain().set_parallel(true)
+	tw.tween_property(_clock, "modulate", Color(1, 1, 1), 0.22)
+	tw.tween_property(_clock, "scale", Vector2.ONE, 0.22)
 
 func _on_via_state(state: int) -> void:
 	# tint the vía bar by state
@@ -326,10 +401,41 @@ func _update_light(side: int, on: bool) -> void:
 	b.text = "%s · %s" % [tr(base), tr("LIGHT_ON") if on else tr("LIGHT_OFF")]
 	b.modulate = Color(1.0, 0.95, 0.5) if on else Color(1, 1, 1)
 
-func _on_notify(key: String, args: Array) -> void:
-	_toast.text = tr(key).format(args) if not args.is_empty() else tr(key)
-	_toast_t = 2.6
+## Briefly pulse a doorway light button toward warm amber so a threat's arrival side
+## is visible. Called (guarded) by night_controller when a threat reaches a door.
+func flash_side(side: int) -> void:
+	var b: Button = _light_btn.get(side)
+	if b == null:
+		return
+	var base := b.modulate
+	var amber := Color(1.0, 0.78, 0.35)
+	var tw := create_tween()
+	tw.tween_property(b, "modulate", amber, 0.12)
+	tw.tween_property(b, "modulate", base, 0.13)
+
+## Story/lesson keys hold longer so the player can actually read them.
+const _TOAST_STORY_KEYS := ["MATROI_RULE", "CAT_WARN", "MADA_LURE", "INVEST_GOAL"]
+
+func _toast_hold(key: String, tr_text: String) -> float:
+	# Scale dwell to text length, with a longer floor for story/lesson beats.
+	var t := clampf(2.6 + tr_text.length() * 0.04, 2.6, 6.0)
+	if key.begins_with("PHONE_N") or key.begins_with("COUNTER_") or key in _TOAST_STORY_KEYS:
+		t = maxf(t, 5.5)
+	return t
+
+func _show_toast(key: String, tr_text: String) -> void:
+	_toast.text = tr_text
+	_toast_t = _toast_hold(key, tr_text)
 	_toast.modulate.a = 1.0
+
+func _on_notify(key: String, args: Array) -> void:
+	var tr_text: String = tr(key).format(args) if not args.is_empty() else tr(key)
+	# If a toast is still comfortably on screen, buffer ONE rather than clobbering it.
+	if _toast_t > 1.0:
+		_toast_pending = tr_text
+		_toast_pending_key = key
+		return
+	_show_toast(key, tr_text)
 
 func _on_water_lure(active: bool) -> void:
 	# The lure also makes the drain action relevant; the phone's answer button is

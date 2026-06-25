@@ -242,6 +242,14 @@ func show_feed(cam_id: String) -> void:
 	_update_clue_hotspot(cam_id)
 	_refresh_threats()
 
+## Confirm an anomaly tag with a brief static/brightness spike on the live feed —
+## reuses the same channel-change burst so the feed "pops" when you nail a tag.
+func tag_confirm() -> void:
+	if _fx_mat == null:
+		return
+	_fx_burst = maxf(_fx_burst, 0.6)
+	_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
+
 func _cam_code(cam_id: String) -> String:
 	return "CAM%d" % (MapGraph.CAMERAS.find(cam_id) + 1)
 
@@ -284,9 +292,10 @@ func _refresh_threats() -> void:
 		var tex: Texture2D = t.current_texture()
 		if tex == null:
 			continue
-		# First time the wronged soul appears on a feed (and her face isn't logged yet),
-		# tell the player she can be tagged — the one clue most likely to be missed.
-		if t.id == "oan_hon" and not _oan_hint_shown and not Save.has_clue("clue_photo"):
+		# First time the wronged soul appears on a feed this night, tell the player she
+		# can be tagged (the one clue most likely to be missed). The per-instance
+		# _oan_hint_shown flag keeps it to one nudge per night.
+		if t.id == "oan_hon" and not _oan_hint_shown:
 			_oan_hint_shown = true
 			Events.notify.emit("CLUE_HINT_TAG", [])
 		var d: Dictionary = CAM_DEPTH.get(_c.current_cam, {"s": 1.0, "y": 0.0})
@@ -298,7 +307,16 @@ func _refresh_threats() -> void:
 		tr_node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		# Keep the figure bright and present on the feed (a faint cold cast to sit in the
 		# CCTV grade) instead of the old dishwater grey that made threats hard to read.
-		tr_node.modulate = Color(0.95, 0.98, 0.97)
+		# The two pale full-height ghosts get split temperatures (cool oan_hon /
+		# warm quy_nhap_trang) so they read apart instantly at the small feed scale
+		# instead of blurring together; everything else keeps the flat cold cast.
+		match t.id:
+			"oan_hon":
+				tr_node.modulate = Color(0.9, 0.95, 1.0)
+			"quy_nhap_trang":
+				tr_node.modulate = Color(1.0, 0.97, 0.9)
+			_:
+				tr_node.modulate = Color(0.95, 0.98, 0.97)
 		UI.place(tr_node, 0.5, 1, 0.5, 1, -hw, -(hh + 20.0) + yo, hw, -20.0 + yo)
 		_threat_host.add_child(tr_node)
 		# Click the figure to "tag" the anomaly — a reward for actually watching the

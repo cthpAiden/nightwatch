@@ -47,7 +47,9 @@ func _surge() -> void:
 	# locks on: a hard vía + light hit, then resets — never an instant kill itself, but
 	# it jinxes your doors/lights open for a moment, so panicking can get you killed by
 	# whatever is at the door right now. Teaches "don't run."
-	if _controller:
+	# Don't drain power/vía or jinx the controls while a death is already resolving —
+	# the controller now exposes is_running() for exactly this.
+	if _controller and _controller.has_method("is_running") and _controller.is_running():
 		_controller.hex_controls(2.5)   # apply the jinx first so its cue always lands
 		_controller.add_startle(-26.0)
 		_controller.add_power(-8.0)

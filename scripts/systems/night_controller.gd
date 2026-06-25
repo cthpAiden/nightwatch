@@ -47,6 +47,7 @@ var speed_timer := 0.0
 var taint_timer := 0.0
 var _via_drain_cd := 0.0     # pauses vía regen briefly after any drain
 var _agitation := 0.0        # "panic" signal (fast pan + rapid cam-switching) for Ma trơi
+var _last_cam_switch_ms := -10000   # Time.get_ticks_msec() of the last camera change (recency gate)
 
 # Living-altar ritual ("hương" incense protection) — the core active defense.
 var huong := 100.0
@@ -70,6 +71,7 @@ var _hex_t := 0.0            # Ma trơi lock-on jinx: doors/lights flail open br
 var _crowd_level := 0.0      # Cô hồn smother (0..1) driving the view-blocking overlay
 var _crowd_layer: CanvasLayer
 var _crowd_overlay: TextureRect
+var _crowd_pulse_t := 0.0    # phase for the subtle surge of the crowd overlay
 var _hb_on := false          # heartbeat loop currently playing (ramped with danger)
 var _breath_on := false      # proximity-breathing loop (a threat looms at a door)
 var _strain_on := false      # shutter-strain loop (a closed door is being pressed)
@@ -252,6 +254,7 @@ void fragment() {
 
 func _connect_events() -> void:
 	Events.jumpscare_started.connect(_on_jumpscare)
+	Events.threat_repelled.connect(func(_id): _on_threat_repelled())
 	Events.threat_at_door.connect(func(id, side): _on_threat_at_door(id, side))
 	Events.threat_left_door.connect(func(_id, side): _refresh_door_sprite(side))
 	Events.crowd_changed.connect(func(level): _crowd_level = level)
@@ -269,12 +272,29 @@ func _on_threat_at_door(id: String, side: int) -> void:
 	_refresh_door_sprite(side)
 	if room:
 		room.add_shake(0.32)
-	Audio.play_sfx("sting_low", -14.0, 1.0, Audio.VERB_BUS)
+	# Pitch the arrival sting by side (left lower, right higher) for a directional read,
+	# mirroring _update_proximity_audio's left=0.92 breath. Delay it ~0.2s after the
+	# threat's own approach_sfx so it reads as cause (footsteps) then consequence (sting).
+	var arr_pitch := 0.92 if side == GameEnums.Side.LEFT else 1.06
+	get_tree().create_timer(0.2).timeout.connect(func():
+		Audio.play_sfx("sting_low", -14.0, arr_pitch, Audio.VERB_BUS))
+	# Pulse the threatened side's doorway light so the player gets a directional cue.
+	if hud and hud.has_method("flash_side"):
+		hud.flash_side(side)
 	# First time a given rusher reaches a door this night, name its counter in context
 	# (teaching that survives past the Night-1 tutorial).
 	if not _first_door.get(id, false):
 		_first_door[id] = true
 		Events.notify.emit("COUNTER_" + id.to_upper(), [])
+
+## A repelled/pushed-back threat: a soft confirm sting + a small jolt so the player
+## reads the success — pressure relieving instead of a silent dissipation.
+func _on_threat_repelled() -> void:
+	if not _running:
+		return
+	Audio.play_sfx("item_good", -8.0)
+	if room:
+		room.add_shake(0.12)
 
 ## Ma da's flood, voiced as a body of water that swells from a distant trickle to an
 ## oppressive slosh as the level rises — so the silent flood mechanic is now felt.
@@ -507,8 +527,8 @@ func _process(delta: float) -> void:
 	# Panic/agitation: fast panning raises it (rapid cam-switching does too, in
 	# on_camera_changed); it decays over time. Drives Ma trơi.
 	# A wisp-storm night makes agitation build faster and fade slower (Ma trơi is wild).
-	var agit_gain := 2.8 if _mod_wisp else 2.0
-	var agit_decay := 0.6 if _mod_wisp else 1.0
+	var agit_gain := 2.5 if _mod_wisp else 2.0
+	var agit_decay := 0.8 if _mod_wisp else 1.0
 	if room.get_pan_speed() > 0.7:
 		_agitation = minf(1.0, _agitation + delta * agit_gain)
 	# Decays a bit quicker than it builds so that simply STOPPING (not panning, not
@@ -614,7 +634,7 @@ func _advance_clock(delta: float) -> void:
 		Events.hour_reached.emit(_last_hour)
 		if _last_hour > 0 and _last_hour < 6:
 			Audio.play_sfx("clock_chime", -10.0)
-			_earn_coins(6)   # vàng mã for each hour you survive
+			_earn_coins(8)   # vàng mã for each hour you survive
 	if game_minutes >= NIGHT_MINUTES:
 		_win()
 
@@ -656,6 +676,12 @@ func _power_out() -> void:
 	room.set_door(GameEnums.Side.RIGHT, false)
 	director.broadcast_door(GameEnums.Side.LEFT, false)
 	director.broadcast_door(GameEnums.Side.RIGHT, false)
+	# Doors are forced open now, so the door-pressure loops no longer make sense — stop
+	# them proactively instead of waiting a frame for _update_proximity_audio to catch up.
+	_strain_on = false
+	Audio.stop_loop("shutter_strain")
+	_breath_on = false
+	Audio.stop_loop("breathing")
 	if monitor_open:
 		_set_monitor(false)
 	Audio.play_sfx("power_down", -2.0)
@@ -731,11 +757,18 @@ func _update_crowd_overlay(delta: float) -> void:
 	if _crowd_overlay == null:
 		return
 	var target := 0.0
+	var press := 0.0
 	if not (shop.visible or cassette.visible or pause.visible):
-		var press := clampf((_crowd_level - 0.55) / 0.45, 0.0, 1.0)
+		press = clampf((_crowd_level - 0.55) / 0.45, 0.0, 1.0)
 		# Pressing harder while you're trying to watch cameras — true information denial.
 		target = press * (0.78 if monitor_open else 0.6)
 	_crowd_overlay.modulate.a = move_toward(_crowd_overlay.modulate.a, target, delta * 1.5)
+	# A subtle pulsing scale keyed off the press fraction makes the wall of faces seem to
+	# surge and breathe in toward you as the crowd swells, rather than sit as a flat sheet.
+	_crowd_pulse_t += delta * 4.0
+	var pulse := 1.0 + 0.02 * press * sin(_crowd_pulse_t)
+	_crowd_overlay.pivot_offset = _crowd_overlay.size * 0.5
+	_crowd_overlay.scale = Vector2(pulse, pulse)
 
 # --- input ------------------------------------------------------------------
 func _unhandled_input(e: InputEvent) -> void:
@@ -775,6 +808,8 @@ func _unhandled_input(e: InputEvent) -> void:
 	elif e.is_action_pressed("use_item"):
 		request_use_item()
 	elif e.is_action_pressed("close_drain"):
+		if _tut_step >= 0:
+			return
 		Events.office_action.emit("close_drain")
 
 # --- requests from UI / input ----------------------------------------------
@@ -858,7 +893,12 @@ func _set_monitor(open: bool) -> void:
 
 func on_camera_changed(cam_id: String) -> void:
 	current_cam = cam_id
-	_agitation = minf(1.0, _agitation + 0.45)   # flipping channels fast = panic
+	# Only rapid channel-flipping reads as panic: gate the bump on recency so a paced scan
+	# (>1.2s between switches) adds little/nothing, while a frantic flip still spikes it.
+	var now := Time.get_ticks_msec()
+	if now - _last_cam_switch_ms <= 1200:
+		_agitation = minf(1.0, _agitation + 0.2)
+	_last_cam_switch_ms = now
 	director.broadcast_view(cam_id)
 	room.set_desk_mirror(cam_id)
 	Events.camera_changed.emit(cam_id)
@@ -871,7 +911,7 @@ func _desk_threat_tex() -> Texture2D:
 	return null
 
 func request_offering() -> void:
-	if not _running:
+	if not _running or _tut_step >= 0:
 		return
 	if offerings <= 0:
 		Events.notify.emit("OFFERING_NONE", [])
@@ -959,7 +999,8 @@ func _caught(cause: String) -> void:
 	# loss feeds the shrine meta instead of being pure wasted time.
 	if _last_hour > 0:
 		_earn_coins(_last_hour * 3)
-	_commit_best()
+	# Anti-farm: do NOT commit best on death. Raising the bar only on a WIN keeps a
+	# stuck player from grinding deaths up to an unbeatable threshold (see _earn_coins).
 	Events.game_over.emit(cause)
 	# Scariness scales with WHO caught you and how late it is: a Night-1 ông kẹ grab and a
 	# Night-6 oan hồn grab should not feel identical.
@@ -1070,12 +1111,24 @@ func _win() -> void:
 	# Dawn relief: the rooster, a soft temple bell, and a warm swell — an exhale after
 	# the night, with the new reverb tail letting it breathe.
 	Audio.play_sfx("rooster", -3.0, 1.0, Audio.VERB_BUS)
-	Audio.play_sfx("offering_bell", -10.0, 1.0, Audio.VERB_BUS)
-	_earn_coins(25)   # survival bonus toward shrine upgrades
+	# Delay the temple bell a beat so it reads as "cockcrow, then bell", not a single smear.
+	get_tree().create_timer(0.35).timeout.connect(func():
+		Audio.play_sfx("offering_bell", -10.0, 1.0, Audio.VERB_BUS))
+	_earn_coins(15)   # survival bonus toward shrine upgrades
 	_commit_best()
 	Events.night_survived.emit()
 	Game.notify_night_survived()
-	await get_tree().create_timer(0.6).timeout
+	# Dawn beat: a soft warm-gold wash that fades, and the bruised vignette settling to a
+	# clean warm white — relief reads visually before we route to the win screen.
+	if _flash:
+		_flash.color = Color(1.0, 0.86, 0.55, 0.0)
+		var tg := create_tween()
+		tg.tween_property(_flash, "color:a", 0.4, 0.5)
+		tg.tween_property(_flash, "color:a", 0.0, 0.7)
+	if _vignette:
+		var tv := create_tween()
+		tv.tween_property(_vignette, "modulate", Color(1.0, 0.97, 0.9, 1.0), 0.7)
+	await get_tree().create_timer(0.9).timeout
 	# Clearing the final story night resolves the campaign with a proper ending
 	# (siêu thoát if the investigation is complete, otherwise the survive epilogue).
 	if not Game.is_custom and Game.current_night >= Game.MAX_NIGHTS:
@@ -1095,6 +1148,9 @@ func get_pan_speed() -> float:
 
 func is_monitor_open() -> bool:
 	return monitor_open
+
+func is_running() -> bool:
+	return _running
 
 func get_agitation() -> float:
 	return _agitation
@@ -1116,7 +1172,15 @@ func add_via(amount: float) -> void:
 ## Burst/startle vía hit. The mulberry bracelet (child_ward) reduces only these,
 ## not the continuous meter drains.
 func add_startle(amount: float) -> void:
-	add_via(amount * (1.0 - clampf(startle_resist, 0.0, 0.8)))
+	var hit := amount * (1.0 - clampf(startle_resist, 0.0, 0.8))
+	add_via(hit)
+	# A meaningful startle burst should be felt: a jolt (gated on jumpscares) + a breath
+	# sting scaled to the size of the hit, so a wisp's startle lands with weight.
+	if hit <= -6.0:
+		if Settings.allow_jumpscares() and room:
+			room.add_shake(0.25)
+		var mag := clampf(absf(hit) / 18.0, 0.0, 1.0)
+		Audio.play_sfx("sting_breath", lerpf(-12.0, -3.0, mag), 1.0, Audio.VERB_BUS)
 
 func add_power(amount: float) -> void:
 	power = clampf(power + amount, 0.0, 100.0)
@@ -1241,7 +1305,7 @@ func _light_incense(silent: bool) -> void:
 		huong = huong_max
 		_incense_cd = 0.0
 	else:
-		huong = minf(huong_max, huong + 58.0)
+		huong = minf(huong_max, huong + 70.0)
 		_incense_cd = 4.0
 	if room:
 		room.set_huong(huong / huong_max)
@@ -1268,6 +1332,10 @@ func request_ring_bell() -> void:
 	# a positioning tool, not a second free altar. (Meter spirits are the incense's job.)
 	director.setback_nearest()
 	add_via(6.0)
+	# Make the bell's push-back visible: a small jolt + a brief reveal of the map.
+	if room:
+		room.add_shake(0.12)
+	start_reveal(1.5)
 	Events.notify.emit("BELL_RUNG", [])
 
 ## Combined threat-aggression multiplier (read by the meter threats each frame):
@@ -1285,7 +1353,7 @@ func meter_mult() -> float:
 
 # --- phone ------------------------------------------------------------------
 func request_answer_phone() -> void:
-	if not _running or phone == null:
+	if not _running or _tut_step >= 0 or phone == null:
 		return
 	phone.answer()
 
@@ -1309,6 +1377,9 @@ func tag_anomaly(threat_id: String) -> void:
 	start_reveal(4.0)
 	add_via(4.0)
 	Audio.play_sfx("camera_switch", -4.0)
+	# A brief static/brightness spike on the live feed confirms the tag landed.
+	if monitor and monitor.has_method("tag_confirm"):
+		monitor.tag_confirm()
 	Events.anomaly_tagged.emit(threat_id)
 	Events.notify.emit("ANOMALY_TAGGED", [])
 	# Tagging the wronged soul on camera reveals her face — an investigation clue.
@@ -1323,7 +1394,8 @@ func find_clue(clue_id: String, msg_key: String) -> void:
 	if Save.find_clue(clue_id):
 		Events.investigation_updated.emit(Save.clue_count())
 		Events.notify.emit(msg_key, [])
-		Audio.play_sfx("item_good", -5.0)
+		# A distinct temple-bell cue for investigation progress (vs the generic item pickup).
+		Audio.play_sfx("offering_bell", -8.0)
 
 # --- vía / currency ---------------------------------------------------------
 ## Continuous meter drain that does NOT freeze vía regen (see _update_via). Slow
@@ -1347,7 +1419,9 @@ func _earn_coins(n: int) -> void:
 	Save.coins = coins
 	Save.save_progress()
 	Events.coins_changed.emit(coins)
-	Audio.play_sfx("coin_chime", -16.0)
+	# Defer the coin chime a beat so it doesn't smear against the hourly clock_chime
+	# (both otherwise land on the same frame); they read as two distinct cues.
+	get_tree().create_timer(0.35).timeout.connect(func(): Audio.play_sfx("coin_chime", -16.0))
 
 func _night_key() -> String:
 	return "custom" if Game.is_custom else str(Game.current_night)

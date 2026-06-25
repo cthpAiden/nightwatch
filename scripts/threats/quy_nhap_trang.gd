@@ -3,7 +3,8 @@ extends ThreatBase
 ## You don't fight the corpse, you fight the CAUSE: keep Mun off the draped form.
 ## Mun pads toward it on a timer (visible on cameras); divert her by closing the
 ## RIGHT door or placing a thorny-branch barrier. If she crosses, the corpse sits
-## up and rushes the LEFT door for the rest of the night (close the left door).
+## up and rushes the RIGHT door — the same wing you watched Mun cross — for the rest
+## of the night (close the right door). The telegraph and the rush are one wing.
 
 var mun_progress := 0.0
 var triggered := false
@@ -13,8 +14,9 @@ var _rest := 0.0   # time the risen corpse has been frozen (stillness only SLOWS
 func _configure() -> void:
 	movement_model = MODEL_PATH
 	spawn_location = MapGraph.GATE
-	# Authored down the right wing; randomize_side can mirror it to the left, so the
-	# risen corpse may rush either door once Mun triggers it.
+	# Authored down the right wing, the same wing Mun is seen crossing. randomize_side
+	# only mirrors the pre-trigger spawn flavor; once Mun crosses, _trigger pins the
+	# rush to this canonical right-wing route so the telegraph matches the kill.
 	path = [MapGraph.GATE, MapGraph.GYM, MapGraph.RESTROOM, MapGraph.INFIRMARY, MapGraph.RIGHT_HALL, MapGraph.RIGHT_DOOR]
 	randomize_side = true
 	move_interval = 3.0
@@ -44,7 +46,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 		super.process_ai(delta, night_progress)
 		# A CREEPER only lurches while you pan, so a perfectly still player could
 		# freeze the corpse at spawn forever. Guarantee a slow baseline creep so
-		# stillness only SLOWS it — eventually it reaches the left door and you must
+		# stillness only SLOWS it — eventually it reaches the right door and you must
 		# actually shut it.
 		if not _player_panning and phase != GameEnums.ThreatPhase.AT_DOOR \
 				and phase != GameEnums.ThreatPhase.ATTACKING:
@@ -58,8 +60,14 @@ func process_ai(delta: float, night_progress: float) -> void:
 func _trigger() -> void:
 	triggered = true
 	# Now a conditional stalker: it only lurches forward while you move/pan; hold
-	# still to keep it back. The left door remains a backup counter.
+	# still to keep it back. The RIGHT door remains a backup counter.
 	movement_model = MODEL_CREEPER
+	# DETERMINISTIC side: the corpse rushes the SAME wing Mun was seen crossing (the
+	# authored right wing), so the on-camera telegraph pays off. Pin the path to the
+	# canonical route and stop _apply_side from re-mirroring it on any later reset.
+	randomize_side = false
+	path = _base_path.duplicate()
+	threatening_side = GameEnums.Side.RIGHT
 	Events.cat_triggered.emit()
 	Events.notify.emit("CAT_WARN", [])
 	Audio.play_sfx("sting_metal", -3.0, 1.0, Audio.VERB_BUS)   # the corpse sits up
