@@ -70,6 +70,13 @@ static func texture_rect(path: String, stretch: int = TextureRect.STRETCH_KEEP_A
 	if ResourceLoader.exists(path):
 		t.texture = load(path)
 	t.stretch_mode = stretch
+	# Fill modes (SCALE / COVERED) are for full-rect images. Without IGNORE_SIZE a
+	# TextureRect's minimum size is its texture's raster size — and since SVGs import at
+	# svg/scale=2 that's 2x the screen, so the rect overflows its anchored bounds and only
+	# a zoomed top-left corner shows (the camera-feed "scene cut off" bug). KEEP_ASPECT and
+	# KEEP_ASPECT_CENTERED stay natural-sized for icons laid out inside containers.
+	if stretch == TextureRect.STRETCH_SCALE or stretch == TextureRect.STRETCH_KEEP_ASPECT_COVERED:
+		t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return t
 
