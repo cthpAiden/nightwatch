@@ -42,13 +42,13 @@ static func _make(row: Array) -> ItemDef:
 static func _cost(id: String) -> int:
 	match id:
 		"bua_that", "banh_chung", "canh_gai":
-			return 3
+			return 10
 		"nhang", "muoi_gao", "nuoc_phep", "vong_dau_tam", "toi":
-			return 2
+			return 7
 		"nuoc_mam", "den_ong_sao":
-			return 1
+			return 4
 		_:
-			return 1
+			return 4
 
 static func all() -> Array:
 	var out: Array = []

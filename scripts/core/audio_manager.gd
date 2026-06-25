@@ -84,7 +84,7 @@ func _ensure_buses() -> void:
 		comp.ratio = 3.5
 		comp.attack_us = 18000.0
 		comp.release_ms = 240.0
-		comp.gain = 2.0
+		comp.gain = 1.0
 		AudioServer.add_bus_effect(mi, comp)
 		var lim := AudioEffectLimiter.new()
 		lim.ceiling_db = -0.6
