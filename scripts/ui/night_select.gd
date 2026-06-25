@@ -17,6 +17,7 @@ func _ready() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	vb.add_child(grid)
+	var first_btn: Button = null
 	for n in range(1, Game.MAX_NIGHTS + 1):
 		var b := UI.button("", 234, 56)
 		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
@@ -25,15 +26,29 @@ func _ready() -> void:
 		var unlocked := Save.is_night_unlocked(n)
 		if unlocked:
 			b.text = "%s · %s" % [tr("NIGHT_LABEL").format([str(n)]), title]
-			b.pressed.connect(func(): Game.start_story_night(n))
+			b.pressed.connect(func():
+				Audio.play_sfx("ui_click", -6.0)
+				Game.start_story_night(n))
+			if first_btn == null:
+				first_btn = b
 		else:
 			b.text = "🔒 " + tr("NIGHT_LABEL").format([str(n)])
 			b.disabled = true
 		grid.add_child(b)
 
 	var shrine := UI.button("MENU_SHRINE", 220, 48)
-	shrine.pressed.connect(func(): Router.change_scene("res://scenes/screens/ShrineScreen.tscn"))
+	shrine.pressed.connect(func():
+		Audio.play_sfx("ui_click", -6.0)
+		Router.change_scene("res://scenes/screens/ShrineScreen.tscn"))
 	vb.add_child(shrine)
 	var back := UI.button("SET_BACK", 220, 48)
-	back.pressed.connect(func(): Router.to_main_menu())
+	back.pressed.connect(func():
+		Audio.play_sfx("ui_back", -4.0)
+		Router.to_main_menu())
 	vb.add_child(back)
+
+	# Keyboard/gamepad cursor lands on the first playable night.
+	if first_btn:
+		first_btn.grab_focus()
+	else:
+		back.grab_focus()

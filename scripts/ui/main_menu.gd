@@ -20,7 +20,7 @@ func _ready() -> void:
 	add_child(vb)
 
 	var cleared_any := not Save.nights_cleared.is_empty()
-	_add(vb, "MENU_NEW_GAME", func(): Router.to_intro())
+	var new_game := _add(vb, "MENU_NEW_GAME", func(): Router.to_intro())
 	var cont := _add(vb, "MENU_CONTINUE", func(): Game.start_story_night(Save.highest_unlocked))
 	cont.disabled = not cleared_any
 	_add(vb, "MENU_NIGHTS", func(): Router.change_scene("res://scenes/screens/NightSelect.tscn"))
@@ -45,6 +45,9 @@ func _ready() -> void:
 	# before they land on an all-Vietnamese menu.
 	if Settings.first_run:
 		_show_lang_picker()
+	else:
+		# Keyboard/gamepad players land on the primary action with a visible cursor.
+		new_game.grab_focus()
 
 func _show_lang_picker() -> void:
 	var layer := CanvasLayer.new()

@@ -33,10 +33,13 @@ func _ready() -> void:
 		sl.min_value = 0
 		sl.max_value = 20
 		sl.step = 1
-		sl.value = 5
+		# Restore the last-built night so reopening the screen doesn't wipe the dial back
+		# to default; falls back to 5 for spirits not in the saved levels dict.
+		var seed_lv := int(Game.custom_levels.get(id, 5))
+		sl.value = seed_lv
 		sl.custom_minimum_size = Vector2(300, 24)
 		grid.add_child(sl)
-		var val := UI.text_label("5", 18, Color(1.0, 0.85, 0.45), HORIZONTAL_ALIGNMENT_RIGHT)
+		var val := UI.text_label(str(seed_lv), 18, Color(1.0, 0.85, 0.45), HORIZONTAL_ALIGNMENT_RIGHT)
 		val.custom_minimum_size = Vector2(40, 0)
 		grid.add_child(val)
 		sl.value_changed.connect(func(v): val.text = str(int(v)))

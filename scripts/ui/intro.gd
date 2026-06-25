@@ -9,6 +9,9 @@ var _done := false
 
 func _ready() -> void:
 	UI.full(self)
+	# Animated base layer so the intro breathes like the menus, with the static
+	# gate art (and its vignette) sitting on top.
+	add_child(UI.backdrop("menu"))
 	var bg := UI.texture_rect("res://assets/art/intro/intro_bg.svg", TextureRect.STRETCH_KEEP_ASPECT_COVERED)
 	UI.full(bg)
 	add_child(bg)

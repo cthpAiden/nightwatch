@@ -20,6 +20,9 @@ func _ready() -> void:
 	vb.add_child(UI.label("WIN_THANKS", 18, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	vb.add_child(UI.label("WIN_SIGN", 16, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	vb.add_child(UI.text_label("%s: %d" % [tr("HUD_COINS"), Save.coins], 20, Color(1.0, 0.85, 0.4), HORIZONTAL_ALIGNMENT_CENTER))
+	# Investigation tracker: show progress toward her freedom every dawn, not just on
+	# the final screen, so the player sees the clue count climb.
+	vb.add_child(UI.text_label("%s: %d/3" % [tr("STATS_CLUES"), Save.clue_count()], 18, Color(0.86, 0.78, 0.55), HORIZONTAL_ALIGNMENT_CENTER))
 
 	var row := UI.hbox(14)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER

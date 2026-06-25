@@ -9,10 +9,9 @@ func _ready() -> void:
 	var good := Save.investigation_complete()
 	Save.mark_ending_seen("sieuthoat" if good else "survive")
 
-	var bg_path := "res://assets/art/screens/ending_sieuthoat.svg" if good else "res://assets/art/screens/ending_survive.svg"
-	var bg := UI.texture_rect(bg_path, TextureRect.STRETCH_KEEP_ASPECT_COVERED)
-	UI.full(bg)
-	add_child(bg)
+	# Animated bookend backdrop instead of a flat card: warm dawn when she's freed,
+	# cold dark when you only survived. Reuses the menu_backdrop shader (no new art).
+	add_child(UI.backdrop("dawn" if good else "dark"))
 	var vig := UI.texture_rect("res://assets/art/ui/vignette.svg", TextureRect.STRETCH_SCALE)
 	UI.full(vig)
 	add_child(vig)

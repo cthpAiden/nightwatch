@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=8 format=3]
+[gd_resource type="Theme" load_steps=10 format=3]
 
 [ext_resource type="FontFile" path="res://assets/fonts/BeVietnamPro-Regular.ttf" id="1_font"]
 [ext_resource type="FontFile" path="res://assets/fonts/BeVietnamPro-SemiBold.ttf" id="2_bold"]
@@ -51,6 +51,38 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="btn_focus"]
+content_margin_left = 18.0
+content_margin_top = 9.0
+content_margin_right = 18.0
+content_margin_bottom = 9.0
+bg_color = Color(0.086, 0.125, 0.18, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.91, 0.64, 0.24, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="btn_disabled"]
+content_margin_left = 18.0
+content_margin_top = 9.0
+content_margin_right = 18.0
+content_margin_bottom = 9.0
+bg_color = Color(0.086, 0.125, 0.18, 0.5)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.32, 0.34, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [sub_resource type="StyleBoxFlat" id="panel"]
 content_margin_left = 16.0
 content_margin_top = 16.0
@@ -90,13 +122,15 @@ corner_radius_bottom_left = 5
 default_font = ExtResource("1_font")
 default_font_size = 20
 Button/colors/font_color = Color(0.91, 0.918, 0.816, 1)
+Button/colors/font_disabled_color = Color(0.45, 0.48, 0.5, 1)
 Button/colors/font_hover_color = Color(1, 1, 1, 1)
 Button/colors/font_pressed_color = Color(0.8, 0.82, 0.78, 1)
 Button/fonts/font = ExtResource("2_bold")
+Button/styles/disabled = SubResource("btn_disabled")
 Button/styles/normal = SubResource("btn_normal")
 Button/styles/hover = SubResource("btn_hover")
 Button/styles/pressed = SubResource("btn_pressed")
-Button/styles/focus = SubResource("btn_normal")
+Button/styles/focus = SubResource("btn_focus")
 Label/colors/font_color = Color(0.88, 0.9, 0.85, 1)
 Panel/styles/panel = SubResource("panel")
 PanelContainer/styles/panel = SubResource("panel")

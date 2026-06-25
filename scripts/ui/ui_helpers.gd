@@ -54,6 +54,17 @@ static func button(key: String, min_w: float = 240.0, min_h: float = 52.0) -> Bu
 	b.text = key
 	b.custom_minimum_size = Vector2(min_w, min_h)
 	b.focus_mode = Control.FOCUS_ALL
+	# Press juice: every button scales down on press and springs back on release,
+	# with a faint hover brighten. Pivot is recentred on each press so it scales
+	# from the middle even before the first layout pass settles the size.
+	b.button_down.connect(func():
+		b.pivot_offset = b.size * 0.5
+		b.create_tween().tween_property(b, "scale", Vector2(0.94, 0.94), 0.07))
+	b.button_up.connect(func():
+		b.pivot_offset = b.size * 0.5
+		b.create_tween().tween_property(b, "scale", Vector2.ONE, 0.07))
+	b.mouse_entered.connect(func(): b.modulate = Color(1.06, 1.06, 1.06))
+	b.mouse_exited.connect(func(): b.modulate = Color.WHITE)
 	return b
 
 static func icon_button(tex_path: String, size: float = 84.0) -> TextureButton:

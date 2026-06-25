@@ -46,7 +46,9 @@ func _ready() -> void:
 	panel.add_child(pad)
 	var tcol := UI.vbox(12)
 	pad.add_child(tcol)
-	_title = UI.text_label("", 22, Color(0.95, 0.8, 0.4), HORIZONTAL_ALIGNMENT_LEFT)
+	# Seed a heading so the panel reads as a labelled cassette even before a tape is
+	# picked, instead of a blank line above the prompt.
+	_title = UI.text_label(tr("TAPE_FROM"), 22, Color(0.95, 0.8, 0.4), HORIZONTAL_ALIGNMENT_LEFT)
 	tcol.add_child(_title)
 	_text = UI.text_label(tr("TAPE_PICK"), 18, UI.COL_TEXT, HORIZONTAL_ALIGNMENT_LEFT)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -54,15 +56,20 @@ func _ready() -> void:
 	tcol.add_child(_text)
 
 	var back := UI.button("SET_BACK", 220, 46)
-	back.pressed.connect(func(): Router.change_scene("res://scenes/screens/ExtrasScreen.tscn"))
+	back.pressed.connect(func():
+		Audio.stop_loop("static_loop")
+		Router.change_scene("res://scenes/screens/ExtrasScreen.tscn"))
 	vb.add_child(back)
 	Audio.play_music("ambience_night")
+	# A faint tape-deck hiss under the archive so replays feel like a cassette.
+	Audio.start_loop("static_loop", -22.0)
 
 func _show(night: int) -> void:
 	Audio.play_sfx("ui_click", -6.0)
 	_title.text = tr("TAPE_NIGHT_LABEL") % night
 	var lines: Array = Lore.tape_keys(night)
-	var body := ""
+	# Cassette framing line so a replay reads as bác Tư's tape, not bare transcript.
+	var body := tr("TAPE_FROM") + "\n\n"
 	for k in lines:
 		body += tr(k) + "\n\n"
 	_text.text = body.strip_edges()

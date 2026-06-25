@@ -23,7 +23,8 @@ func _ready() -> void:
 			vb.add_child(UI.text_label(tr("GO_CAUGHT_BY").format([tr(meta.get("name_key", cause))]),
 				20, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 		# A one-line counter tip teaches the player how to avoid that grab next time.
-		var tip := UI.label("COUNTER_" + cause.to_upper(), 16, Color(0.6, 0.66, 0.62), HORIZONTAL_ALIGNMENT_CENTER)
+		# Bigger and warm clue-gold so it reads as actionable advice, not flavour.
+		var tip := UI.label("COUNTER_" + cause.to_upper(), 20, Color(0.86, 0.78, 0.55), HORIZONTAL_ALIGNMENT_CENTER)
 		tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		tip.custom_minimum_size = Vector2(560, 0)
 		vb.add_child(tip)
@@ -41,3 +42,6 @@ func _ready() -> void:
 	var menu := UI.button("GO_MENU", 220, 50)
 	menu.pressed.connect(func(): Router.to_main_menu())
 	row.add_child(menu)
+	# Default focus to Retry so a keyboard/controller player can re-enter the night
+	# immediately without hunting for the button.
+	retry.grab_focus()

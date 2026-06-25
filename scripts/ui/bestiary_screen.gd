@@ -15,6 +15,14 @@ func _ready() -> void:
 	add_child(vb)
 	vb.add_child(UI.label("BESTIARY_TITLE", 40, Color(0.9, 0.86, 0.8), HORIZONTAL_ALIGNMENT_CENTER))
 	vb.add_child(UI.label("BESTIARY_HINT", 15, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
+	# Discovered-count subtitle so collection progress is visible at a glance.
+	var all_ids: Array = ThreatRegistry.ids()
+	var seen_n := 0
+	for id in all_ids:
+		if Save.bestiary_seen.get(id, false):
+			seen_n += 1
+	vb.add_child(UI.text_label("%s %d/%d" % [tr("BESTIARY_DISCOVERED"), seen_n, all_ids.size()],
+		15, Color(0.86, 0.78, 0.55), HORIZONTAL_ALIGNMENT_CENTER))
 
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(852, 430)
@@ -54,6 +62,11 @@ func _card(id: String) -> Control:
 	if seen:
 		var accent: Color = info.get("accent", UI.COL_TEXT)
 		col.add_child(UI.label(info.get("name_key", id), 20, accent))
+		# Fear rating as filled/empty dots in the spirit's accent colour (language-neutral,
+		# display-only over the existing ThreatRegistry "fear" field).
+		var fear := int(info.get("fear", 0))
+		if fear > 0:
+			col.add_child(UI.text_label("●".repeat(fear) + "○".repeat(maxi(0, 5 - fear)), 14, accent))
 		col.add_child(UI.label(info.get("tag_key", ""), 13, Color(0.72, 0.7, 0.5)))
 		var d := UI.label(info.get("desc_key", ""), 14, UI.COL_DIM)
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -19,6 +19,25 @@ func _ready() -> void:
 	_row(vb, "STATS_OUTAGES", str(int(s.get("power_outages", 0))))
 	_row(vb, "STATS_OFFERINGS", str(int(s.get("offerings_made", 0))))
 	_row(vb, "STATS_CLUES", "%d/3" % Save.clue_count())
+	# Endings collected: mirror the clue tracker so completionists see what's left.
+	var endings := int(Save.has_ending("survive")) + int(Save.has_ending("sieuthoat"))
+	_row(vb, "STATS_ENDINGS", "%d/2" % endings)
+	# Nemesis: which spirit has caught the player most. Only shown once there's a death
+	# on record, so a fresh save isn't littered with an empty row.
+	var by: Dictionary = s.get("deaths_by", {})
+	if not by.is_empty():
+		var worst_id := ""
+		var worst_n := 0
+		for id in by:
+			var n := int(by[id])
+			if n > worst_n:
+				worst_n = n
+				worst_id = id
+		if worst_id != "":
+			_row(vb, "STATS_NEMESIS", "%s (%d)" % [tr(ThreatRegistry.name_key(worst_id)), worst_n])
+	# Surface the existing custom-night-beaten flag.
+	if Save.custom_night_beaten:
+		_row(vb, "STATS_CUSTOM", tr("BTN_YES"))
 
 	var back := UI.button("SET_BACK", 240, 48)
 	back.pressed.connect(func(): Router.change_scene("res://scenes/screens/ExtrasScreen.tscn"))

@@ -68,7 +68,7 @@ func _make_card(def: ItemDef) -> Control:
 	return card
 
 func _pick(def: ItemDef) -> void:
-	Audio.play_sfx("ui_confirm", -4.0)
+	Audio.play_sfx("coin_chime", -9.0)
 	if _on_pick.is_valid():
 		var ok = _on_pick.call(def)
 		if ok == false:
