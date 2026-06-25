@@ -11,7 +11,7 @@ var _refresh_t := 0.0
 var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
 var _fx_burst := 0.0                # decaying static spike on channel change
 var _fog := 0.0                     # extra baseline static on a "fog" night
-const FX_BASE := 0.09
+const FX_BASE := 0.06
 
 ## A foggy night runs every feed heavier with static (set once at night start).
 func set_fog_level(v: float) -> void:
@@ -53,19 +53,26 @@ func _build() -> void:
 	UI.full(bg)
 	add_child(bg)
 
-	# SCALE (not KEEP_ASPECT_COVERED) so the whole feed image fills the screen
-	# without being zoomed in / cropped — the bezel art frames the edges. The feed's
-	# own material both GRADES the image (so it reads as a live CCTV monitor, not flat
-	# grey) and lays the CCTV noise/scanline over it in one pass.
+	# The feed fills the WHOLE screen edge-to-edge (only a hair of inset for the bezel).
+	# Aspect is handled in-shader by a COVER fit (object-fit: cover) keyed off rect_aspect,
+	# so the 16:9 art fills any window aspect without the tall/squashed stretch the old
+	# STRETCH_SCALE gave under `expand`. The material also grades the feed (live CCTV, not
+	# flat grey) and lays the noise/scanline over it in one pass.
 	_feed = UI.texture_rect("res://assets/art/cameras/cam_gate.svg", TextureRect.STRETCH_SCALE)
-	UI.place(_feed, 0, 0, 1, 1, 40, 36, -40, -36)
+	UI.place(_feed, 0, 0, 1, 1, 14, 12, -14, -12)
 	var sh := Shader.new()
 	sh.code = """
 shader_type canvas_item;
 uniform float strength = 0.10;
+uniform float rect_aspect = 1.7778;
 float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
 void fragment() {
-	vec4 src = texture(TEXTURE, UV);
+	// COVER fit: centre-crop the 16:9 source to fill the rect at any aspect, no stretch.
+	vec2 fuv = UV;
+	float r = rect_aspect / 1.7778;
+	if (r > 1.0) fuv.y = (fuv.y - 0.5) / r + 0.5;
+	else fuv.x = (fuv.x - 0.5) * r + 0.5;
+	vec4 src = texture(TEXTURE, fuv);
 	vec3 c = src.rgb;
 	// De-grey grade: add contrast, restore saturation the night art crushes out, give
 	// the feed a faint cold-CCTV cast, and lift the blacks so it isn't a dead grey slab.
@@ -80,7 +87,7 @@ void fragment() {
 	c -= (sin(UV.y * 720.0) * 0.5 + 0.5) * strength * 0.10;
 	// Soft vignette draws the eye to the centre of the frame.
 	float vig = distance(UV, vec2(0.5));
-	c *= 1.0 - smoothstep(0.55, 1.0, vig) * 0.5;
+	c *= 1.0 - smoothstep(0.6, 1.05, vig) * 0.5;
 	COLOR = vec4(clamp(c, 0.0, 1.0), src.a);
 }
 """
@@ -92,7 +99,7 @@ void fragment() {
 	add_child(_feed)
 
 	_threat_host = Control.new()
-	UI.place(_threat_host, 0, 0, 1, 1, 40, 36, -40, -36)
+	UI.place(_threat_host, 0, 0, 1, 1, 14, 12, -14, -12)
 	_threat_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_threat_host)
 
@@ -174,6 +181,10 @@ func _cam_code(cam_id: String) -> String:
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	# Keep the feed's COVER fit correct for the live window aspect (so it fills any screen
+	# under `expand` without stretching) — cheap, just a uniform write.
+	if _fx_mat and _feed and _feed.size.y > 1.0:
+		_fx_mat.set_shader_parameter("rect_aspect", _feed.size.x / _feed.size.y)
 	# Ease the channel-change static burst back down to the resting noise level.
 	if _fx_burst > 0.0 and _fx_mat:
 		_fx_burst = maxf(0.0, _fx_burst - delta * 3.0)
