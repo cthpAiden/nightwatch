@@ -67,15 +67,15 @@ WIN_SIGN,— Ban Giám Hiệu,— The School Board
 WIN_AGAIN,...Thử đêm khó hơn không?,...Try a harder night?
 WIN_NEXT_NIGHT,Đêm Tiếp Theo,Next Night
 WIN_ALL_DONE,Anh đã qua hết các đêm. Anh là bảo vệ thật sự.,You cleared every night. You are a true guard.
-WIN_SIEU_TITLE,Siêu Thoát,At Rest
+WIN_SIEU_TITLE,Siêu Thoát,Set Free
 ENDING_GOOD_L1,"Đêm thứ sáu tàn. Nhưng lần này, anh không chỉ sống sót.","The sixth night ends. But this time, you did more than survive."
 ENDING_GOOD_L2,"Anh đã ghép lại câu chuyện của em — cái tên, bức vẽ, gương mặt.","You pieced her story together — the name, the drawing, the face."
-ENDING_GOOD_L3,"Anh thắp nén nhang cuối, gọi đúng tên em. Oan tình được gỡ.","You light the last incense and call her true name. The grievance unwinds."
+ENDING_GOOD_L3,"Anh thắp nén nhang cuối, gọi đúng tên em. Oan tình được gỡ.","You light the last incense and call her name — Linh. The grievance unwinds."
 ENDING_GOOD_L4,"Bóng trắng tan vào ánh bình minh. Ngôi trường, cuối cùng, được ngủ yên.","The pale shape melts into the dawn. The school, at last, can rest."
 ENDING_GOOD_SIGN,"Em đã siêu thoát. Bác Tư hẳn sẽ tự hào.","She is free. Bác Tư would be proud."
-EPILOGUE_TITLE,Bình Minh,Daybreak
+EPILOGUE_TITLE,Bình Minh,Cold Dawn
 ENDING_SURV_L1,"Đêm thứ sáu tàn. Anh còn sống. Tay vẫn run.","The sixth night ends. You're alive. Your hands still shake."
-ENDING_SURV_L2,"Nhưng có thứ gì đó vẫn chưa xong. Một ô cửa trên lầu còn sáng.","But something is unfinished. One upstairs window is still lit."
+ENDING_SURV_L2,"Nhưng có thứ gì đó vẫn chưa xong. Một ô cửa trên lầu còn sáng.","But it isn't finished. One window upstairs is still lit."
 ENDING_SURV_L3,"Em vẫn ở đó, đợi ai đó chịu lắng nghe câu chuyện của em.","She is still there, waiting for someone willing to hear her story."
 ENDING_SURV_L4,"Có lẽ, nếu anh để ý kỹ hơn... anh sẽ gỡ được cho em.","Perhaps, if you look closer... you could set her free."
 ENDING_CLUE_HINT,Manh mối đã tìm: %d/3,Clues found: %d/3
@@ -89,7 +89,7 @@ ENDING_MISSING,"Còn thiếu: %s. Chơi lại để tìm cho đủ.","Still miss
 CREDITS_TITLE,Đội Ngũ,Credits
 CREDITS_FONT,Font: Be Vietnam Pro (SIL OFL 1.1),Font: Be Vietnam Pro (SIL OFL 1.1)
 CREDITS_THANKS,Cảm ơn anh đã chơi. Ngủ ngon.,Thank you for playing. Sleep well.
-CLUE_GOT_NAME,Bác Tư cho anh biết tên em... (manh mối),Bác Tư tells you her name... (a clue)
+CLUE_GOT_NAME,Bác Tư cho anh biết tên em... (manh mối),Bác Tư tells you her name — Linh. (a clue)
 CLUE_GOT_DRAWING,Trên bảng lớp — bức vẽ của em. (manh mối),On the classroom board — her drawing. (a clue)
 CLUE_GOT_PHOTO,Anh thấy rõ gương mặt em trên camera. (manh mối),You see her face clearly on the camera. (a clue)
 GO_TITLE,ĐÊM NAY KHÔNG QUA ĐƯỢC,YOU DIDN'T MAKE IT
@@ -121,7 +121,7 @@ SHOP_PICK_ONE,Chọn một món thôi,Pick just one
 SHOP_LEAVE,Thôi khỏi,No thanks
 SHOP_TIMER,Bà đợi: {0}s,She waits: {0}s
 OFFERING_PROMPT,Đặt mâm cúng,Place an offering
-OFFERING_DONE,Đã cúng. Mong các vong yên nghỉ.,Offering placed. May the souls rest.
+OFFERING_DONE,Đã cúng. Mong các vong yên nghỉ.,"Offering placed — the crowd, the water, and the grievance ease."
 OFFERING_NONE,Hết đồ cúng rồi,No offerings left
 TAPE_TITLE,Băng Ghi Âm,Cassette Tape
 TAPE_PLAY,Nghe băng,Play tape
@@ -195,7 +195,7 @@ HELP_ITEM,Dùng vật phẩm: Q,Use item: Q
 HELP_DRAIN,Khóa cống nước: D,Close drain: D
 LANG_CHOOSE,Chọn ngôn ngữ / Choose language,Chọn ngôn ngữ / Choose language
 CREDITS_MADE_BY,Thực hiện bởi,Made by
-CREDITS_BUILT_WITH,Làm bằng Godot + Claude Code,Built with Godot + Claude Code
+CREDITS_BUILT_WITH,Làm bằng Godot 4,Built with Godot 4
 PROMPT_ANY_KEY,Nhấn phím bất kỳ để tiếp tục,Press any key to continue
 PROMPT_CLICK,Nhấn để tiếp tục,Click to continue
 ITEM_GOT,Nhận: {0},Got: {0}
@@ -203,7 +203,7 @@ ITEM_USED,Dùng: {0},Used: {0}
 WARD_SAVED,Bùa đã cứu anh!,The amulet saved you!
 VENDOR_HOSTILE,"Đóng cửa trái! Cái đó không phải bà ấy!","Close the left door! That isn't her!"
 VENDOR_LEFT,Nó bỏ đi rồi.,It slipped away.
-VENDOR_FAKE_TELL,"Tiếng rao... sai sai. Đừng mở cửa sổ.","That street-cry... is wrong. Don't open the window."
+VENDOR_FAKE_TELL,"Tiếng rao... sai sai. Đừng mở cửa sổ.","That cry is wrong. Don't open the window."
 ACTION_CLOSE_DRAIN,Khóa cống,Shut the drain
 ACTION_ANSWER,Trả lời?,Answer?
 MADA_LURE,"Cứu... cứu tôi với...","Help... please, help me..."
@@ -344,3 +344,10 @@ PHONE_N5_L3,Tao mệt rồi... chỉ giúp được tới đây thôi. Ráng ngh
 PHONE_N6_L1,"Con bé áo dài trắng... liếc nhanh thôi. Đừng nhìn lâu, cũng đừng bỏ mặc.","The girl in white — glance briefly. Don't stare, don't ignore her."
 PHONE_N6_L2,Nó chịu oan. Nhang và đồ cúng làm nó dịu lại.,She was wronged. Incense and offerings calm her.
 PHONE_N6_L3,"Sống tới sáng đi đã. Rồi... giúp nó siêu thoát giùm tao.","Just live till dawn. Then... help her find peace, for me."
+TUT_LIGHT,Bật đèn hành lang để xem ai đang đứng đó — nhấn S hoặc K.,Flick a doorway light to see who's there — press S or K.
+STATS_CUSTOM,Đêm Tùy Chỉnh,Custom Night
+STATS_ENDINGS,Kết cục,Endings
+STATS_NEMESIS,Bị bắt nhiều nhất bởi,Most caught by
+SET_DIFF_HELP,Dễ: ma chậm và hiền hơn. Ác Mộng: nhanh và dồn dập.,"Easy: slower, gentler threats. Nightmare: fast and relentless."
+SET_SCARE_HELP,"Giảm: rung nhẹ, không giật hình. Tắt: không có ảnh hù.","Reduced: softer shake, no screen jitter. Off: no jump image."
+BESTIARY_DISCOVERED,Đã khám phá,Discovered

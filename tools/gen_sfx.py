@@ -546,8 +546,8 @@ def _cricket_bed(dur, gap_lo, gap_hi, f_lo, f_hi, gain):
     # very faint airy bed so it isn't dead silence between chirps
     air = lowpass(noise(dur), 900)
     for i in range(n):
-        left[i] += air[i] * 0.012
-        right[i] += air[i] * 0.012
+        left[i] += air[i] * 0.02
+        right[i] += air[i] * 0.02
     peak = max(max(abs(x) for x in left), max(abs(x) for x in right), 1e-9)
     g = 0.7 / peak
     return [(left[i] * g, right[i] * g) for i in range(n)]
@@ -555,13 +555,13 @@ def _cricket_bed(dur, gap_lo, gap_hi, f_lo, f_hi, gain):
 def ambience_night():
     # Calm night: a lively, dense cricket bed (no drone/wind/traffic — those read
     # as a bug). Just crickets, per the brief.
-    stereo = _cricket_bed(14.0, 0.10, 0.30, 3600, 5200, 0.22)
+    stereo = _cricket_bed(26.0, 0.10, 0.30, 3600, 5200, 0.22)
     save("ambience_night.wav", stereo, folder=MUSIC_DIR, stereo=True, peak=0.7)
 
 def ambience_dread():
     # Late nights: the same crickets, sparser and a touch lower — tenser, but
     # still just crickets (no wind/drone).
-    stereo = _cricket_bed(14.0, 0.30, 0.75, 3000, 4400, 0.20)
+    stereo = _cricket_bed(26.0, 0.30, 0.75, 3000, 4400, 0.20)
     save("ambience_dread.wav", stereo, folder=MUSIC_DIR, stereo=True, peak=0.7)
 
 # ---------------------------------------------------------------- horror: anticipation + body
