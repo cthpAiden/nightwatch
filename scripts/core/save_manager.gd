@@ -35,12 +35,13 @@ func _ready() -> void:
 
 func load_progress() -> void:
 	var cfg := ConfigFile.new()
+	var recovered := false
 	var err := cfg.load(PATH)
 	if err != OK:
 		# Try a backup from the last good atomic write before giving up.
 		var bak := PATH + ".bak"
 		if FileAccess.file_exists(bak) and cfg.load(bak) == OK:
-			pass   # recovered from backup
+			recovered = true   # recovered from backup; rewrite a healthy cfg below
 		elif FileAccess.file_exists(PATH):
 			# The file exists but is unreadable/corrupt. Copy it aside to a non-rotating
 			# name (a later save rotates .bak, so that alone wouldn't preserve it), then
@@ -69,9 +70,18 @@ func load_progress() -> void:
 	night_best_coins = cfg.get_value("progress", "night_best_coins", {})
 	stats = cfg.get_value("stats", "data", stats)
 	_migrate(ver)
+	# Recovered from .bak: immediately rewrite a healthy progress.cfg, otherwise the next
+	# routine save would rotate the still-corrupt cfg over our only good backup.
+	if recovered:
+		save_progress()
 
 ## Forward-migration hook. Bump SAVE_VERSION and add a branch per schema change.
 func _migrate(from_version: int) -> void:
+	if from_version > SAVE_VERSION:
+		# Save came from a newer build; don't run old migrations or rewrite it and risk
+		# downgrading fields this build doesn't understand.
+		push_warning("progress.cfg is from a newer version (%d > %d); not overwriting." % [from_version, SAVE_VERSION])
+		return
 	if from_version < SAVE_VERSION:
 		# v0 (pre-versioning) -> v1: new fields default to empty; nothing to convert.
 		save_progress()
@@ -123,8 +133,12 @@ func unlock_night(n: int) -> void:
 	save_progress()
 
 func mark_night_cleared(n: int) -> void:
+	# Only count the win the first time this night is cleared; replays of an
+	# already-cleared night must not inflate nights_won.
+	var first := not nights_cleared.has(n)
 	nights_cleared[n] = true
-	stats["nights_won"] = int(stats.get("nights_won", 0)) + 1
+	if first:
+		stats["nights_won"] = int(stats.get("nights_won", 0)) + 1
 	save_progress()
 
 func see_threat(threat_id: String) -> void:

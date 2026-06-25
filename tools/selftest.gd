@@ -375,6 +375,64 @@ func _run(c) -> void:
 	Save.night_best_coins = saved_best   # restore real progress
 	Save.save_progress()
 
+	print("\n--- SAVE ROBUSTNESS ---")
+	# (a) A win is counted once: replaying an already-cleared night must not inflate
+	# nights_won. Pure in-memory, restored afterwards.
+	var saved_nc: Dictionary = Save.nights_cleared.duplicate(true)
+	var saved_stats: Dictionary = Save.stats.duplicate(true)
+	Save.nights_cleared = {}
+	Save.stats["nights_won"] = 0
+	Save.mark_night_cleared(2)
+	Save.mark_night_cleared(2)   # replay of an already-cleared night
+	check("mark_night_cleared counts a win once", int(Save.stats.get("nights_won", 0)) == 1 and Save.nights_cleared.has(2))
+	Save.nights_cleared = saved_nc
+	Save.stats = saved_stats
+	Save.save_progress()
+
+	# (b) .bak recovery re-heals progress.cfg; (c) a newer save_version is not downgraded.
+	# The real save files are sandboxed to *.selftest and restored at the end, so the
+	# player's campaign is never touched even if a check fails.
+	var pth: String = Save.PATH
+	var da2 := DirAccess.open("user://")
+	if da2 != null:
+		var had_main := da2.file_exists(pth)
+		var had_bak := da2.file_exists(pth + ".bak")
+		if had_main:
+			if da2.file_exists(pth + ".selftest"): da2.remove(pth + ".selftest")
+			da2.copy(pth, pth + ".selftest")
+		if had_bak:
+			if da2.file_exists(pth + ".bak.selftest"): da2.remove(pth + ".bak.selftest")
+			da2.copy(pth + ".bak", pth + ".bak.selftest")
+		# Known-good backup, deliberately-corrupt main: recovery should read the .bak.
+		var good := ConfigFile.new()
+		good.set_value("meta", "version", Save.SAVE_VERSION)
+		good.set_value("progress", "highest_unlocked", 4)
+		good.set_value("progress", "coins", 77)
+		good.save(pth + ".bak")
+		var fbad := FileAccess.open(pth, FileAccess.WRITE)
+		fbad.store_buffer(PackedByteArray([0, 1, 2, 255, 254, 91, 91, 91, 61, 61]))
+		fbad.close()
+		Save.load_progress()
+		check("recovery restores values from .bak", Save.highest_unlocked == 4 and Save.coins == 77)
+		var reheal := ConfigFile.new()
+		check("recovery re-heals a clean progress.cfg on disk", reheal.load(pth) == OK)
+		# Forward-version guard: a save from a newer build must not be silently downgraded.
+		var future := ConfigFile.new()
+		future.set_value("meta", "version", Save.SAVE_VERSION + 99)
+		future.set_value("progress", "highest_unlocked", 5)
+		future.save(pth)
+		if da2.file_exists(pth + ".bak"): da2.remove(pth + ".bak")   # force a read of main
+		Save.load_progress()
+		var after := ConfigFile.new()
+		after.load(pth)
+		check("newer save_version is not downgraded on disk", int(after.get_value("meta", "version", 0)) == Save.SAVE_VERSION + 99)
+		# Restore the player's real save exactly.
+		if da2.file_exists(pth): da2.remove(pth)
+		if da2.file_exists(pth + ".bak"): da2.remove(pth + ".bak")
+		if had_main: da2.rename(pth + ".selftest", pth)
+		if had_bak: da2.rename(pth + ".bak.selftest", pth + ".bak")
+		Save.load_progress()
+
 	print("\n--- MA TROI HEX IS NON-LETHAL ---")
 	c._hex_t = 0.0
 	if c.is_door_closed(GameEnums.Side.LEFT):   # ensure the door is OPEN so the rusher looms
