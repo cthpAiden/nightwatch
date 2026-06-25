@@ -330,7 +330,7 @@ def jumpscare():
     # massive low impact at the front
     out = add(out, exp_decay(sine(55, 0.8), 0.2), 0.0, 1.4)
     out = adsr(out, a=0.001, d=0.1, s=0.85, r=0.4)
-    save("jumpscare.wav", soft_clip(out), folder=JUMP_DIR, peak=0.99)
+    save("jumpscare.wav", soft_clip(out), folder=JUMP_DIR, peak=0.9)
 
 def stinger():
     # short dread hit for scares that aren't a game over
