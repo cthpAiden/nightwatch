@@ -8,6 +8,7 @@ extends Control
 ## It ignores the mouse, so it sits harmlessly behind a screen's buttons.
 
 var mood := "menu"
+var _mat: ShaderMaterial
 
 func _ready() -> void:
 	UI.full(self)
@@ -15,13 +16,20 @@ func _ready() -> void:
 	var rect := ColorRect.new()
 	UI.full(rect)
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var mat := ShaderMaterial.new()
+	_mat = ShaderMaterial.new()
 	var sh := Shader.new()
 	sh.code = SHADER
-	mat.shader = sh
-	_apply_mood(mat)
-	rect.material = mat
+	_mat.shader = sh
+	_apply_mood(_mat)
+	rect.material = _mat
 	add_child(rect)
+
+## Keep the moon round at any window aspect (the backdrop fills the screen under `expand`).
+func _process(_delta: float) -> void:
+	if _mat:
+		var s := get_viewport_rect().size
+		if s.y > 1.0:
+			_mat.set_shader_parameter("screen_aspect", s.x / s.y)
 
 ## Per-mood palette: menu = cold blue night + a faint warm altar glow; dark = a
 ## bruised red dread for the game-over card; dawn = a warm sunrise for survival/endings.
@@ -58,6 +66,7 @@ uniform vec2 moon_pos = vec2(0.76, 0.22);
 uniform float moon_amt = 1.0;
 uniform float fog_amt = 1.0;
 uniform float ember_amt = 1.0;
+uniform float screen_aspect = 1.7778;
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p){
@@ -77,7 +86,7 @@ void fragment(){
 	vec2 uv = UV;
 	vec3 col = mix(sky_top.rgb, sky_bot.rgb, smoothstep(0.0, 1.0, uv.y));
 	// Moon: a small soft disc with a contained halo (aspect-corrected so it's round).
-	vec2 ar = vec2(1.0, 0.5625);
+	vec2 ar = vec2(1.0, 1.0 / max(screen_aspect, 0.1));
 	float md = distance(uv * ar, moon_pos * ar);
 	float disc = smoothstep(0.066, 0.05, md);              // filled disc, soft rim
 	float surf = 0.82 + 0.18 * fbm(uv * 26.0);             // faint maria so it isn't a blob
