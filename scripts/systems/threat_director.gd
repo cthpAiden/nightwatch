@@ -3,6 +3,8 @@ extends Node
 ## Spawns the night's threats from a NightConfig and ticks their AI each frame.
 ## Routes player actions (door/light/pan/view/offering) to every threat.
 
+const _NO_THREAT_DIST := 1 << 30   # "infinity" stand-in for the nearest-threat scan
+
 var threats: Array[ThreatBase] = []
 var night_progress: float = 0.0
 
@@ -23,7 +25,6 @@ func setup(controller, cfg: NightConfig) -> void:
 		var t: ThreatBase = scr.new()
 		t.id = id
 		t.name = id
-		t.name_key = meta.get("name_key", id)
 		t.fear_factor = meta.get("fear", 3)
 		t.accent_color = meta.get("accent", Color(0.8, 0.2, 0.2))
 		t.tex_idle = ThreatRegistry.load_tex(id, "idle")
@@ -57,7 +58,7 @@ func threat_at_door(side: int) -> ThreatBase:
 
 func nearest_threat() -> ThreatBase:
 	var best: ThreatBase = null
-	var best_d := 99999
+	var best_d := _NO_THREAT_DIST
 	for t in threats:
 		# Only positional rushers can be meaningfully "set back" to spawn; meter
 		# threats store their danger in flood/crowd/agro/lock, not in position.

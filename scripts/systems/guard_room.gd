@@ -33,6 +33,7 @@ var _pivot: Node3D
 var _cam: Camera3D
 var _doors := {}             # side -> Node3D
 var _door_closed := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}
+var _door_tw := {}           # side -> Tween (single live tween per side; a reversal retargets cleanly)
 var _lights := {}            # side -> SpotLight3D
 var _light_on := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}
 var _lamp_mats := {}         # side -> StandardMaterial3D (visible wall fixture glow)
@@ -978,7 +979,10 @@ func set_door(side: int, closed: bool) -> void:
 	_door_closed[side] = closed
 	var door: Node3D = _doors[side]
 	var ty := DOOR_CLOSED_Y if closed else DOOR_OPEN_Y
+	if _door_tw.get(side) and _door_tw[side].is_valid():
+		_door_tw[side].kill()   # a rapid reverse must not leave two tweens fighting position:y
 	var tw := create_tween()
+	_door_tw[side] = tw
 	if closed:
 		tw.tween_property(door, "position:y", ty, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	else:

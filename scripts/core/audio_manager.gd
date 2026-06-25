@@ -23,7 +23,9 @@ const MUSIC_NAMES := ["ambience_night", "ambience_dread"]
 # NOTE: "whisper" is intentionally NOT here. It is played as a one-shot lure
 # (ma_da / counterfeit vendor); if its WAV had loop_mode set it would play
 # forever in the SFX pool — that was the "windy/sawing" bug.
-const LOOPING := ["fluorescent_hum", "static_loop", "heartbeat", "breathing",
+# NOTE: "fluorescent_hum" is loaded (still in SFX_NAMES) but currently unused —
+# it is never started, so it is intentionally left out of LOOPING.
+const LOOPING := ["static_loop", "heartbeat", "breathing",
 	"ambience_night", "ambience_dread", "drone_tension",
 	"ambience_sub", "water_loop", "shutter_strain", "incense_bed"]
 

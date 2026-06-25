@@ -14,7 +14,7 @@ func _configure() -> void:
 func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
-	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := _ai_at(night_progress)
 	crowd = clampf(crowd + (0.35 + lvl * 0.13) * delta * _meter_mult(), 0.0, 100.0)
 	Events.crowd_changed.emit(crowd / 100.0)
 	current_location = MapGraph.GATE if crowd < 50.0 else MapGraph.CANTEEN
@@ -22,7 +22,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 		_bleed_via(-(crowd - 60.0) * 0.05 * delta)
 
 func on_offering(_location: String) -> void:
-	crowd = maxf(0.0, crowd - 45.0)   # one tray reliably scatters them below the drain threshold
+	crowd = maxf(0.0, crowd - 30.0)   # one tray thins the crowd, but won't fully scatter it
 
 func on_calm() -> void:
 	crowd = maxf(0.0, crowd - 30.0)   # incense settles the crowd a while
@@ -30,7 +30,7 @@ func on_calm() -> void:
 func on_ward_save() -> void:
 	crowd = minf(crowd, 25.0)         # a ward scatters the pressing crowd
 
-func on_via_state(state: int) -> void:
+func on_via_state(_state: int) -> void:
 	# When the guard is already shaken, a big crowd presses harder (handled via drain).
 	pass
 

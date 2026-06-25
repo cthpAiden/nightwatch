@@ -12,15 +12,15 @@ var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is an
 var _fx_burst := 0.0                # decaying static spike on channel change
 var _fog := 0.0                     # extra baseline static on a "fog" night
 const FX_BASE := 0.06
+var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
+var _clue_pulse := 0.0              # animates the unclaimed hotspot so the eye catches it
+var _oan_hint_shown := false        # one-time "tag her" hint on first oan_hon sighting
 
 ## A foggy night runs every feed heavier with static (set once at night start).
 func set_fog_level(v: float) -> void:
 	_fog = maxf(0.0, v)
 	if _fx_mat:
 		_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
-var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
-var _clue_pulse := 0.0              # animates the unclaimed hotspot so the eye catches it
-var _oan_hint_shown := false        # one-time "tag her" hint on first oan_hon sighting
 
 ## Per-camera depth tier for the threat billboard: deeper rooms render the figure
 ## smaller and higher up the frame, near rooms larger and lower — sells the 2.5D space.

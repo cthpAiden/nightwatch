@@ -17,7 +17,7 @@ func _configure() -> void:
 func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
-	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := _ai_at(night_progress)
 	# "Running" = panic: fast panning OR rapid camera-flipping (works even on the
 	# monitor, where raw pan speed is forced to ~0).
 	var agit: float = _controller.get_agitation() if _controller else 0.0

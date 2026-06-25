@@ -69,6 +69,9 @@ func change_scene(path: String, fade_time: float = 0.5) -> void:
 		_pending = [path, fade_time]
 		return
 	_busy = true
+	# Block clicks on the outgoing screen for the duration of the transition (at rest the
+	# transparent overlay stays IGNORE so it never eats gameplay input).
+	_fade.mouse_filter = Control.MOUSE_FILTER_STOP
 	# Sustained loops (heartbeat / tension drone / camera static) live on the Audio
 	# autoload, so they'd otherwise bleed across a scene change (dying with cameras up,
 	# quitting from the pause menu, etc.). Kill them on every transition. Music is left
@@ -85,6 +88,7 @@ func change_scene(path: String, fade_time: float = 0.5) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	await fade_in(fade_time)
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE   # back to pass-through at rest
 	_busy = false
 	if not _pending.is_empty():
 		var nxt: Array = _pending

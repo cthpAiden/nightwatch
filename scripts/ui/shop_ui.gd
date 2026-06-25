@@ -28,7 +28,7 @@ func open(stock: Array, counterfeit: bool, on_pick: Callable) -> void:
 	dim.add_child(portrait)
 
 	var panel := PanelContainer.new()
-	UI.place(panel, 0.5, 0.5, 0.5, 0.5, -360, -220, 460, 240)
+	UI.place(panel, 0.5, 0.5, 0.5, 0.5, -410, -230, 410, 230)
 	dim.add_child(panel)
 	var vb := UI.vbox(14)
 	panel.add_child(vb)

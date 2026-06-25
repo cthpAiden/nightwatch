@@ -25,7 +25,7 @@ const STORY := {
 	3: {"levels": {"ong_ke": 4, "ma_da": 3, "co_hon": 3}, "vendor": true, "spd": 63.0, "name": "NIGHT_TITLE_3", "mods": ["blackout"]},
 	4: {"levels": {"ong_ke": 5, "ma_da": 4, "co_hon": 4, "quy_nhap_trang": 3}, "vendor": true, "spd": 60.0, "name": "NIGHT_TITLE_4", "mods": ["fog"]},
 	5: {"levels": {"ong_ke": 6, "ma_da": 5, "co_hon": 5, "quy_nhap_trang": 4, "ma_troi": 4}, "vendor": true, "spd": 57.0, "name": "NIGHT_TITLE_5", "mods": ["wisp_storm"]},
-	6: {"levels": {"ong_ke": 7, "ma_da": 6, "co_hon": 6, "quy_nhap_trang": 6, "ma_troi": 6, "oan_hon": 8}, "vendor": true, "spd": 55.0, "name": "NIGHT_TITLE_6", "mods": ["blackout", "fog"]},
+	6: {"levels": {"ong_ke": 7, "ma_da": 6, "co_hon": 6, "quy_nhap_trang": 5, "ma_troi": 5, "oan_hon": 6}, "vendor": true, "spd": 55.0, "name": "NIGHT_TITLE_6", "mods": ["blackout", "fog"]},
 }
 
 func _ready() -> void:
@@ -72,8 +72,10 @@ func _build_config(n: int, levels: Dictionary, vendor: bool, spd: float) -> Nigh
 			meter += 1
 	cfg.offerings_start = 0 if meter == 0 else meter + 2
 	cfg.has_tape = not is_custom
-	# Apply difficulty scaling to AI levels and pacing.
-	var lvl_scale := _difficulty_level_scale()
+	# Apply difficulty scaling to AI levels and pacing. Custom nights author their own
+	# 0-20 levels directly (and already force NIGHTMARE), so the level-scale is skipped —
+	# otherwise authored levels would get multiplied a second time and clamp to ~20.
+	var lvl_scale := 1.0 if is_custom else _difficulty_level_scale()
 	var scaled := {}
 	for id in levels:
 		# Floor at 1: a threat the night intentionally includes (any clue-critical or

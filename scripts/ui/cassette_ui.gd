@@ -55,7 +55,7 @@ func show_tape(night: int) -> void:
 	vb.add_child(row)
 
 	visible = true
-	Audio.start_loop("static_loop", -26.0)
+	Audio.start_loop("static_loop", -22.0)
 	_show_line()
 
 func _show_line() -> void:

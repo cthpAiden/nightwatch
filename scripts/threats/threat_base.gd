@@ -12,12 +12,11 @@ extends Node
 const MODEL_PATH := 0       # fixed ordered route to a door (Ma da, Ông kẹ)
 const MODEL_WANDER := 1     # random walk on adjacency (Cô hồn)
 const MODEL_FLYER := 2      # path, but ignores doors; countered by light/offering (Ma lai)
-const MODEL_STALKER := 3    # advances only while NOT watched on its camera
+const MODEL_STALKER := 3    # advances only while NOT watched on its camera — reserved; no current threat uses it
 const MODEL_CREEPER := 4    # advances only while the player is panning/moving
 
 # --- identity / configuration (set by subclass _configure or director) ------
 var id: String = "threat"
-var name_key: String = ""
 var fear_factor: int = 3
 var accent_color: Color = Color(0.8, 0.2, 0.2)
 var movement_model: int = MODEL_PATH
@@ -82,7 +81,7 @@ func _configure() -> void:
 func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
-	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := _ai_at(night_progress)
 
 	if phase == GameEnums.ThreatPhase.AT_DOOR or phase == GameEnums.ThreatPhase.ATTACKING:
 		_process_attack(delta)
@@ -242,6 +241,11 @@ func _meter_mult() -> float:
 	if _controller and _controller.has_method("meter_mult"):
 		return _controller.meter_mult()
 	return 1.0
+
+## Effective AI level for this point in the night: lerps the starting ai_level
+## toward ai_level_end as the night progresses (0..1).
+func _ai_at(night_progress: float) -> float:
+	return lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
 
 ## Continuous (per-frame) vía drain that does NOT freeze regen — meter pressure is
 ## a net bleed you can offset, not a hard regen lockout (see NightController).

@@ -28,7 +28,7 @@ func _configure() -> void:
 func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
-	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := _ai_at(night_progress)
 	if not triggered:
 		var diverted: bool = _controller != null and (_controller.is_barrier_active() \
 			or _controller.is_door_closed(GameEnums.Side.RIGHT))

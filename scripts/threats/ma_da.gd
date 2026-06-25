@@ -21,7 +21,7 @@ func _configure() -> void:
 func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
-	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := _ai_at(night_progress)
 	flood = minf(100.0, flood + (0.35 + lvl * 0.11) * delta * _meter_mult())
 	Events.water_level.emit(flood / 100.0)
 
@@ -70,7 +70,7 @@ func _on_action(action: String) -> void:
 		Audio.play_sfx("incense_whoosh", -8.0)
 
 func on_offering(_location: String) -> void:
-	flood = maxf(0.0, flood - 32.0)   # one offering reliably drops it below the drain threshold
+	flood = maxf(0.0, flood - 22.0)   # one offering eases the flood, but won't fully drain it
 
 func on_calm() -> void:
 	flood = maxf(0.0, flood - 30.0)   # incense at the pond shrine

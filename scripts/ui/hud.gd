@@ -210,7 +210,7 @@ func _ctrl_btn(key: String, cb: Callable, w: float = 180.0) -> Button:
 func _build_help() -> void:
 	_help_panel = Control.new()
 	_help_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UI.place(_help_panel, 1, 0, 1, 0, -288, 128, -22, 372)
+	UI.place(_help_panel, 1, 0, 1, 0, -288, 196, -22, 440)
 	add_child(_help_panel)
 	var bg := UI.color_rect(Color(0.04, 0.05, 0.07, 0.62))
 	UI.full(bg)
@@ -294,7 +294,7 @@ func _process(delta: float) -> void:
 	_warn.text = w
 
 func _refresh_clock(m: int) -> void:
-	var h := m / 60
+	var h := int(float(m) / 60.0)
 	var mm := m % 60
 	var disp_h := 12 if h == 0 else h
 	_clock.text = "%d:%02d %s" % [disp_h, mm, tr("CLOCK_AM")]

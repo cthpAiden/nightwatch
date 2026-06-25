@@ -19,7 +19,7 @@ func _configure() -> void:
 func process_ai(delta: float, night_progress: float) -> void:
 	if not _active:
 		return
-	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := _ai_at(night_progress)
 	var mult := _meter_mult()
 	if _viewing:
 		agro += (3.2 + lvl * 0.4) * delta * mult      # watched too long
@@ -50,7 +50,7 @@ func on_view(is_viewing_my_cam: bool) -> void:
 	_viewing = is_viewing_my_cam
 
 func on_offering(_location: String) -> void:
-	agro = maxf(0.0, agro - 45.0)
+	agro = maxf(0.0, agro - 30.0)
 
 func on_calm() -> void:
 	agro = maxf(0.0, agro - 40.0)   # incense pacifies her zone short-term

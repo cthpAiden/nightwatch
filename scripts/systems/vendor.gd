@@ -102,4 +102,9 @@ func repel_to_idle() -> void:
 		_reset_idle()
 
 func _attack() -> void:
+	# Self-disable so the HOSTILE branch can't re-emit the grab every frame (mirrors
+	# ThreatBase._kill()). The ward path (repel_to_idle) still resets her independently.
+	if state != GameEnums.VendorState.HOSTILE:
+		return
+	state = GameEnums.VendorState.LEAVING
 	Events.jumpscare_started.emit("ba_hang_rong")

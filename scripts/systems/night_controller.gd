@@ -567,7 +567,7 @@ func _update_atmosphere() -> void:
 	var want_drone := looming or via_state == GameEnums.ViaState.CRITICAL
 	if want_drone and not _drone_on:
 		_drone_on = true
-		Audio.start_loop("drone_tension", -16.0)
+		Audio.start_loop("drone_tension", -19.0)
 	elif not want_drone and _drone_on:
 		_drone_on = false
 		Audio.stop_loop("drone_tension")
@@ -582,7 +582,7 @@ func _update_proximity_audio(left_loom: bool, right_loom: bool) -> void:
 		var pitch := 0.92 if (left_loom and not right_loom) else 1.0
 		if not _breath_on:
 			_breath_on = true
-			Audio.start_loop("breathing", -15.0)
+			Audio.start_loop("breathing", -18.0)
 		Audio.set_loop_pitch("breathing", pitch)
 	elif _breath_on:
 		_breath_on = false
@@ -593,7 +593,7 @@ func _update_proximity_audio(left_loom: bool, right_loom: bool) -> void:
 			or (right_loom and room.is_door_closed(GameEnums.Side.RIGHT))
 	if pressed and not _strain_on:
 		_strain_on = true
-		Audio.start_loop("shutter_strain", -16.0)
+		Audio.start_loop("shutter_strain", -19.0)
 	elif not pressed and _strain_on:
 		_strain_on = false
 		Audio.stop_loop("shutter_strain")
@@ -607,7 +607,7 @@ func _advance_clock(delta: float) -> void:
 		Events.clock_advanced.emit(m)
 	# Fire every hour actually crossed so a long frame can never skip the chime
 	# or, critically, the 06:00 win (which would softlock the night).
-	var h := int(game_minutes) / 60
+	var h := int(game_minutes / 60.0)
 	while _last_hour < h:
 		_last_hour += 1
 		Events.hour_reached.emit(_last_hour)
@@ -827,9 +827,9 @@ func request_toggle_monitor() -> void:
 
 func _set_monitor(open: bool) -> void:
 	monitor_open = open
-	monitor.visible = open
 	room.set_look_enabled(not open)
 	if open:
+		monitor.visible = true
 		monitor.modulate.a = 0.0
 		var tw := create_tween()
 		tw.tween_property(monitor, "modulate:a", 1.0, 0.12)
@@ -840,6 +840,11 @@ func _set_monitor(open: bool) -> void:
 		room.set_desk_mirror(current_cam)   # desk CRT mirrors what you're watching
 	else:
 		Audio.play_sfx("camera_down", -6.0)
+		# Fade the panel out to match the raise, then hide it on completion. The next open
+		# resets modulate.a to 0, so leaving a=0 after a faded close is fine.
+		var tw := create_tween()
+		tw.tween_property(monitor, "modulate:a", 0.0, 0.10)
+		tw.tween_callback(func(): monitor.visible = false)
 		Audio.stop_loop("static_loop")
 		director.broadcast_view("")
 		room.set_desk_idle()                # back to the idle slideshow
@@ -887,9 +892,16 @@ func request_pause() -> void:
 	if pause.visible:
 		pause.close()
 		get_tree().paused = false
+		# Restore exactly: re-asserts Master/Music/SFX/Verb from Settings and clears any duck.
+		Audio.apply_volumes()
 	else:
 		pause.open()
 		get_tree().paused = true
+		# Duck the SFX bus (where the heartbeat/drone/breathing/water/static loops live) so the
+		# drone bed drops behind the menu. Reversible — resume calls Audio.apply_volumes().
+		var sfx_idx := AudioServer.get_bus_index(Audio.SFX_BUS)
+		if sfx_idx != -1:
+			AudioServer.set_bus_volume_db(sfx_idx, -60.0)
 
 func open_shop() -> void:
 	if vendor == null or vendor.state != GameEnums.VendorState.SHOP:
@@ -940,7 +952,7 @@ func _caught(cause: String) -> void:
 	# Even a failed night still pays a little vàng mã for the hours you held — so a
 	# loss feeds the shrine meta instead of being pure wasted time.
 	if _last_hour > 0:
-		_earn_coins(_last_hour * 2)
+		_earn_coins(_last_hour * 3)
 	_commit_best()
 	Events.game_over.emit(cause)
 	# Scariness scales with WHO caught you and how late it is: a Night-1 ông kẹ grab and a
@@ -950,6 +962,8 @@ func _caught(cause: String) -> void:
 	var prog := night_progress()
 	var intensity: float = clampf(0.30 + fear * 0.11 + prog * 0.34, 0.0, 1.0)
 	var is_oan: bool = cause == "oan_hon"
+	# REDUCED scare tier is gentler than FULL: softer shake/strobe and no position jitter.
+	var reduced: bool = Settings.scare_intensity == Settings.Scare.REDUCED
 
 	# --- 1) ANTICIPATION — the held breath. The whole mix ducks out, the office snaps
 	# dark, and a low sub swells for a beat where you KNOW it is coming. ----------------
@@ -966,7 +980,8 @@ func _caught(cause: String) -> void:
 	if room:
 		room.set_dread(1.0)
 		room.set_powered(false)   # blackout for the beat
-		room.add_shake(0.16)
+		if Settings.allow_jumpscares():
+			room.add_shake(0.16)
 	_flash.color = Color(0, 0, 0, 0)
 	Audio.play_sfx("pre_scare", -3.0, lerpf(1.06, 0.8, intensity), Audio.VERB_BUS)
 	var pre := 0.32 + intensity * 0.22 + (0.26 if is_oan else 0.0)
@@ -990,19 +1005,25 @@ func _caught(cause: String) -> void:
 		var ts := create_tween()
 		ts.tween_property(_jumpscare_rect, "scale", Vector2.ONE, 0.7 if is_oan else 0.4) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		_jump_jitter_t = (0.28 if is_oan else 0.5) * (0.7 + intensity)
-		_strobe_flash(is_oan)
+		# REDUCED tier skips the screen-position jitter entirely (FULL keeps it).
+		if not reduced:
+			_jump_jitter_t = (0.28 if is_oan else 0.5) * (0.7 + intensity)
+		# REDUCED uses the soft/low-intensity strobe variant (as Oan hồn already does).
+		_strobe_flash(is_oan or reduced)
 		if room:
-			room.add_shake(clampf(0.85 + intensity * 0.35, 0.0, 1.2) * (0.6 if is_oan else 1.0))
+			# REDUCED halves the jumpscare shake; FULL is unchanged.
+			room.add_shake(clampf(0.85 + intensity * 0.35, 0.0, 1.2) * (0.6 if is_oan else 1.0) * (0.5 if reduced else 1.0))
 		Audio.play_jumpscare(lerpf(1.0, 0.82, intensity))
 	else:
 		# accessibility / non-lethal cause: a soft red wash + a breath sting, no jump image.
 		Audio.play_sfx("sting_breath", -5.0, 1.0, Audio.VERB_BUS)
-		_flash.color = Color(0.35, 0.02, 0.02, 0.55)
-		var tfade := create_tween()
-		tfade.tween_property(_flash, "color:a", 0.0, 0.9)
-		if room:
-			room.add_shake(0.4)
+		# Scares OFF must produce no shake and no flash — gate the red wash + jolt.
+		if Settings.allow_jumpscares():
+			_flash.color = Color(0.35, 0.02, 0.02, 0.55)
+			var tfade := create_tween()
+			tfade.tween_property(_flash, "color:a", 0.0, 0.9)
+			if room:
+				room.add_shake(0.4)
 
 	# --- 3) LINGER — hold the burned-in face in dead silence, then dissolve to black. ---
 	await get_tree().create_timer(0.9 + intensity * 0.5).timeout
