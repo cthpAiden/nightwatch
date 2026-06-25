@@ -75,11 +75,6 @@ func _pick_lang(code: String) -> void:
 	Settings.apply({"language": code, "first_run": false})
 	get_tree().reload_current_scene()
 
-func _bg(path: String) -> TextureRect:
-	var t := UI.texture_rect(path, TextureRect.STRETCH_KEEP_ASPECT_COVERED)
-	UI.full(t)
-	return t
-
 func _add(vb: VBoxContainer, key: String, cb: Callable) -> Button:
 	var b := UI.button(key, 300, 46)
 	b.pressed.connect(func():

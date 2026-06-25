@@ -337,7 +337,9 @@ func _begin_night() -> void:
 		if nhang:
 			acquire_item(nhang)
 	_apply_mods()
-	if not Game.is_custom and not OS.has_environment("NW_SKIP_TAPE"):
+	# Night 1 owns the screen centre with its hands-on tutorial banner, so skip the
+	# (also-centred) title card there — they'd otherwise stack for the card's ~3s.
+	if not Game.is_custom and not OS.has_environment("NW_SKIP_TAPE") and Game.current_night != 1:
 		_show_title_card()
 	# Night 1 runs a short, safe, hands-on lesson (no threats act until it's done);
 	# every other night (and headless tests) goes live immediately.

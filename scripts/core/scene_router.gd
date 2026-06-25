@@ -74,6 +74,10 @@ func change_scene(path: String, fade_time: float = 0.5) -> void:
 	# quitting from the pause menu, etc.). Kill them on every transition. Music is left
 	# alone — each destination screen manages its own ambience.
 	Audio.stop_all_loops()
+	# Re-assert the slider bus levels: a duck() (death / ma da lure) may have been in
+	# flight, and an overlapping or interrupted duck can otherwise leave Music/SFX
+	# attenuated into the next screen until the player touches a settings slider.
+	Audio.apply_volumes()
 	await fade_out(fade_time)
 	var err := get_tree().change_scene_to_file(path)
 	if err != OK:

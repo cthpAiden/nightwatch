@@ -36,6 +36,7 @@ var _streams: Dictionary = {}                 # name -> AudioStream
 var _pool: Array[AudioStreamPlayer] = []
 var _loops: Dictionary = {}                    # name -> AudioStreamPlayer
 var _music_player: AudioStreamPlayer
+var _duck_tweens: Dictionary = {}              # bus name -> active duck Tween (overlap guard)
 
 func _ready() -> void:
 	_ensure_buses()
@@ -200,12 +201,20 @@ func duck(amount_db: float = 16.0, attack: float = 0.05, hold: float = 0.22, rel
 		var idx := AudioServer.get_bus_index(bus)
 		if idx == -1 or AudioServer.is_bus_mute(idx):
 			continue
-		var base := AudioServer.get_bus_volume_db(idx)
+		# Restore TARGET is the slider volume, not the live (maybe already-ducked) level,
+		# and any in-flight duck on this bus is killed first — so overlapping ducks (e.g.
+		# a ma da lure rolling into a death) can't ratchet the bus down and never recover.
+		var setting: float = Settings.music_volume if bus == MUSIC_BUS else Settings.sfx_volume
+		var base := linear_to_db(setting)
 		var low := base - amount_db
+		var prev: Tween = _duck_tweens.get(bus)
+		if prev and prev.is_valid():
+			prev.kill()
 		var tw := create_tween()
 		tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(idx, v), base, low, attack)
 		tw.tween_interval(hold)
 		tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(idx, v), low, base, release)
+		_duck_tweens[bus] = tw
 
 func stop_all_loops() -> void:
 	for k in _loops:
