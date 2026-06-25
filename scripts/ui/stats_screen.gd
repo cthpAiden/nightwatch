@@ -30,7 +30,9 @@ func _ready() -> void:
 		var worst_n := 0
 		for id in by:
 			var n := int(by[id])
-			if n > worst_n:
+			# Only real threats can be a "nemesis" — skip non-threat causes like "via"
+			# (a nerve-loss defeat) so the row never shows a raw, untranslated id.
+			if n > worst_n and ThreatRegistry.ids().has(id):
 				worst_n = n
 				worst_id = id
 		if worst_id != "":

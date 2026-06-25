@@ -1,5 +1,40 @@
 # POLISH_NOTES.md — shippability pass (2026-06-26)
 
+> ## Pass 3 — full-game "make it feel WAY better" pass
+> An exhaustive 12-aspect critique (gameplay loop, balance, onboarding, juice, audio, UI/UX,
+> threat design, narrative, extras, accessibility, code, art) produced **84 findings**; the
+> high-value, in-scope set (~55) was applied as **91 edits** across 32 files. **No new features;
+> screen resolution/display untouched** (per a known bug). Highlights:
+> - **Feel/juice:** directional door-arrival cue (side-pitched sting + HUD light flash); success
+>   spikes on repel/bell/anomaly-tag; HUD bar tween + hit-flash; Ma trơi startle shake; dawn-win
+>   relief beat; weightier screen shake; surging crowd overlay.
+> - **Clarity/onboarding:** toast queue + length-scaled dwell (story lines stay readable); meter
+>   threats teach their counter the first time they hurt; tutorial now teaches the doorway light;
+>   pause menu shows a 3-clue checklist.
+> - **Balance/economy:** shop items & shrine upgrades share one currency scale; anti-farm commits
+>   on win only (stuck players keep earning); N5 wisp softened so the peak lands on N6; early-night
+>   dead air trimmed; Custom Night pace relaxed off NIGHTMARE.
+> - **UX:** visible keyboard focus + disabled-button styles; button press/click juice; reachable
+>   Settings + Reset-to-defaults + live slider %; Stats nemesis/endings/custom rows; Bestiary
+>   discovered-count + fear; animated intro/ending backdrops.
+> - **Narrative:** the wronged girl is named **Linh** so the climax pays off (EN; VI flagged for
+>   native review); clearer endings/credit copy ("Built with Godot 4").
+> - **Audio/art:** unstacked the hourly chime collision and the door double-hit; deeper, longer
+>   cricket ambience; hostile-doorway glow tint; ghost temperature split; removed 6 dead-art SVGs.
+>
+> Deferred (flagged, intentionally not done): the structural one-offering-targets-one-threat rework
+> and a mid-game difficulty selector (both need playtesting, not headless validation). Balance
+> numbers are conservative judgment calls validated by a green test battery, not human playtesting.
+>
+> **Verification:** self-test **103/0**, integrity sweep **36/0** (every screen + N1-N6 + custom +
+> the new l10n keys), death N1-N6 → GameOver, win N3 → WinScreen, win N6 → EndingScreen. Strings
+> recompiled; ambience regenerated. An adversarial regression re-check of the full diff found **0
+> critical/major** issues and **2 minor self-introduced regressions, both fixed**: the new button
+> hover-juice was wiping HUD door/light state colors (moved to `self_modulate`), and the Stats
+> nemesis row could show the raw `via` id (now threat-causes only).
+
+---
+
 An audit-driven **polish & hardening** pass: no new threats, screens, items, or mechanics —
 only refinement of the existing build. A 9-axis read-only audit produced 37 grounded findings
 (0 critical / 9 major / 16 minor / 12 polish); **36 code fixes were applied** across 19 files,

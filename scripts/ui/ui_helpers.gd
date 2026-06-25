@@ -63,8 +63,11 @@ static func button(key: String, min_w: float = 240.0, min_h: float = 52.0) -> Bu
 	b.button_up.connect(func():
 		b.pivot_offset = b.size * 0.5
 		b.create_tween().tween_property(b, "scale", Vector2.ONE, 0.07))
-	b.mouse_entered.connect(func(): b.modulate = Color(1.06, 1.06, 1.06))
-	b.mouse_exited.connect(func(): b.modulate = Color.WHITE)
+	# Brighten via self_modulate, NOT modulate: HUD door/light/incense buttons encode
+	# their state (closed=green, light-on=amber) through modulate, so hover must use a
+	# separate channel or it would wipe that state on mouse-out.
+	b.mouse_entered.connect(func(): b.self_modulate = Color(1.06, 1.06, 1.06))
+	b.mouse_exited.connect(func(): b.self_modulate = Color.WHITE)
 	return b
 
 static func icon_button(tex_path: String, size: float = 84.0) -> TextureButton:
