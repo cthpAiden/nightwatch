@@ -316,6 +316,28 @@ func _run(c) -> void:
 	check("meter drain does NOT freeze regen", c._via_drain_cd <= 0.0)
 	c.add_via(-1.0)
 	check("burst drain DOES pause regen", c._via_drain_cd > 0.0)
+	# Blackout bleed must route through the CONTINUOUS channel (add_via_drain) so vía regen
+	# is never frozen for 0.7s after power returns — regression guard for the power-out path.
+	# (looming=true isolates the bleed from regen so the assertion is deterministic.)
+	c._powered = false
+	c.via = 80.0
+	c._via_drain_cd = 0.0
+	c._update_via(0.1, true)
+	check("blackout bleed lowers vía", c.via < 80.0)
+	check("blackout bleed does NOT freeze vía regen", c._via_drain_cd <= 0.0)
+	c._powered = true
+	c.room.set_powered(true)
+
+	print("\n--- AUDIO TEARDOWN ---")
+	# Death/win loop cleanup is centralised in one helper so the two end states can't drift.
+	c._drone_on = true
+	c._hb_on = true
+	c._breath_on = true
+	c._strain_on = true
+	c._water_on = true
+	c._stop_tension_loops()
+	check("_stop_tension_loops clears every loop-state flag",
+		not c._drone_on and not c._hb_on and not c._breath_on and not c._strain_on and not c._water_on)
 
 	print("\n--- PHONE ---")
 	var ph = c.phone

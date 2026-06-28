@@ -11,6 +11,7 @@ var _refresh_t := 0.0
 var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
 var _fx_burst := 0.0                # decaying static spike on channel change
 var _fog := 0.0                     # extra baseline static on a "fog" night
+var _last_feed_size := Vector2.ZERO # last feed rect size — re-upload rect_aspect only on resize
 const FX_BASE := 0.06
 var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
 var _clue_pulse := 0.0              # animates the unclaimed hotspot so the eye catches it
@@ -258,7 +259,8 @@ func _process(delta: float) -> void:
 		return
 	# Keep the feed's COVER fit correct for the live window aspect (so it fills any screen
 	# under `expand` without stretching) — cheap, just a uniform write.
-	if _fx_mat and _feed and _feed.size.y > 1.0:
+	if _fx_mat and _feed and _feed.size.y > 1.0 and _feed.size != _last_feed_size:
+		_last_feed_size = _feed.size
 		_fx_mat.set_shader_parameter("rect_aspect", _feed.size.x / _feed.size.y)
 	# Ease the channel-change static burst back down to the resting noise level.
 	if _fx_burst > 0.0 and _fx_mat:

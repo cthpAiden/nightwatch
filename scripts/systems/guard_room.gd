@@ -22,6 +22,10 @@ const ALTAR_ENERGY := 2.2
 const CANDLE_ENERGY := 1.5
 const TUBE_EMISSION := 1.5
 
+# Doorway threat-billboard tint: a hot rim when hostile vs a neutral cold silhouette.
+const THREAT_TINT_HOSTILE := Color(1.0, 0.45, 0.4)
+const THREAT_TINT_IDLE := Color(0.72, 0.74, 0.74)
+
 const DOOR_CLOSED_Y := 1.35
 const DOOR_OPEN_Y := 3.45   # raised, but a visible lip remains so you see the shutter
 
@@ -66,6 +70,7 @@ var _screen_mat: ShaderMaterial      # desk CRT showing the camera feed
 var _screen_feeds: Array = []        # feeds in CAMERAS order (idle slideshow)
 var _feed_by_cam := {}               # cam_id -> Texture2D
 var _screen_idx := 0
+var _screen_lit := -1                # last 'lit' uniform written (-1 = unwritten) — avoids a per-frame re-upload
 var _screen_timer := 0.0
 var _desk_mirror := false            # true = mirror the player's operated camera
 var _desk_threat: Sprite3D           # threat figure shown on the desk CRT
@@ -832,7 +837,13 @@ func _animate_screen(delta: float) -> void:
 	if not _screen_mat:
 		return
 	_screen_mat.set_shader_parameter("t", _t)
-	_screen_mat.set_shader_parameter("lit", 1.0 if _powered else 0.0)
+	# 'lit' only flips on a power-out/restore (rare), so write it on change rather than
+	# every frame. The int sentinel forces the first write so correctness never depends
+	# on the shader's default matching the initial powered state.
+	var lit := 1 if _powered else 0
+	if lit != _screen_lit:
+		_screen_lit = lit
+		_screen_mat.set_shader_parameter("lit", float(lit))
 	# Only auto-cycle when NOT mirroring the player's live camera. The desk-threat
 	# figure dims out when the screen is dead (blackout) or when mirroring is off.
 	if _desk_mirror:
@@ -1021,21 +1032,10 @@ func set_light(side: int, on: bool) -> void:
 	Audio.play_sfx("light_switch", -8.0)
 	Events.light_toggled.emit(side, on)
 
-func show_threat(side: int, tex: Texture2D, hostile: bool = false) -> void:
-	var spr: Sprite3D = _threat_sprites[side]
-	if tex == null:
-		spr.visible = false
-		return
-	spr.texture = tex
-	# Hostile reads as a hot rim/glow (these sprites are shaded + lit by the doorway
-	# spotlight); the old dark-red multiply crushed the silhouette to mud.
-	spr.modulate = Color(1.0, 0.45, 0.4) if hostile else Color(0.72, 0.74, 0.74)
-	spr.visible = _light_on.get(side, false)
-
 func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null, hostile: bool = false) -> void:
 	var spr: Sprite3D = _threat_sprites[side]
 	if has_threat and tex:
 		spr.texture = tex
 	# Hostile reads as a hot rim/glow rather than a mud-dark multiply (sprites are lit).
-	spr.modulate = Color(1.0, 0.45, 0.4) if hostile else Color(0.72, 0.74, 0.74)
+	spr.modulate = THREAT_TINT_HOSTILE if hostile else THREAT_TINT_IDLE
 	spr.visible = has_threat and _light_on.get(side, false)

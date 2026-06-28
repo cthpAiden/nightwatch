@@ -5,6 +5,8 @@ extends Node
 ## Threats call the small public API at the bottom (is_door_closed, add_via, ...).
 
 const NIGHT_MINUTES := 360.0            # 00:00 -> 06:00
+const BLACKOUT_GAP := Vector2(45.0, 75.0)   # seconds between rolling-blackout windows
+const BLACKOUT_LEN := Vector2(9.0, 14.0)    # seconds a blackout window lasts
 
 var config: NightConfig
 var room                                 # guard_room.gd (Node3D)
@@ -394,7 +396,7 @@ func _apply_mods() -> void:
 	if _mod_fog and monitor and monitor.has_method("set_fog_level"):
 		monitor.set_fog_level(0.22)   # the cameras run heavy with static tonight
 	if _mod_blackout:
-		_blk_cd = randf_range(45.0, 75.0)
+		_blk_cd = randf_range(BLACKOUT_GAP.x, BLACKOUT_GAP.y)
 
 ## Rolling-blackout windows: periodically the grid sags, draining power faster and
 ## rattling the room, until you ride it out.
@@ -406,8 +408,8 @@ func _update_mods(delta: float) -> void:
 		return
 	_blk_cd -= delta
 	if _blk_cd <= 0.0:
-		_blk_cd = randf_range(45.0, 75.0)
-		_blk_t = randf_range(9.0, 14.0)
+		_blk_cd = randf_range(BLACKOUT_GAP.x, BLACKOUT_GAP.y)
+		_blk_t = randf_range(BLACKOUT_LEN.x, BLACKOUT_LEN.y)
 		Audio.play_sfx("power_down", -12.0)
 		if room:
 			room.add_shake(0.45)
@@ -522,7 +524,13 @@ func _process(delta: float) -> void:
 		return
 	_advance_clock(delta)
 	_update_power(delta)
-	_update_via(delta)
+	# Resolve who is at each door ONCE this frame, then thread it through the readers
+	# below instead of each (vía / atmosphere / door-sprite) re-scanning the threat list
+	# — ~6 scans/frame collapse to 2. Stable for the frame: the director (a child) ticks
+	# AFTER this parent _process, per the documented parent-before-child order.
+	var loom_l := director.threat_at_door(GameEnums.Side.LEFT)
+	var loom_r := director.threat_at_door(GameEnums.Side.RIGHT)
+	_update_via(delta, loom_l != null or loom_r != null)
 	_update_timers(delta)
 	# Panic/agitation: fast panning raises it (rapid cam-switching does too, in
 	# on_camera_changed); it decays over time. Drives Ma trơi.
@@ -545,15 +553,15 @@ func _process(delta: float) -> void:
 	if monitor_open:
 		room.set_desk_threat(_desk_threat_tex())   # mirror the threat onto the desk CRT
 	_update_altar(delta)
-	_refresh_door_sprite(GameEnums.Side.LEFT)
-	_refresh_door_sprite(GameEnums.Side.RIGHT)
+	_refresh_door_sprite(GameEnums.Side.LEFT, loom_l)
+	_refresh_door_sprite(GameEnums.Side.RIGHT, loom_r)
 	_update_crowd_overlay(delta)
-	_update_atmosphere()
+	_update_atmosphere(loom_l, loom_r)
 
 ## Drives the room's danger grade and the tension drone from how close to losing you
 ## are: low vía / low hương / a blackout sour the colour; a rusher at the door or a
 ## critical vía fades a low drone in under everything.
-func _update_atmosphere() -> void:
+func _update_atmosphere(loom_l, loom_r) -> void:
 	var via_danger := 1.0 - clampf(via / via_max, 0.0, 1.0)
 	var huong_danger := 1.0 - clampf(huong / huong_max, 0.0, 1.0)
 	var d := maxf(via_danger * 1.1, huong_danger * 0.6)
@@ -582,8 +590,8 @@ func _update_atmosphere() -> void:
 		else:
 			Audio.set_loop_volume("heartbeat", vol)
 		Audio.set_loop_pitch("heartbeat", lerpf(0.9, 1.5, sev))
-	var left_loom: bool = director.threat_at_door(GameEnums.Side.LEFT) != null
-	var right_loom: bool = director.threat_at_door(GameEnums.Side.RIGHT) != null
+	var left_loom: bool = loom_l != null
+	var right_loom: bool = loom_r != null
 	var looming := left_loom or right_loom
 	var want_drone := looming or via_state == GameEnums.ViaState.CRITICAL
 	if want_drone and not _drone_on:
@@ -690,19 +698,21 @@ func _power_out() -> void:
 	Events.power_depleted.emit()
 	Events.notify.emit("POWER_OUT", [])
 
-func _update_via(delta: float) -> void:
+func _update_via(delta: float, looming: bool) -> void:
 	if _via_drain_cd > 0.0:
 		_via_drain_cd = maxf(0.0, _via_drain_cd - delta)
-	var looming := director.threat_at_door(GameEnums.Side.LEFT) != null \
-		or director.threat_at_door(GameEnums.Side.RIGHT) != null
 	# Regen only when nothing looms AND no drain happened very recently, so active
 	# meter pressure (cô hồn / ma da / oan hồn) is a genuine net loss, not cancelled.
 	if not looming and _via_drain_cd <= 0.0:
 		var regen := 1.0 + night_progress() * 1.8
 		via = minf(via_max, via + regen * delta)
 		Events.via_changed.emit(via, via_max)
+	# Blackout bleed routes through the CONTINUOUS channel (add_via_drain) so vía regen
+	# can still fight it. The old add_via() re-armed the 0.7s regen freeze every frame —
+	# stalling recovery for 0.7s after power returned — and was taint-amplified; neither
+	# suits a slow blackout pressure (this mirrors the guttered-altar bleed).
 	if not _powered:
-		add_via(-2.0 * delta)
+		add_via_drain(-2.0 * delta)
 	_update_via_state()
 	if via <= 0.0:
 		_via_zero()
@@ -961,10 +971,11 @@ func acquire_item(def: ItemDef) -> void:
 	Events.notify.emit("ITEM_GOT", [tr(def.name_key)])
 
 # --- door billboards --------------------------------------------------------
-func _refresh_door_sprite(side: int) -> void:
+func _refresh_door_sprite(side: int, t = false) -> void:
 	if room == null:
 		return
-	var t := director.threat_at_door(side)
+	if typeof(t) == TYPE_BOOL:   # sentinel: caller didn't supply it — look it up
+		t = director.threat_at_door(side)
 	if t:
 		room.refresh_threat_visibility(side, true, t.current_texture(), true)
 	else:
@@ -1015,15 +1026,8 @@ func _caught(cause: String) -> void:
 	# --- 1) ANTICIPATION — the held breath. The whole mix ducks out, the office snaps
 	# dark, and a low sub swells for a beat where you KNOW it is coming. ----------------
 	Audio.duck(26.0, 0.04, 1.2, 0.7)
-	for lp in ["heartbeat", "drone_tension", "static_loop", "breathing", "water_loop",
-			"shutter_strain", "ambience_sub", "incense_bed"]:
-		Audio.stop_loop(lp)
+	_stop_tension_loops()
 	Audio.stop_music(0.05)
-	_drone_on = false
-	_hb_on = false
-	_breath_on = false
-	_strain_on = false
-	_water_on = false
 	if room:
 		room.set_dread(1.0)
 		room.set_powered(false)   # blackout for the beat
@@ -1099,12 +1103,7 @@ func _win() -> void:
 	_ending = true
 	_running = false
 	director.set_paused(true)
-	Audio.stop_all_loops()   # heartbeat, drone, sub, breathing, strain, water, incense...
-	_drone_on = false
-	_hb_on = false
-	_breath_on = false
-	_strain_on = false
-	_water_on = false
+	_stop_tension_loops()   # heartbeat, drone, sub, breathing, strain, water, incense...
 	if room:
 		room.set_dread(0.0)
 	Audio.stop_music(0.2)   # let the win/ending screen start its own ambience cleanly
@@ -1135,6 +1134,17 @@ func _win() -> void:
 		Router.to_ending()
 	else:
 		Router.to_win()
+
+## Stop every sustained loop and clear the loop-state flags — the single source of
+## truth for the death/win audio teardown (the documented loop-cleanup invariant), so
+## the two end states can't silently drift apart when a new loop is added later.
+func _stop_tension_loops() -> void:
+	Audio.stop_all_loops()
+	_drone_on = false
+	_hb_on = false
+	_breath_on = false
+	_strain_on = false
+	_water_on = false
 
 # --- public API used by threats & items ------------------------------------
 func is_door_closed(side: int) -> bool:
