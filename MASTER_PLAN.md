@@ -131,11 +131,13 @@ These no longer block anything; the remaining gaps are the v2 backlog below.
 
 - **Đốt vía step-over ritual** as its own interaction (vía restore today is via
   offerings / incense / dawn; the step-over mini-game is not a distinct beat).
-- **Giật cô hồn scramble** — the offering-grab risk/reward moment is not its own
-  interaction (the cô hồn economy is appeasement-only today).
-- **Forbidden-offering fail-state** — offerings always succeed (the humble tray); the
-  "wrong food fails" teaching choice is not surfaced.
-- **Vendor on the camera feed** — she's audio + toast cued; no on-cam sprite yet.
+- ~~**Giật cô hồn scramble**~~ — **DONE (Pass 4)**: a ~4 s risk/reward beat after placing an
+  offering (let the child-spirits take it for lộc, or press the offering key to guard it and
+  slight the souls). Logic self-tested; feel/odds want playtest. See POLISH_NOTES Pass 4.
+- ~~**Forbidden-offering fail-state**~~ — **DONE (Pass 4)**: an occasional, telegraphed
+  mặn/lavish tray the souls refuse (a gentle, auto-fixing fail teaching the humble rule).
+- ~~**Vendor on the camera feed**~~ — **DONE (Pass 4)**: she now shows on the gate feed while
+  shopping/hostile (the warped-rao tell still does the work, never her face).
 - **Ma lai bestiary entry** — the flying-head legend is held for v2 (sensitivity reasoning
   in DESIGN §2.7); it is not implemented and has no bestiary file.
 - **Native-speaker VO + text proof** of `localization/strings.csv` (esp. tapes/phone).

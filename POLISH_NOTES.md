@@ -1,5 +1,74 @@
 # POLISH_NOTES.md — shippability pass (2026-06-26)
 
+> ## Pass 4 — multi-phase deep overhaul (2026-06-29)
+> A six-axis, adversarially-verified audit ([`AUDIT.md`](AUDIT.md): 46 findings → **44 confirmed
+> real**, 0 critical / 2 major / 31 minor / 11 polish) drove a four-phase overhaul. **Each phase
+> was gated on the full green battery and committed separately on `main`**, so every phase is
+> reviewable and revertible in isolation. Net validation: self-test **103 → 119**
+> (`NW_SKIP_TAPE=1 NW_NIGHT=6 godot --headless --path . res://tools/SelfTest.tscn`), integrity
+> **36/0**, and the death / win→ending / win→screen flow tests all green.
+>
+> - **Phase 1 — Audit** (commit `35546d7`, `AUDIT.md`). Six read-only finders (one per axis:
+>   performance, graphics, audio, gameplay, logic, code-health) → an adversarial verifier per
+>   finding. The verifiers downgraded most "major" claims and, importantly, flagged the big
+>   megafile extractions as high-regression-risk against the test-coupled megafiles (see backlog).
+> - **Phase 2 — Performance & code health** (`e6810d2`). Memoised `threat_at_door` (≈6→2 list
+>   scans/frame); CRT `lit` and camera `rect_aspect` uniforms now written on-change, not per
+>   frame. **Real bug fix:** the power-out vía bleed ran through the burst channel, re-arming
+>   the 0.7 s regen-freeze every frame (regen stalled 0.7 s *after* power returned) and was
+>   taint-amplified → routed to the continuous channel. Extracted `_stop_tension_loops()` (one
+>   source of truth for the death/win loop-cleanup invariant); removed dead `show_threat()`;
+>   named tint + blackout-cadence constants.
+> - **Phase 3 — Graphics & audio, procedural-only** (`c17150e` audio, `7fb25d4` graphics). Master
+>   mix eased (comp −14/3.5→−10/2.5, limiter soft-clip 2.0→0.3 — kills the double-saturation grit
+>   on loud hits); Verb wet send sits 3 dB under the dry SFX bus. **Accessibility:** new
+>   `Audio.play_sting()` makes the 12 scare-punch stings honour the REDUCED tier (OFF keeps a soft
+>   floor so the death cue still lands); informational/relief cues (water_call, whisper,
+>   vendor_bell, rooster, offering_bell) stay full. SFX: seamless `static_loop` (killed the 2 s
+>   loop click via an RNG-neutral seam crossfade), resonant bodies on clock_tick/footstep/
+>   approach_soft. Render: removed the baked corner-vignette that **tiled into a dark grid** on
+>   wall/floor/ceiling, enabled mipmaps on those tiled 3D surfaces (anti-shimmer on pans),
+>   per-puff incense-smoke turbulence.
+> - **Phase 4 — Gameplay loop & logic** (`34633ee` balance, `d2f261a` features). Balance (all
+>   one-line, was→now commented): oan-hồn neglect now actually builds grievance (was net-negative
+>   while incensed — half the camera paradox was dead); co-hồn bleed is continuous (was a ~1.5/s
+>   cliff at crowd 85); ma-da telegraph re-arms after an offering; ma-trơi post-surge lock reset
+>   below its own bleed line; EASY story floor raised to 2 (custom stays exactly 1). **Features**
+>   (all gated to the cô hồn economy, telegraphed, and auto-resolving so none can soft-lock):
+>   **giật cô hồn** scramble (let them take it → lộc; guard it → slighted souls), **forbidden
+>   (mặn) offering** fail-state, and the **vendor-on-camera** sprite (was audio+toast only).
+>
+> ### Remaining risks / not done (honest)
+> - **The 3 new Phase-4 mechanics and every balance number are conservative judgment calls —
+>   self-test-covered for LOGIC, NOT playtested for FEEL.** All odds/windows/penalties are
+>   one-line revertible — start with the `randf() < 0.35` scramble odds, the 12 s rich-tray
+>   window, and the Phase-4 balance lines.
+> - **Native-speaker proof of the 4 new VI strings** (OFFERING_WRONG, GIAT_PROMPT/SNATCH/GUARD)
+>   is pending — add them to `docs/L10N_REVIEW.md`. The mechanical `.translation` re-import is
+>   verified by a self-test resolve check; the *register/lore* is not.
+> - **Procedural Phase-3 quality** (de-tiled textures, mipmaps, smoke, the eased mix, the REDUCED
+>   stings) was code-verified and headless-loaded but wants a real-renderer eyeball + a listen
+>   on headphones before release.
+> - **Vendor-on-camera** draws over any cô hồn crowd at the gate (both spawn there); fine for
+>   placeholder, but a position pass would separate them.
+> - Self-test leak counts at exit remain pre-existing harness teardown noise, not a runtime issue.
+>
+> ### Backlog — audit findings deliberately deferred (with the reason)
+> - **Megafile decomposition (#39 altar / #43 jumpscare / #45 room-builder).** The adversarial
+>   verifiers flagged all three as high-risk: the self-test reaches directly into
+>   `night_controller`/`guard_room` private state, and the subsystems are entangled (altar
+>   `meter_mult` ↔ `_aggro_mult` / `add_via_drain` / tutorial flags; the jumpscare ↔ the
+>   `_ending` re-entrancy + scare-OFF gating + `is_inside_tree` await guards). Behaviour-
+>   preserving extraction needs the harness restructured first — an attended, playtest-backed
+>   task, not an unattended push. **Both files remain ~1.4k / 1.0k lines.**
+> - **Camera-monitor node-churn cache (#1/#11).** A real per-frame rebuild, but not headless-
+>   verifiable, and a wrong cache breaks anomaly-tagging (the good-ending clue) — needs a UI playtest.
+> - **Stereo panning (#16)**, **đồng-dao motif (#22)**, **doorway rim-light (#14)**, **ma-da
+>   water plane (#13)**, **post-process occlusion gate (#12)**, **bell-vs-risen-corpse (#36)**:
+>   all real findings, but each needs headphones / an eyeball / a balance playtest to land safely.
+> - **Đốt-vía step-over ritual** — the 4th v2 feature, not selected for this run.
+> ---
+
 > ## Pass 3 — full-game "make it feel WAY better" pass
 > An exhaustive 12-aspect critique (gameplay loop, balance, onboarding, juice, audio, UI/UX,
 > threat design, narrative, extras, accessibility, code, art) produced **84 findings**; the
