@@ -25,7 +25,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 	if _viewing:
 		agro += (3.2 + lvl * 0.4) * delta * mult      # watched too long
 	else:
-		agro += (0.9 + lvl * 0.12) * delta * mult      # ignored too long (slower)
+		agro += (1.6 + lvl * 0.18) * delta * mult      # ignored too long (was 0.9+lvl*0.12; raised so neglect still nets positive vs the -0.6 settle even while incensed — keeps the paradox two-sided)
 	agro = clampf(agro - 0.6 * delta, 0.0, 100.0)  # slow settle if you neither stare nor neglect
 	Events.grievance_changed.emit(agro / 100.0)
 	# occasional drift for camera flavor

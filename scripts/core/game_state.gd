@@ -76,11 +76,14 @@ func _build_config(n: int, levels: Dictionary, vendor: bool, spd: float) -> Nigh
 	# 0-20 levels directly (and already force NIGHTMARE), so the level-scale is skipped —
 	# otherwise authored levels would get multiplied a second time and clamp to ~20.
 	var lvl_scale := 1.0 if is_custom else _difficulty_level_scale()
+	# A threat the night intentionally includes must never be scaled to 0. Story nights floor
+	# an introduced threat at 2 so its DEBUT night keeps it at a teachable level (on EASY,
+	# round(2*0.7)=1 left a just-introduced spirit barely acting all night). Custom keeps a
+	# floor of 1 so the slider still honours an authored low level exactly. (balance #37)
+	var floor_lvl := 1 if is_custom else 2
 	var scaled := {}
 	for id in levels:
-		# Floor at 1: a threat the night intentionally includes (any clue-critical or
-		# introduced spirit) must never be scaled down to 0 by Easy/custom math.
-		scaled[id] = clampi(int(round(float(levels[id]) * lvl_scale)), 1, 20)
+		scaled[id] = clampi(int(round(float(levels[id]) * lvl_scale)), floor_lvl, 20)
 	cfg.threat_levels = scaled
 	cfg.seconds_per_hour = spd * _difficulty_speed_scale()
 	cfg.ai_ramp = 2.0 + float(n) * 0.3

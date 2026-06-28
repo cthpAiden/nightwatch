@@ -142,6 +142,16 @@ func _run(c) -> void:
 		md.flood = 50.0
 		md.on_offering("")
 		check("ma_da: offering lowers flood", md.flood < 50.0)
+		# The rising-water telegraph re-arms once an offering drops the flood (was stuck if it
+		# oscillated in the 70-85 band, so the kill could land with no cue). (balance #33)
+		md._active = true
+		md._lure_active = false
+		md._lure_cd = 99.0
+		md._warned = true
+		md.flood = 99.0
+		md.on_offering("")          # -22 -> ~77
+		md.process_ai(0.1, 0.5)     # the elif flood < 80 re-arms _warned
+		check("ma_da: telegraph re-arms after an offering drops flood below 80", not md._warned)
 
 	print("\n--- CO HON ---")
 	var ch = d.get_threat("co_hon")
@@ -163,6 +173,17 @@ func _run(c) -> void:
 		oh.agro = 50.0
 		oh.on_offering("")
 		check("oan_hon: offering lowers agro", oh.agro < 50.0)
+		# The ignored branch must still net positive even while the altar is lit (mult 0.5),
+		# or the paradox collapses to "just never look at her". (balance #31)
+		c.altar_lit = true
+		c.huong = 100.0
+		oh.on_view(false)
+		oh.agro = 30.0
+		for _i in 10:
+			oh.process_ai(0.5, 0.5)
+		check("oan_hon: neglect builds grievance even while incensed", oh.agro > 32.0)
+		oh.agro = 0.0
+		oh.on_view(false)
 
 	print("\n--- MA TROI (non-lethal surge) ---")
 	var mt = d.get_threat("ma_troi")
@@ -171,7 +192,7 @@ func _run(c) -> void:
 		mt.lock = 99.0
 		var vbefore: float = c.via
 		mt.process_ai(0.2, 0.5)
-		check("ma_troi: surge resets lock (not a kill)", mt.lock <= 60.0 and mt._active)
+		check("ma_troi: surge resets lock below the 40 bleed threshold (not a kill)", mt.lock <= 40.0 and mt._active)
 		check("ma_troi: surge costs via", c.via < vbefore)
 		check("ma_troi: surge jinxes the controls", c._hex_t > 0.0)
 		c._agitation = 0.0
@@ -515,7 +536,13 @@ func _run(c) -> void:
 	var prev_diff: int = Game.difficulty
 	Game.difficulty = GameEnums.Difficulty.EASY
 	var fcfg = Game._build_config(2, {"ong_ke": 1}, false, 60.0)
-	check("a present threat is never scaled to 0", int(fcfg.threat_levels.get("ong_ke", 0)) >= 1)
+	check("story EASY floors an introduced threat at a teachable 2 (not 0/1)", int(fcfg.threat_levels.get("ong_ke", 0)) >= 2)
+	# Custom nights keep an exact floor of 1 so an authored low slider value isn't bumped. (#37)
+	var prev_custom: bool = Game.is_custom
+	Game.is_custom = true
+	var ccfg = Game._build_config(7, {"ong_ke": 1}, false, 75.0)
+	check("custom night honours an authored level of 1 (floor stays 1)", int(ccfg.threat_levels.get("ong_ke", 0)) == 1)
+	Game.is_custom = prev_custom
 	Game.difficulty = prev_diff
 
 	print("\n--- MAP (10 cameras, two wings, FNAF routes) ---")

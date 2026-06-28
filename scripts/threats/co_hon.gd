@@ -26,8 +26,10 @@ func process_ai(delta: float, night_progress: float) -> void:
 			_taught = true
 			Events.notify.emit("COUNTER_CO_HON", [])
 		# The bleed bites harder near full — neglect is a real via-zero threat, not a flat trickle.
-		var coef := 0.05 if crowd <= 85.0 else 0.11
-		_bleed_via(-(crowd - 60.0) * coef * delta)
+		# Continuous ramp (was a two-branch coef with a ~1.5/s STEP at exactly crowd 85): same
+		# endpoints (1.25/s at 85, ~2.75/s at 100) but it begins to bite gradually from ~80,
+		# where vía regen starts losing — no invisible cliff. (balance #32)
+		_bleed_via(-((crowd - 60.0) * 0.05 + maxf(0.0, crowd - 85.0) * 0.06) * delta)
 	# Telegraph: when the crowd first crosses ~70, a one-shot murmur + a re-emit of the
 	# counter prompt so the player can react before the bleed deepens. Mirrors ma_troi's
 	# _warned one-shot (reuses COUNTER_CO_HON — no new string).

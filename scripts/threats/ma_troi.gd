@@ -55,8 +55,8 @@ func _surge() -> void:
 		_controller.add_power(-8.0)
 	Audio.play_sting("sting_low", -4.0, 1.0)
 	Events.notify.emit("MATROI_RULE", [])
-	lock = 45.0
-	_warned = false   # re-arm the telegraph so back-to-back lock-ons are also warned
+	lock = 38.0   # reset BELOW the 40 bleed threshold (was 45 — INSIDE its own bleed zone, so a
+	_warned = false   # calmed player still bled ~0.6s post-surge); the >45 idle-texture check is unaffected — #35
 
 func current_texture() -> Texture2D:
 	return tex_move if lock > 45.0 else tex_idle

@@ -52,8 +52,8 @@ func process_ai(delta: float, night_progress: float) -> void:
 		_warned = true
 		Audio.play_sfx("water_call", -4.0, 0.78, Audio.VERB_BUS)   # the water is rising
 		Events.notify.emit("COUNTER_MA_DA", [])
-	elif flood < 70.0:
-		_warned = false
+	elif flood < 80.0:   # re-arm the rising-water telegraph (was <70; one offering's -22 from
+		_warned = false  # ~99 lands ~77, so the cue now re-fires before each subsequent near-kill — #33
 	if flood >= 100.0:
 		_kill()
 
