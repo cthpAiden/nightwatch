@@ -332,3 +332,19 @@ func _refresh_threats() -> void:
 		var tid: String = t.id
 		tag.pressed.connect(func(): _c.tag_anomaly(tid))
 		_threat_host.add_child(tag)
+	# The roaming vendor shows on the gate feed while she's at the window (shop/hostile).
+	if _c.vendor and _c.vendor.has_method("on_camera") and _c.vendor.on_camera() and _c.current_cam == MapGraph.GATE:
+		var vtex: Texture2D = _c.vendor.cam_texture()
+		if vtex:
+			var vd: Dictionary = CAM_DEPTH.get(MapGraph.GATE, {"s": 1.0, "y": 0.0})
+			var vhw: float = 150.0 * float(vd["s"])
+			var vhh: float = 360.0 * float(vd["s"])
+			var vyo: float = float(vd["y"])
+			var vr := TextureRect.new()
+			vr.texture = vtex
+			vr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			vr.modulate = Color(1.0, 0.96, 0.92)
+			vr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			# Off to the right of any cô hồn crowd at the gate, a touch smaller.
+			UI.place(vr, 0.7, 1, 0.7, 1, -vhw, -(vhh + 20.0) + vyo, vhw, -20.0 + vyo)
+			_threat_host.add_child(vr)

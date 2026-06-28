@@ -254,6 +254,48 @@ func _run(c) -> void:
 	if c.shop.visible:
 		c.shop.visible = false
 
+	print("\n--- VENDOR ON CAMERA ---")
+	ve.state = GameEnums.VendorState.SHOP
+	check("vendor shows on the gate feed while shopping", ve.on_camera() and ve.cam_texture() != null)
+	ve.state = GameEnums.VendorState.IDLE
+	check("vendor is off-camera when idle", not ve.on_camera())
+
+	print("\n--- GIAT CO HON + FORBIDDEN OFFERING ---")
+	c._running = true
+	c._rich_tray = false
+	c._rich_cd = 0.0
+	var ch2 = d.get_threat("co_hon")
+	if ch2:
+		# Giật cô hồn — GUARD (offering key during the window) slights the souls (crowd rises).
+		c._scramble_t = 4.0
+		ch2.crowd = 40.0
+		c.request_offering()
+		check("giật guard slights the souls (crowd rises, window ends)", ch2.crowd > 40.0 and c._scramble_t == 0.0)
+		# SNATCH (let the window expire) brings lộc (coins credited).
+		var saved_best2: Dictionary = Save.night_best_coins.duplicate(true)
+		Save.night_best_coins[c._night_key()] = 0
+		c._run_earned = 0
+		c._rich_cd = 0.0
+		var coins_b: int = c.coins
+		c._scramble_t = 0.1
+		c._update_timers(0.2)
+		check("giật snatch brings lộc (coins credited)", c.coins > coins_b and c._scramble_t == 0.0)
+		Save.night_best_coins = saved_best2
+		Save.save_progress()
+		# Forbidden offering — a rich/mặn tray is refused: the offering is spent, nothing appeased.
+		c._scramble_t = 0.0
+		c._rich_tray = true
+		c.offerings = 2
+		ch2.crowd = 50.0
+		c.request_offering()
+		check("rich (mặn) offering is refused — consumed, no calm applied", c.offerings == 1 and ch2.crowd >= 50.0 and not c._rich_tray)
+		c._rich_tray = false
+		c._rich_cd = 0.0
+	# The new player-facing keys must resolve (i.e. strings.csv was re-imported to the
+	# .translation binaries — guards against a silent desync).
+	check("new offering/giật strings resolve from the .translation",
+		tr("OFFERING_WRONG") != "OFFERING_WRONG" and tr("GIAT_PROMPT") != "GIAT_PROMPT" and tr("GIAT_SNATCH") != "GIAT_SNATCH")
+
 	print("\n--- WARD SAVE EDGE CASES ---")
 	# Counterfeit vendor: a ward must send her packing, not leave her frozen to
 	# re-fire the grab next frame (regression guard for the vendor ward-block bug).

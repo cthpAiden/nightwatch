@@ -39,6 +39,10 @@ var monitor_open := false
 var _monitor_tw: Tween         # raise/lower alpha tween; killed on re-toggle to avoid a stale hide
 var current_cam := MapGraph.GATE
 var offerings := 0
+var _scramble_t := 0.0       # giật cô hồn: window to guard the tray (else the child-spirits take it for lộc)
+var _rich_tray := false      # forbidden-offering: the current tray is mặn/lavish — the souls refuse it
+var _rich_cd := 0.0          # time until the next "wrong tray" event (cô hồn nights only)
+var _rich_expire := 0.0      # time before the rookie swaps a rich tray back to a humble one
 var item_held: ItemDef = null
 var ward_tokens := 0
 var via_drain_mult := 1.0
@@ -353,6 +357,10 @@ func _begin_night() -> void:
 		Save.see_threat(id)
 	if config.vendor_enabled:
 		Save.see_threat("ba_hang_rong")
+	# Forbidden-offering: arm the occasional "wrong (mặn) tray" event only on nights with the
+	# cô hồn offering economy. It's telegraphed (OFFERING_WRONG) and auto-fixes if you wait.
+	if config.threat_levels.has("co_hon"):
+		_rich_cd = randf_range(45.0, 90.0)
 	# Start with one stick of incense (nhang) in hand so the player always has the
 	# calm tool available and learns what it does.
 	if item_held == null:
@@ -760,6 +768,7 @@ func _update_timers(delta: float) -> void:
 			_tag_cds[k] = maxf(0.0, _tag_cds[k] - delta)
 	if _hex_t > 0.0:
 		_hex_t = maxf(0.0, _hex_t - delta)
+	_tick_offering_events(delta)
 
 ## Cô hồn smother: blind the office (and especially the camera feed) as the crowd
 ## swells past ~55%. Hidden behind any modal so it can't trap the player off-screen.
@@ -923,8 +932,22 @@ func _desk_threat_tex() -> Texture2D:
 func request_offering() -> void:
 	if not _running or _tut_step >= 0:
 		return
+	# A giật-cô-hồn scramble is live: the offering key now GUARDS the tray from the spirits.
+	if _scramble_t > 0.0:
+		_scramble_guard()
+		return
 	if offerings <= 0:
 		Events.notify.emit("OFFERING_NONE", [])
+		return
+	# Forbidden offering: the rookie grabbed the mặn (lavish) tray — the souls' needle-thin
+	# throats refuse it. A gentle, telegraphed fail (it was flagged by OFFERING_WRONG): the
+	# tray is spent but nothing is appeased. Teaches that offerings must be humble.
+	if _rich_tray:
+		offerings -= 1
+		_rich_tray = false
+		_rich_cd = randf_range(45.0, 90.0)
+		Audio.play_sfx("item_bad", -6.0)
+		Events.notify.emit("OFFERING_WRONG", [])
 		return
 	offerings -= 1
 	Events.offering_placed.emit(MapGraph.GATE)
@@ -933,6 +956,54 @@ func request_offering() -> void:
 	Save.record_offering()
 	Audio.play_sfx("offering_bell", -4.0)
 	Events.notify.emit("OFFERING_DONE", [])
+	_maybe_start_scramble()
+
+## Giật cô hồn: after a successful offering, mischievous child-spirits may scramble for the
+## tray. Letting them take it (do nothing) brings lộc — sharing is fortune; grabbing it back
+## (press the offering key) keeps the tray but slights the souls. A risk/reward beat tied to
+## the cô hồn economy. (v2 feature — feel/odds want playtest tuning.)
+func _maybe_start_scramble() -> void:
+	if _scramble_t > 0.0 or director.get_threat("co_hon") == null:
+		return
+	if randf() < 0.35:
+		_scramble_t = 4.0
+		Audio.play_sfx("whisper", -8.0)
+		Events.notify.emit("GIAT_PROMPT", [])
+
+func _scramble_guard() -> void:
+	_scramble_t = 0.0
+	var ch := director.get_threat("co_hon")
+	if ch:
+		ch.crowd = clampf(ch.crowd + 18.0, 0.0, 100.0)   # slighted souls press back in
+	Audio.play_sfx("item_bad", -8.0)
+	Events.notify.emit("GIAT_GUARD", [])
+
+func _scramble_snatch() -> void:
+	_scramble_t = 0.0
+	add_via(6.0)          # lộc: sharing brings a little calm
+	_earn_coins(2)
+	Audio.play_sfx("coin_chime", -12.0)
+	Events.notify.emit("GIAT_SNATCH", [])
+
+## Tick the giật-cô-hồn window and the forbidden-offering "wrong tray" timer (both tied to
+## the cô hồn offering economy). Called once per frame from _update_timers.
+func _tick_offering_events(delta: float) -> void:
+	if _scramble_t > 0.0:
+		_scramble_t = maxf(0.0, _scramble_t - delta)
+		if _scramble_t == 0.0:
+			_scramble_snatch()
+	if _rich_cd > 0.0:
+		_rich_cd = maxf(0.0, _rich_cd - delta)
+		if _rich_cd == 0.0:
+			_rich_tray = true
+			_rich_expire = 12.0
+			Audio.play_sfx("item_bad", -10.0)
+			Events.notify.emit("OFFERING_WRONG", [])
+	elif _rich_tray:
+		_rich_expire = maxf(0.0, _rich_expire - delta)
+		if _rich_expire == 0.0:
+			_rich_tray = false   # the rookie quietly swaps in a humble tray
+			_rich_cd = randf_range(45.0, 90.0)
 
 func request_use_item() -> void:
 	if item_held == null or not _running or _tut_step >= 0:

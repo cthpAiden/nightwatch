@@ -351,3 +351,7 @@ STATS_NEMESIS,Bị bắt nhiều nhất bởi,Most caught by
 SET_DIFF_HELP,Dễ: ma chậm và hiền hơn. Ác Mộng: nhanh và dồn dập.,"Easy: slower, gentler threats. Nightmare: fast and relentless."
 SET_SCARE_HELP,"Giảm: rung nhẹ, không giật hình. Tắt: không có ảnh hù.","Reduced: softer shake, no screen jitter. Off: no jump image."
 BESTIARY_DISCOVERED,Đã khám phá,Discovered
+OFFERING_WRONG,Đồ cúng phải thanh đạm. Bỏ đồ mặn ra.,Offerings must be humble — take the meat out.
+GIAT_PROMPT,"Giật cô hồn! Buông cho tụi nhỏ giật lấy lộc, hay giữ mâm?","Souls scramble for the tray! Let the children snatch it for lộc, or guard it?"
+GIAT_SNATCH,Tụi nhỏ giật sạch — nhưng buông là có lộc.,The children grabbed it all — but letting go brings fortune.
+GIAT_GUARD,"Giữ được mâm, nhưng các vong phật lòng.",You kept the tray but the souls are slighted.

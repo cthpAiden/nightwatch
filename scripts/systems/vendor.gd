@@ -128,3 +128,14 @@ func _attack() -> void:
 		return
 	state = GameEnums.VendorState.LEAVING
 	Events.jumpscare_started.emit("ba_hang_rong")
+
+## Is the vendor currently shown on her camera (the gate)? True while shopping or hostile.
+func on_camera() -> bool:
+	return state == GameEnums.VendorState.SHOP or state == GameEnums.VendorState.HOSTILE
+
+## Sprite for the gate feed. While shopping she looks the same whether real or counterfeit
+## (the tell is the warped rao, not her face); only when the mask drops (HOSTILE) does the
+## impostor's form show.
+func cam_texture() -> Texture2D:
+	var p := "res://assets/art/threats/vendor_hostile.svg" if state == GameEnums.VendorState.HOSTILE else "res://assets/art/threats/vendor_shop.svg"
+	return load(p) if ResourceLoader.exists(p) else null
