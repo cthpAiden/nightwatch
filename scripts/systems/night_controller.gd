@@ -279,7 +279,7 @@ func _on_threat_at_door(id: String, side: int) -> void:
 	# threat's own approach_sfx so it reads as cause (footsteps) then consequence (sting).
 	var arr_pitch := 0.92 if side == GameEnums.Side.LEFT else 1.06
 	get_tree().create_timer(0.2).timeout.connect(func():
-		Audio.play_sfx("sting_low", -14.0, arr_pitch, Audio.VERB_BUS))
+		Audio.play_sting("sting_low", -14.0, arr_pitch))
 	# Pulse the threatened side's doorway light so the player gets a directional cue.
 	if hud and hud.has_method("flash_side"):
 		hud.flash_side(side)
@@ -1034,7 +1034,7 @@ func _caught(cause: String) -> void:
 		if Settings.allow_jumpscares():
 			room.add_shake(0.16)
 	_flash.color = Color(0, 0, 0, 0)
-	Audio.play_sfx("pre_scare", -3.0, lerpf(1.06, 0.8, intensity), Audio.VERB_BUS)
+	Audio.play_sting("pre_scare", -3.0, lerpf(1.06, 0.8, intensity))
 	var pre := 0.32 + intensity * 0.22 + (0.26 if is_oan else 0.0)
 	await get_tree().create_timer(pre).timeout
 	if not is_inside_tree():
@@ -1067,7 +1067,7 @@ func _caught(cause: String) -> void:
 		Audio.play_jumpscare(lerpf(1.0, 0.82, intensity))
 	else:
 		# accessibility / non-lethal cause: a soft red wash + a breath sting, no jump image.
-		Audio.play_sfx("sting_breath", -5.0, 1.0, Audio.VERB_BUS)
+		Audio.play_sting("sting_breath", -5.0, 1.0)
 		# Scares OFF must produce no shake and no flash — gate the red wash + jolt.
 		if Settings.allow_jumpscares():
 			_flash.color = Color(0.35, 0.02, 0.02, 0.55)
@@ -1190,7 +1190,7 @@ func add_startle(amount: float) -> void:
 		if Settings.allow_jumpscares() and room:
 			room.add_shake(0.25)
 		var mag := clampf(absf(hit) / 18.0, 0.0, 1.0)
-		Audio.play_sfx("sting_breath", lerpf(-12.0, -3.0, mag), 1.0, Audio.VERB_BUS)
+		Audio.play_sting("sting_breath", lerpf(-12.0, -3.0, mag), 1.0)
 
 func add_power(amount: float) -> void:
 	power = clampf(power + amount, 0.0, 100.0)
@@ -1287,7 +1287,7 @@ func _gutter_candles() -> void:
 	altar_lit = false
 	huong = 0.0
 	Audio.play_sfx("candle_gust", -3.0)
-	Audio.play_sfx("sting_breath", -10.0, 1.0, Audio.VERB_BUS)
+	Audio.play_sting("sting_breath", -10.0, 1.0)
 	Audio.stop_loop("incense_bed")   # the room goes acoustically cold
 	if room:
 		room.add_shake(0.5)

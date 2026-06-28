@@ -80,22 +80,30 @@ func _ensure_buses() -> void:
 	var mi := AudioServer.get_bus_index("Master")
 	if mi != -1 and AudioServer.get_bus_effect_count(mi) == 0:
 		var comp := AudioEffectCompressor.new()
-		comp.threshold = -14.0
-		comp.ratio = 3.5
+		# Eased from -14/3.5 to -10/2.5: the source WAVs are already peak-0.9 normalised and
+		# soft-clipped, so the old hot, high-ratio comp pumped the bed and stacked saturation
+		# under the limiter. Gentler glue, less audible pumping.
+		comp.threshold = -10.0
+		comp.ratio = 2.5
 		comp.attack_us = 18000.0
 		comp.release_ms = 240.0
 		comp.gain = 1.0
 		AudioServer.add_bus_effect(mi, comp)
 		var lim := AudioEffectLimiter.new()
 		lim.ceiling_db = -0.6
-		lim.soft_clip_db = 2.0
+		# soft_clip_db 2.0 -> 0.3: AudioEffectLimiter's soft-clip saturates BELOW the ceiling,
+		# so 2 dB of it coloured every loud hit (jumpscare) on top of the source soft-clip —
+		# audible grit. Drop it so the limiter is a clean brickwall catch, not a saturator.
+		lim.soft_clip_db = 0.3
 		AudioServer.add_bus_effect(mi, lim)
 
 func apply_volumes() -> void:
 	_set_bus("Master", Settings.master_volume)
 	_set_bus(MUSIC_BUS, Settings.music_volume)
 	_set_bus(SFX_BUS, Settings.sfx_volume)
-	_set_bus(VERB_BUS, Settings.sfx_volume)   # wet send tracks the SFX slider
+	# Wet send tracks the SFX slider but sits ~3 dB under the dry bus (×0.708) so a scare's
+	# reverb tail doesn't tower over the (ducked) dry mix during a death duck().
+	_set_bus(VERB_BUS, Settings.sfx_volume * 0.708)
 
 func _set_bus(bus: String, linear: float) -> void:
 	var idx := AudioServer.get_bus_index(bus)
@@ -162,6 +170,14 @@ func play_jumpscare(pitch: float = 1.0) -> void:
 	if scale <= 0.0:
 		return
 	play_sfx("jumpscare", linear_to_db(scale), pitch, VERB_BUS)
+
+## Play a scare-grade sting (pre-scare swell, death/startle/approach stings). Routes to
+## VERB (so it blooms + survives a duck) AND honours the accessibility tier: REDUCED
+## attenuates it, OFF keeps only a soft floor so the cue still lands (OFF removes the jump
+## IMAGE + shake/flash, never the audio confirmation). FULL is unchanged (0 dB offset).
+func play_sting(sound_name: String, volume_db: float = 0.0, pitch: float = 1.0) -> AudioStreamPlayer:
+	var mult := maxf(Settings.scare_volume_scale(), 0.4)
+	return play_sfx(sound_name, volume_db + linear_to_db(mult), pitch, VERB_BUS)
 
 # --- sustained loops --------------------------------------------------------
 func start_loop(sound_name: String, volume_db: float = 0.0) -> void:

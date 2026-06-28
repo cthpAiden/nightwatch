@@ -84,7 +84,7 @@ func _on_answer() -> void:
 	if _lure_active:
 		_lure_answered = true   # mark answered BEFORE _end_lure so it skips the resist reward
 		flood = minf(100.0, flood + 28.0)
-		Audio.play_sfx("sting_rise", -8.0, 1.0, Audio.VERB_BUS)   # you answered the water
+		Audio.play_sting("sting_rise", -8.0, 1.0)   # you answered the water
 		_end_lure()
 
 func _on_action(action: String) -> void:

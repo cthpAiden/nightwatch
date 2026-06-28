@@ -338,6 +338,27 @@ func _run(c) -> void:
 	c._stop_tension_loops()
 	check("_stop_tension_loops clears every loop-state flag",
 		not c._drone_on and not c._hb_on and not c._breath_on and not c._strain_on and not c._water_on)
+	# play_sting honours the REDUCED accessibility tier (attenuates) and leaves FULL bit-identical.
+	var prev_scare: int = Settings.scare_intensity
+	Settings.scare_intensity = Settings.Scare.FULL
+	var pf = Audio.play_sting("sting_low", -10.0, 1.0)
+	check("play_sting is a 0 dB offset on FULL (unchanged)", pf != null and is_equal_approx(pf.volume_db, -10.0))
+	Settings.scare_intensity = Settings.Scare.REDUCED
+	var pr = Audio.play_sting("sting_low", -10.0, 1.0)
+	check("play_sting attenuates a scare sting on REDUCED", pr != null and pr.volume_db < -10.5)
+	Settings.scare_intensity = prev_scare
+	# Master mix: the limiter is a clean brickwall catch (low soft-clip) and the comp is eased.
+	var _mi := AudioServer.get_bus_index("Master")
+	var _lim_ok := false
+	var _comp_ok := false
+	for _ei in AudioServer.get_bus_effect_count(_mi):
+		var _fx = AudioServer.get_bus_effect(_mi, _ei)
+		if _fx is AudioEffectLimiter:
+			_lim_ok = _fx.soft_clip_db <= 0.5
+		elif _fx is AudioEffectCompressor:
+			_comp_ok = _fx.ratio <= 3.0
+	check("master limiter soft-clip is a clean catch (<=0.5 dB)", _lim_ok)
+	check("master compressor ratio eased (<=3.0)", _comp_ok)
 
 	print("\n--- PHONE ---")
 	var ph = c.phone

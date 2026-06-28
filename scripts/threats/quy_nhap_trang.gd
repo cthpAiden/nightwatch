@@ -70,7 +70,7 @@ func _trigger() -> void:
 	threatening_side = GameEnums.Side.RIGHT
 	Events.cat_triggered.emit()
 	Events.notify.emit("CAT_WARN", [])
-	Audio.play_sfx("sting_metal", -3.0, 1.0, Audio.VERB_BUS)   # the corpse sits up
+	Audio.play_sting("sting_metal", -3.0, 1.0)   # the corpse sits up
 	phase = GameEnums.ThreatPhase.ACTIVE
 	current_location = spawn_location
 	path_index = 0

@@ -164,13 +164,17 @@ def ui_confirm():
 
 # ---------------------------------------------------------------- clock
 def clock_tick():
-    # mechanical tick: short noise transient + tiny low thud
+    # mechanical tick: a short noise transient + a low thud + a damped resonant "tock"
+    # body so it reads as a wooden clock movement, not a bare click.
     n = bandpass(noise(0.03), 1500, 6000)
     n = exp_decay(n, 0.006)
-    thud = exp_decay(sine(160, 0.04), 0.01)
-    s = buf(0.06)
-    add(s, n, 0.0, 0.9)
+    thud = exp_decay(sine(160, 0.05), 0.012)
+    s = buf(0.09)
+    add(s, n, 0.0, 0.85)
     add(s, thud, 0.0, 0.3)
+    # resonant tock: two damped partials give the escapement a little wooden ring
+    add(s, exp_decay(sine(800, 0.08), 0.03), 0.0, 0.18)
+    add(s, exp_decay(sine(1900, 0.06), 0.022), 0.0, 0.10)
     save("clock_tick.wav", s, peak=0.5)
 
 def clock_chime():
@@ -251,7 +255,22 @@ def camera_switch():
     save("camera_switch.wav", s, peak=0.55)
 
 def static_loop():
-    st = bandpass(noise(2.0), 400, 9000)
+    # CRT hiss. Crossfade the loop seam with material taken just PAST the loop point so
+    # start==end seamlessly — no periodic click (and, unlike a fade-to-zero window, no
+    # amplitude dip every 2 s, which would pump on a constant hiss). The module shares one
+    # global RNG (see the seed at top), so we restore it to where a plain noise(dur) would
+    # leave it — the seam material must not shift every sound generated after this one.
+    dur = 2.0
+    xf = int(0.05 * SR)
+    n = int(SR * dur)
+    _state = random.getstate()
+    raw = bandpass(noise(dur + 0.06), 400, 9000)
+    random.setstate(_state)
+    noise(dur)   # advance the shared RNG by exactly the original amount, discard result
+    st = raw[:n]
+    for i in range(xf):
+        a = i / xf
+        st[i] = raw[i] * a + raw[n + i] * (1.0 - a)
     save("static_loop.wav", st, peak=0.35)
 
 def camera_up():
@@ -393,9 +412,14 @@ def item_bad():
 
 # ---------------------------------------------------------------- world
 def footstep_wood():
-    s = buf(0.22)
-    add(s, exp_decay(sine(120, 0.12), 0.03), 0.0, 0.8)
-    add(s, exp_decay(bandpass(noise(0.1), 200, 1800), 0.02), 0.0, 0.5)
+    # A footfall on an old floorboard: a low thump, a noisy attack, and two low-Q wood
+    # resonances so it rings briefly like timber instead of a flat soft tap. (Kept to the
+    # same noise() draw as before so the shared RNG isn't shifted for later sounds.)
+    s = buf(0.3)
+    add(s, exp_decay(sine(120, 0.14), 0.035), 0.0, 0.8)
+    add(s, exp_decay(bandpass(noise(0.1), 200, 1800), 0.02), 0.0, 0.45)
+    add(s, exp_decay(sine(180, 0.18), 0.06), 0.0, 0.3)    # wood body mode
+    add(s, exp_decay(sine(520, 0.14), 0.05), 0.0, 0.16)   # upper board mode
     save("footstep_wood.wav", s, peak=0.5)
 
 def knock():
@@ -624,10 +648,12 @@ def approach_heavy():
     save("approach_heavy.wav", soft_clip(s), peak=0.85)
 
 def approach_soft():
-    # The rest: a small, childlike single tap from the dark — almost shy.
+    # The rest: a small, childlike single tap from the dark — almost shy, but with a
+    # little body and a soft sub thump so it reads as a presence, not a click.
     s = buf(0.5)
-    add(s, exp_decay(sine(300, 0.1), 0.02), 0.0, 0.55)
-    add(s, exp_decay(bandpass(noise(0.06), 400, 3000), 0.01), 0.0, 0.4)
+    add(s, exp_decay(sine(300, 0.16), 0.05), 0.0, 0.5)
+    add(s, exp_decay(bandpass(noise(0.06), 400, 3000), 0.012), 0.0, 0.35)
+    add(s, exp_decay(sine(90, 0.18), 0.06), 0.0, 0.3)   # soft sub thump — a footfall from the dark
     save("approach_soft.wav", s, peak=0.4)
 
 # ---------------------------------------------------------------- ma da water

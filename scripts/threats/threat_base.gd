@@ -156,7 +156,7 @@ func _arrive_at_door(side: int) -> void:
 	# Diegetic warning only: a knock + a vague unease. It does NOT say which door
 	# or what it is — you have to check the doorway lights to find out, then react
 	# (light it up and hold still, or shut the door). That's the tension.
-	Audio.play_sfx(approach_sfx, -4.0, 1.0, Audio.VERB_BUS)
+	Audio.play_sting(approach_sfx, -4.0, 1.0)
 	Events.notify.emit("THREAT_NEARBY", [])
 	# If the relevant counter is already engaged, leave immediately.
 	if _is_repelled_now():

@@ -74,7 +74,7 @@ func answer() -> void:
 	if _fake:
 		# took the bait — Ma da surges (it listens for intercom_answered)
 		Events.intercom_answered.emit()
-		Audio.play_sfx("sting_rise", -6.0, 1.0, Audio.VERB_BUS)   # you took the bait
+		Audio.play_sting("sting_rise", -6.0, 1.0)   # you took the bait
 		Events.notify.emit("PHONE_FAKE", [])
 		_stop()
 	else:
