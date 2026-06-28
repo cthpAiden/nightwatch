@@ -42,10 +42,7 @@
   <circle cx="220" cy="420" r="3" fill="#1a231f" fill-opacity="0.5"/>
   <circle cx="160" cy="330" r="2" fill="#1a231f" fill-opacity="0.5"/>
   <circle cx="440" cy="440" r="2.5" fill="#1a231f" fill-opacity="0.5"/>
-  <!-- subtle top-down vignette for grime in corners -->
-  <radialGradient id="wallvig" cx="0.5" cy="0.5" r="0.75">
-    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
-    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.45"/>
-  </radialGradient>
-  <rect x="0" y="0" width="512" height="512" fill="url(#wallvig)"/>
+  <!-- NOTE: no baked corner vignette here — this texture tiles 2x on the 3D walls, so a
+       baked radial darkening repeats as a visible grid. Falloff comes from the room's
+       lights + Environment fog instead (see guard_room.gd). -->
 </svg>

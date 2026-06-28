@@ -44,10 +44,7 @@
   </radialGradient>
   <ellipse cx="190" cy="300" rx="120" ry="70" fill="url(#scuff)"/>
   <ellipse cx="380" cy="120" rx="90" ry="60" fill="url(#scuff)"/>
-  <!-- corner vignette, dim room -->
-  <radialGradient id="floorvig" cx="0.5" cy="0.5" r="0.72">
-    <stop offset="0.5" stop-color="#0a0e14" stop-opacity="0"/>
-    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.55"/>
-  </radialGradient>
-  <rect x="0" y="0" width="512" height="512" fill="url(#floorvig)"/>
+  <!-- NOTE: no baked corner vignette — this texture tiles 3x on the floor, so a baked
+       radial darkening repeats as a 3x3 grid of dark blobs. The room lighting + fog
+       provide the falloff instead. -->
 </svg>

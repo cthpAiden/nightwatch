@@ -477,7 +477,16 @@ func _build_altar() -> void:
 			var base := Vector3(ax, 2.28, az + 0.15)
 			puff.position = base
 			add_child(puff)
-			_smoke.append({"node": puff, "base": base, "phase": float(i) * 0.85})
+			# Per-puff drift/sway/curl/alpha so the strands desync and curl differently
+			# instead of pumping as one mechanical column (rebuilt fresh each night).
+			_smoke.append({
+				"node": puff, "base": base,
+				"phase": float(i) * 0.85 + randf_range(-0.25, 0.25),
+				"drift": randf_range(0.05, 0.11),
+				"sway": randf_range(0.9, 1.5),
+				"curl": randf_range(0.015, 0.05),
+				"amax": randf_range(0.36, 0.5),
+			})
 
 	# flanking candles (these are the ones a cold draft can gutter out)
 	for cx in [-0.56, 0.56]:
@@ -796,13 +805,16 @@ func _animate_altar(_delta: float) -> void:
 	# joss-stick tips dim as the incense burns down
 	for tip in _incense_tips:
 		tip.emission_energy_multiplier = (6.0 * (0.4 + 0.6 * _huong)) if lit else 0.6
-	# rising smoke
+	# rising smoke — per-puff two-harmonic lazy-S drift so the column curls and breathes
+	# instead of reading as four identical strands pumping in lockstep.
 	for s in _smoke:
 		var node: Sprite3D = s.node
 		var cyc := 3.0
 		var ph: float = fmod(_t + s.phase, cyc) / cyc
-		node.position = s.base + Vector3(sin((_t + s.phase) * 1.3) * 0.06 * ph, ph * 0.85, 0)
-		node.modulate.a = (sin(ph * PI) * 0.45 * _huong) if lit else 0.0
+		var t2: float = _t + s.phase
+		var dx: float = (sin(t2 * s.sway) * s.drift + sin(t2 * s.sway * 2.3) * s.curl) * ph
+		node.position = s.base + Vector3(dx, ph * 0.85, 0)
+		node.modulate.a = (sin(ph * PI) * s.amax * _huong) if lit else 0.0
 		node.scale = Vector3.ONE * (0.5 + ph * 1.2)
 
 func _animate_props(delta: float) -> void:

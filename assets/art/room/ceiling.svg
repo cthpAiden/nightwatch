@@ -46,10 +46,6 @@
     <circle cx="60" cy="440" r="2.5"/><circle cx="200" cy="470" r="3"/><circle cx="120" cy="250" r="2"/>
     <circle cx="470" cy="240" r="2.5"/><circle cx="380" cy="420" r="3"/><circle cx="440" cy="370" r="2"/>
   </g>
-  <!-- vignette -->
-  <radialGradient id="ceilvig" cx="0.5" cy="0.5" r="0.75">
-    <stop offset="0.55" stop-color="#0a0e14" stop-opacity="0"/>
-    <stop offset="1" stop-color="#0a0e14" stop-opacity="0.5"/>
-  </radialGradient>
-  <rect x="0" y="0" width="512" height="512" fill="url(#ceilvig)"/>
+  <!-- NOTE: no baked corner vignette — this texture tiles 2x on the ceiling, so a baked
+       radial darkening repeats as a grid. Falloff comes from the room lighting + fog. -->
 </svg>
