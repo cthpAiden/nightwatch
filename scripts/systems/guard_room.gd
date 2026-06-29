@@ -303,15 +303,25 @@ render_mode unshaded, cull_disabled;
 uniform sampler2D feed : source_color;
 uniform float t = 0.0;
 uniform float lit = 1.0;
+uniform float screen_aspect = 1.3333;   // glass W/H; feeds are 16:9 (1.7778)
 float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
 void fragment() {
-	vec2 uv = UV;
-	vec3 col = texture(feed, uv).rgb;
-	col *= 0.86 + 0.14 * sin(uv.y * 240.0);              // scanlines
-	vec2 d = uv - 0.5;
+	// CONTAIN fit: letterbox the 16:9 feed inside the glass so the WHOLE frame is
+	// visible (no edge crop, no stretch), whatever the screen's own aspect is.
+	const float SRC_ASPECT = 1.7778;
+	vec2 fuv = UV;
+	if (screen_aspect > SRC_ASPECT)
+		fuv.x = (UV.x - 0.5) * (screen_aspect / SRC_ASPECT) + 0.5;   // pillarbox
+	else
+		fuv.y = (UV.y - 0.5) * (SRC_ASPECT / screen_aspect) + 0.5;   // letterbox
+	float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
+	vec3 col = texture(feed, fuv).rgb * inside;          // black bars outside the frame
+	// CRT effects key off the real glass coord (UV), not the letterboxed content.
+	col *= 0.86 + 0.14 * sin(UV.y * 240.0);              // scanlines
+	vec2 d = UV - 0.5;
 	col *= 1.0 - dot(d, d) * 0.7;                        // vignette
 	col *= 0.92 + 0.08 * sin(t * 7.0);                  // flicker
-	col += rand(uv * vec2(91.0, 75.0) + fract(t)) * 0.035;  // faint static
+	col += rand(UV * vec2(91.0, 75.0) + fract(t)) * 0.035;  // faint static
 	col *= vec3(0.82, 1.0, 0.92);                        // cool CRT tint
 	col *= lit;                                          // dies on blackout
 	ALBEDO = col;
@@ -329,13 +339,17 @@ void fragment() {
 	if not _screen_feeds.is_empty():
 		_screen_mat.set_shader_parameter("feed", _screen_feeds[0])
 	_screen_mat.set_shader_parameter("t", 0.0)
+	_screen_mat.set_shader_parameter("screen_aspect", 0.8 / 0.6)
 	_screen_timer = 2.6
+	# Flat glass (QuadMesh) so the full feed maps cleanly across the face — a BoxMesh's
+	# per-face unwrap only showed a cropped sub-rectangle of the image.
 	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = Vector3(0.8, 0.6, 0.02)
-	mi.mesh = bm
+	var qm := QuadMesh.new()
+	qm.size = Vector2(0.8, 0.6)
+	mi.mesh = qm
 	mi.material_override = _screen_mat
 	mi.position = Vector3(0.9, 1.47, -1.46)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	# Threat figure composited onto the desk CRT (sits just in front of the glass,
 	# tinted to match the cool phosphor). Shown when a threat is on the mirrored cam.
