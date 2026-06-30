@@ -116,7 +116,11 @@ func _run(c) -> void:
 	og._arrive_at_door(GameEnums.Side.LEFT)
 	c.request_toggle_door(GameEnums.Side.LEFT)
 	d.broadcast_door(GameEnums.Side.LEFT, true)
-	check("closed door repels ong_ke", not og.is_at_door())
+	og._process_attack(0.1)
+	check("closed door does NOT instantly banish ong_ke (must hold it)", og.is_at_door())
+	for i in 50:   # > linger_time: holding the door shut finally makes him give up
+		og._process_attack(0.1)
+	check("holding the door shut repels ong_ke", not og.is_at_door())
 	c.request_toggle_door(GameEnums.Side.LEFT)
 	og.reset_to_spawn()
 	og._arrive_at_door(GameEnums.Side.LEFT)

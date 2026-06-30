@@ -26,6 +26,7 @@ var wander_zone: Array = []                 # if set, WANDER stays within these 
 var randomize_side: bool = false           # PATH: re-roll left/right on each approach
 var move_interval: float = 5.0             # seconds between movement opportunities
 var attack_time: float = 6.0               # seconds at a door before it kills
+var linger_time: float = 4.0               # seconds a blocked threat presses at the door before giving up
 var via_drain_at_door: float = 6.0         # vía/sec drained while looming at a door
 var approach_sfx: String = "approach_soft"  # diegetic cue when it reaches a door (per threat)
 
@@ -52,6 +53,7 @@ var _controller                            # NightController (duck-typed)
 var _rng := RandomNumberGenerator.new()
 var _move_accum: float = 0.0
 var _attack_accum: float = 0.0
+var _linger_accum: float = 0.0              # time held off at the door by the active counter
 var _speed_mult: float = 1.0
 var _active: bool = false
 var _player_viewing_me: bool = false
@@ -151,6 +153,7 @@ func _arrive_at_door(side: int) -> void:
 	current_location = MapGraph.side_door(side)
 	phase = GameEnums.ThreatPhase.AT_DOOR
 	_attack_accum = 0.0
+	_linger_accum = 0.0
 	Events.threat_relocated.emit(id, current_location)
 	Events.threat_at_door.emit(id, side)
 	# Diegetic warning only: a knock + a vague unease. It does NOT say which door
@@ -158,13 +161,23 @@ func _arrive_at_door(side: int) -> void:
 	# (light it up and hold still, or shut the door). That's the tension.
 	Audio.play_sting(approach_sfx, -4.0, 1.0)
 	Events.notify.emit("THREAT_NEARBY", [])
-	# If the relevant counter is already engaged, leave immediately.
+
+## Shared "held off at the door" handling. A threat blocked by its counter (a shut
+## door / a held light) no longer vanishes the instant you react — it presses at
+## the door and only gives up after linger_time. Reopen too early and its attack
+## resumes where it left off (the kill timer is NOT reset). Returns true while it
+## is still blocked, so the caller stops processing the attack this frame.
+func _handle_door_block(delta: float) -> bool:
 	if _is_repelled_now():
-		repel()
+		_linger_accum += delta
+		if _linger_accum >= linger_time:
+			repel()
+		return true
+	_linger_accum = 0.0
+	return false
 
 func _process_attack(delta: float) -> void:
-	if _is_repelled_now():
-		repel()
+	if _handle_door_block(delta):
 		return
 	# While Ma trơi's panic-hex has the guard's hands jammed (doors flung open), a
 	# looming rusher does NOTHING — no grab AND no vía drain — so the hex can never be
@@ -199,6 +212,7 @@ func repel() -> void:
 	var side := threatening_side
 	threatening_side = -1
 	_attack_accum = 0.0
+	_linger_accum = 0.0
 	phase = GameEnums.ThreatPhase.ACTIVE
 	Events.threat_left_door.emit(id, side)
 	Events.threat_repelled.emit(id)
@@ -208,6 +222,7 @@ func repel() -> void:
 func reset_to_spawn() -> void:
 	threatening_side = -1
 	_attack_accum = 0.0
+	_linger_accum = 0.0
 	phase = GameEnums.ThreatPhase.ACTIVE
 	_active = true
 	_reset_position()
@@ -255,14 +270,14 @@ func _bleed_via(amount: float) -> void:
 	elif _controller:
 		_controller.add_via(amount)
 
-func on_door(side: int, closed: bool) -> void:
-	if closed and phase == GameEnums.ThreatPhase.AT_DOOR and side == threatening_side:
-		if counter_door and not ignores_doors:
-			repel()
+## Door/light toggles no longer banish a looming threat on the spot — _process_attack
+## sees the engaged counter next frame and starts the linger-then-leave timer, so you
+## must HOLD the counter for linger_time. Kept as override hooks for special threats.
+func on_door(_side: int, _closed: bool) -> void:
+	pass
 
-func on_light(side: int, on: bool) -> void:
-	if on and phase == GameEnums.ThreatPhase.AT_DOOR and side == threatening_side and counter_light:
-		repel()
+func on_light(_side: int, _on: bool) -> void:
+	pass
 
 func on_view(is_viewing_my_cam: bool) -> void:
 	_player_viewing_me = is_viewing_my_cam

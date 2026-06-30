@@ -8,7 +8,7 @@ const MUSIC_DIR := "res://assets/audio/music/"
 const JUMP_DIR := "res://assets/audio/jumpscare/"
 
 const SFX_NAMES := [
-	"ui_click", "ui_hover", "ui_back", "ui_confirm", "clock_tick", "clock_chime",
+	"ui_click", "ui_hover", "ui_back", "ui_confirm", "clock_chime",
 	"door_slam", "door_creak", "light_switch", "fluorescent_hum", "camera_switch",
 	"static_loop", "camera_up", "camera_down", "heartbeat", "breathing", "whisper",
 	"stinger", "power_down", "low_power_beep", "offering_bell", "incense_whoosh",
@@ -28,8 +28,7 @@ const MUSIC_NAMES := ["ambience_night", "ambience_dread"]
 # it is never started, so it is intentionally left out of LOOPING.
 const LOOPING := ["static_loop", "heartbeat", "breathing",
 	"ambience_night", "ambience_dread", "drone_tension",
-	"ambience_sub", "water_loop", "shutter_strain", "incense_bed",
-	"clock_tick"]   # backlog#25: accelerating tick into dawn (looped, pitched up 1.0->1.85)
+	"ambience_sub", "water_loop", "shutter_strain", "incense_bed"]
 
 const MUSIC_BUS := "Music"
 const SFX_BUS := "SFX"

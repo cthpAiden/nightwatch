@@ -22,9 +22,9 @@ func _configure() -> void:
 	approach_sfx = "approach_heavy"   # three slow, descending knocks
 
 func _process_attack(delta: float) -> void:
-	# Closing the door always repels him (the panic / power-hungry counter).
-	if _is_repelled_now():
-		repel()
+	# Closing the door is his panic counter — but he now lingers against it for
+	# linger_time before giving up (shared logic), so you must HOLD the door shut.
+	if _handle_door_block(delta):
 		return
 	# "Ngoan": stand your ground — shine the doorway LIGHT on him and stay calm
 	# (monitor down, don't whip the view around). Faced and unafraid, he loses
