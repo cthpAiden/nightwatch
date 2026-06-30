@@ -7,11 +7,10 @@ config/description="A Vietnamese FNAF-style comedy-horror night-guard game."
 config/version="1.0.0"
 run/main_scene="res://scenes/screens/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
-; Cap the framerate: a slow horror game gains nothing from rendering 150-300 FPS,
-; but the uncapped frames peg the CPU/GPU and heat the machine. 60 is smooth for
-; this genre and dramatically lowers power draw. Raise this single number if a
-; higher-refresh feel is ever wanted.
-run/max_fps=60
+; Cap the framerate so frames never run uncapped (150-300 FPS) and needlessly
+; peg the CPU/GPU. 144 matches high-refresh panels for a smooth feel; lower this
+; single number (e.g. 60) if reducing power draw/heat ever matters more.
+run/max_fps=144
 boot_splash/bg_color=Color(0.03, 0.03, 0.05, 1)
 boot_splash/show_image=false
 config/icon="res://assets/art/ui/icon_app.svg"
