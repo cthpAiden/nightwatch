@@ -24,6 +24,12 @@ var _jumpscare_rect: TextureRect
 var _scare_mat: ShaderMaterial     # chromatic-split + UV-jitter on the scare image ("hit" 1->0)
 var _flash: ColorRect              # white burst on a jumpscare
 var _jump_jitter_t := 0.0          # seconds of remaining jumpscare position-jitter
+# 3D grinning-maw jumpscare: a textured GLB lunged at the camera inside a SubViewport,
+# whose live texture feeds _jumpscare_rect (so the glitch shader / strobe / jitter still apply).
+var _maw_vp: SubViewport
+var _maw_cam: Camera3D
+var _maw_node: Node3D
+var _maw_bg: ColorRect            # opaque black behind the maw so the office can't leak at the edges
 var _vignette: TextureRect
 var _drone_on := false             # tension drone bed currently faded in
 
@@ -230,9 +236,21 @@ void fragment() {
 	var jl := CanvasLayer.new()
 	jl.layer = 50
 	add_child(jl)
+	# Opaque black behind the maw render: masks the office at the screen edges if the
+	# COVERED rect / overscan doesn't reach a corner. Hidden until a maw grab.
+	_maw_bg = ColorRect.new()
+	UI.full(_maw_bg)
+	_maw_bg.color = Color(0, 0, 0, 1)
+	_maw_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_maw_bg.visible = false
+	jl.add_child(_maw_bg)
 	_jumpscare_rect = TextureRect.new()
 	UI.full(_jumpscare_rect)
 	_jumpscare_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	# Without IGNORE_SIZE the rect's min size is its texture's raster size (1280x720 for
+	# the maw viewport), so it overflows its full-screen anchors and leaks the office at
+	# the edges. IGNORE_SIZE makes COVERED fill the anchored bounds exactly.
+	_jumpscare_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_jumpscare_rect.visible = false
 	# The grab image distorts on impact: a hard chromatic R/B split + a little UV jitter
 	# that decays over ~0.4s (driven from _process), so the face glitches as it lands.
@@ -1180,6 +1198,10 @@ func _caught(cause: String) -> void:
 			room.add_shake(0.16)
 	_flash.color = Color(0, 0, 0, 0)
 	Audio.play_sting("pre_scare", -3.0, lerpf(1.06, 0.8, intensity))
+	# Build the maw rig now, under cover of the blackout, so loading the 23 MB mesh can't
+	# hitch the hit. Only for grabs that actually show it (lethal causes have a scare image).
+	if Settings.allow_jumpscares() and ThreatRegistry.info(cause).get("scare", "") != "":
+		_build_maw_rig()
 	var pre := 0.32 + intensity * 0.22 + (0.26 if is_oan else 0.0)
 	await get_tree().create_timer(pre).timeout
 	if not is_inside_tree():
@@ -1190,17 +1212,20 @@ func _caught(cause: String) -> void:
 	var scare_path: String = meta.get("scare", "") if not meta.is_empty() else ""
 	var has_image: bool = Settings.allow_jumpscares() and scare_path != "" and ResourceLoader.exists(scare_path)
 	if has_image:
-		_jumpscare_rect.texture = load(scare_path)
-		_jumpscare_rect.pivot_offset = _jumpscare_rect.size * 0.5
-		var pop := 1.18 if is_oan else 1.5
-		_jumpscare_rect.scale = Vector2(pop, pop)
-		_jumpscare_rect.modulate = Color(1, 1, 1, 1)
-		_jumpscare_rect.visible = true
+		# The grab is the 3D grinning maw lunging into the camera. If the rig can't
+		# build, fall back to the threat's flat scare image with the old scale pop.
+		if not _show_maw_scare(is_oan, reduced):
+			_jumpscare_rect.texture = load(scare_path)
+			_jumpscare_rect.pivot_offset = _jumpscare_rect.size * 0.5
+			var pop := 1.18 if is_oan else 1.5
+			_jumpscare_rect.scale = Vector2(pop, pop)
+			_jumpscare_rect.modulate = Color(1, 1, 1, 1)
+			_jumpscare_rect.visible = true
+			var ts := create_tween()
+			ts.tween_property(_jumpscare_rect, "scale", Vector2.ONE, 0.7 if is_oan else 0.4) \
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		if _scare_mat:
 			_scare_mat.set_shader_parameter("hit", 1.0)
-		var ts := create_tween()
-		ts.tween_property(_jumpscare_rect, "scale", Vector2.ONE, 0.7 if is_oan else 0.4) \
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		# REDUCED tier skips the screen-position jitter entirely (FULL keeps it).
 		if not reduced:
 			_jump_jitter_t = (0.28 if is_oan else 0.5) * (0.7 + intensity)
@@ -1222,13 +1247,21 @@ func _caught(cause: String) -> void:
 				room.add_shake(0.4)
 
 	# --- 3) LINGER — hold the burned-in face in dead silence, then dissolve to black. ---
-	await get_tree().create_timer(0.9 + intensity * 0.5).timeout
+	# (The maw's slow creep through this hold is chained onto the lunge in _show_maw_scare.)
+	var linger := 0.9 + intensity * 0.5
+	await get_tree().create_timer(linger).timeout
 	if not is_inside_tree():
 		return
 	if has_image and _jumpscare_rect.visible:
 		var td := create_tween()
 		td.tween_property(_jumpscare_rect, "modulate:a", 0.0, 0.5)
+		if _maw_bg and _maw_bg.visible:
+			td.parallel().tween_property(_maw_bg, "modulate:a", 0.0, 0.5)
 	await get_tree().create_timer(0.6).timeout
+	if _maw_vp:
+		_maw_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	if _maw_bg:
+		_maw_bg.visible = false
 	Save.record_death(cause)
 	Router.to_game_over(cause)
 
@@ -1241,6 +1274,90 @@ func _strobe_flash(soft: bool) -> void:
 	tw.tween_property(_flash, "color:a", 0.15, 0.06)
 	tw.tween_property(_flash, "color:a", peak * 0.7, 0.05)
 	tw.tween_property(_flash, "color:a", 0.0, 0.4)
+
+const MAW_SCENE := "res://assets/Meshy_AI_Grinning_Maw_0630172929_texture.glb"
+
+## Lazily build the off-screen 3D rig: a transparent SubViewport holding the maw, a
+## hard frontal "torch" key + a cold under-fill, and the lunge camera. The viewport's
+## live texture is what _jumpscare_rect samples, so all the 2D scare FX still layer on.
+func _build_maw_rig() -> bool:
+	if _maw_vp:
+		return true
+	if not ResourceLoader.exists(MAW_SCENE):
+		return false
+	_maw_vp = SubViewport.new()
+	_maw_vp.size = Vector2i(1280, 720)
+	_maw_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	# Own world + transparent: render ONLY the maw, isolated from the office scene (a
+	# shared World3D bleeds the room into the render). The full-screen _maw_bg masks black.
+	_maw_vp.own_world_3d = true
+	_maw_vp.transparent_bg = true
+	add_child(_maw_vp)
+
+	var we := WorldEnvironment.new()
+	var e := Environment.new()
+	e.background_mode = Environment.BG_CANVAS   # transparent: only the lit maw renders
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	e.ambient_light_color = Color(0.5, 0.55, 0.7)
+	e.ambient_light_energy = 0.28
+	we.environment = e
+	_maw_vp.add_child(we)
+
+	var key_l := DirectionalLight3D.new()
+	key_l.rotation_degrees = Vector3(-18, 8, 0)
+	key_l.light_energy = 1.7
+	key_l.light_color = Color(1.0, 0.96, 0.9)
+	_maw_vp.add_child(key_l)
+	var fill := DirectionalLight3D.new()
+	fill.rotation_degrees = Vector3(55, -20, 0)
+	fill.light_energy = 0.35
+	fill.light_color = Color(0.55, 0.62, 0.8)
+	_maw_vp.add_child(fill)
+
+	_maw_node = (load(MAW_SCENE) as PackedScene).instantiate()
+	_maw_vp.add_child(_maw_node)
+
+	_maw_cam = Camera3D.new()
+	_maw_cam.fov = 52.0
+	_maw_vp.add_child(_maw_cam)
+	_maw_cam.look_at_from_position(Vector3(0, 0.02, 2.0), Vector3(0, -0.12, 0), Vector3.UP)
+	return true
+
+## Show the maw and lunge it at the camera. Replaces the flat scare image: the figure
+## rushes from across the room until its gaping mouth engulfs the screen, with a small
+## roll snap. The slow creep during the linger hold is driven by the caller.
+func _show_maw_scare(is_oan: bool, reduced: bool) -> bool:
+	if not _build_maw_rig():
+		return false
+	_maw_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_maw_bg.modulate.a = 1.0
+	_maw_bg.visible = true
+	_jumpscare_rect.texture = _maw_vp.get_texture()
+	_jumpscare_rect.pivot_offset = _jumpscare_rect.size * 0.5
+	# Depth is the 3D lunge now, not a 2D pop — but keep a small steady overscan so the
+	# screen-position jitter never slides the maw off-frame and bares a black seam.
+	_jumpscare_rect.scale = Vector2(1.08, 1.08)
+	_jumpscare_rect.modulate = Color(1, 1, 1, 1)
+	_jumpscare_rect.visible = true
+
+	# Start far (full figure) and a touch off-axis; SNAP to a tight climax where the
+	# gaping mouth fills the frame, then keep creeping a hair closer through the hold.
+	var far_z := 2.6 if reduced else 3.0
+	var climax_z := 1.5 if reduced else 1.18
+	var creep_z := climax_z - 0.22
+	_maw_cam.look_at_from_position(Vector3(0, 0.0, far_z), Vector3(0, -0.1, 0), Vector3.UP)
+	_maw_cam.rotation_degrees.z = -7.0 if reduced else (5.0 if is_oan else -10.0)
+	var dur := 0.30 if is_oan else (0.22 if reduced else 0.16)
+	# One chained tween: the lunge first, then the slow creep — so they never fight over
+	# position:z (racing them made the slow creep swallow the snap and it read as "far").
+	var lt := create_tween()
+	lt.tween_property(_maw_cam, "position:z", climax_z, dur) \
+		.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	lt.parallel().tween_property(_maw_cam, "rotation_degrees:z", 0.0, dur * 1.4) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	lt.tween_property(_maw_cam, "position:z", creep_z, 2.4) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return true
 
 func _win() -> void:
 	if _ending:
