@@ -44,8 +44,13 @@ var _lamp_mats := {}         # side -> StandardMaterial3D (visible wall fixture 
 var _threat_sprites := {}    # side -> Sprite3D
 var _threat_base_pos := {}   # side -> Vector3 (rest pose; sprites sway around it)
 var _threat_rim := {}        # side -> OmniLight3D co-located with the sprite (AUDIT#14)
-const ONG_KE_SCENE := "res://assets/ong_ke_texture.glb"
-var _threat_models := {}        # side -> Node3D (ông kẹ's 3D figure; stands in for his Sprite3D)
+# Threats that stand in the doorway as a 3D GLB figure instead of the flat billboard.
+const THREAT_SCENES := {
+	"ong_ke": "res://assets/ong_ke_texture.glb",
+	"ma_da": "res://assets/ma_da.glb",
+}
+var _threat_models := {}        # side -> Node3D (the 3D figure; stands in for the Sprite3D)
+var _threat_model_id := {}      # side -> String (which threat the cached model was built for)
 var _threat_model_base_pos := {}   # side -> Vector3 (rest pose; model sways around it)
 var _threat_hostile := {}    # side -> bool (hostile throb in _update_threat_sprites) (backlog#19)
 var _threat_accent := {}     # side -> Color (rim-light tint while a threat is present) (AUDIT#14)
@@ -888,15 +893,21 @@ func _build_doorway(side: int, x: float) -> void:
 	add_child(sl)
 	_lights[side] = sl
 
-## Lazily instances ông kẹ's 3D figure in place of his Sprite3D, standing in the same
-## doorway spot. Built once per side and reused (the GLB is static, no skeleton/animation —
-## _update_threat_sprites sways it the same way it sways the billboards).
-func _ensure_ong_ke_model(side: int) -> Node3D:
-	if _threat_models.has(side):
+## Lazily instances a threat's 3D figure in place of its Sprite3D, standing in the same
+## doorway spot. Cached per side and reused (the GLB is static, no skeleton/animation —
+## _update_threat_sprites sways it the same way it sways the billboards). If a different
+## threat takes the same doorway, the old figure is freed and rebuilt for the new id.
+func _ensure_threat_model(side: int, id: String) -> Node3D:
+	if _threat_models.has(side) and _threat_model_id.get(side) == id:
 		return _threat_models[side]
-	if not ResourceLoader.exists(ONG_KE_SCENE):
+	var scene_path: String = THREAT_SCENES.get(id, "")
+	if scene_path == "" or not ResourceLoader.exists(scene_path):
 		return null
-	var m := (load(ONG_KE_SCENE) as PackedScene).instantiate()
+	# A different threat held this doorway's figure slot — free it before rebuilding.
+	if _threat_models.has(side):
+		_threat_models[side].queue_free()
+		_threat_models.erase(side)
+	var m := (load(scene_path) as PackedScene).instantiate()
 	var base: Vector3 = _threat_base_pos[side]
 	var dir := -1.0 if side == GameEnums.Side.LEFT else 1.0
 	# Set back deeper into the corridor than the sprite's spot, out of the doorway
@@ -907,6 +918,7 @@ func _ensure_ong_ke_model(side: int) -> Node3D:
 	m.visible = false
 	add_child(m)
 	_threat_models[side] = m
+	_threat_model_id[side] = id
 	_threat_model_base_pos[side] = m.position
 	# The hallway goes pitch black past the doorway's near stretch (by design — see the
 	# corridor comment above), so his own rim light has to follow him back here or he's
@@ -1335,10 +1347,8 @@ func _play_light_reveal(side: int) -> void:
 func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null,
 		hostile: bool = false, accent: Color = Color(0.7, 0.72, 0.72), id: String = "") -> void:
 	var spr: Sprite3D = _threat_sprites[side]
-	# Ông kẹ stands in the doorway as his 3D figure instead of the flat billboard.
-	var use_model: bool = has_threat and id == "ong_ke"
-	if use_model:
-		_ensure_ong_ke_model(side)
+	# Threats with a GLB stand in the doorway as a 3D figure instead of the flat billboard.
+	var use_model: bool = has_threat and THREAT_SCENES.has(id) and _ensure_threat_model(side, id) != null
 	var model: Node3D = _threat_models.get(side)
 	if has_threat and tex:
 		spr.texture = tex

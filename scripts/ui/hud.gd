@@ -385,6 +385,7 @@ func _connect() -> void:
 	Events.notify.connect(_on_notify)
 	Events.water_lure.connect(_on_water_lure)
 	Events.water_level.connect(_on_water_level)
+	Events.water_drain_ready.connect(_on_water_drain_ready)
 	Events.crowd_changed.connect(_on_crowd)
 	Events.grievance_changed.connect(_on_grievance)
 	Events.huong_changed.connect(_on_huong)
@@ -593,6 +594,12 @@ func _refresh_drain() -> void:
 	# Show the "close drain" action only while the flood is rising or the lure cries;
 	# hide it again once the water recedes so it isn't a permanent dead button.
 	_drain_btn.visible = _water_lure or _water_bar.value > 0.01
+
+func _on_water_drain_ready(ready: bool) -> void:
+	# Grey the button out while the grate is shut & backed up, so the cooldown is legible
+	# instead of presses silently doing nothing.
+	_drain_btn.disabled = not ready
+	_drain_btn.modulate.a = 1.0 if ready else 0.45
 
 func _on_crowd(level: float) -> void:
 	_crowd_bar.get_parent().visible = level > 0.01
