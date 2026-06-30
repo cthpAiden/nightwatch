@@ -234,15 +234,34 @@ func _reset_position() -> void:
 	Events.threat_relocated.emit(id, current_location)
 
 ## Pick which side of the building this approach comes down. PATH threats with
-## randomize_side flip a coin and mirror their authored (left) route to the right
-## half on roughly half of approaches, so the right door is a live threat too.
+## randomize_side mirror their authored (left) route to the right half, so the right
+## door is a live threat too. The base coin is fair, but it LEANS toward whichever door
+## the guard is NOT currently holding (a shut door or a held light) — a soft read on
+## your posture, not an unbeatable one. At night start nothing is held, so the first
+## approach is a true 50/50; the lean mostly bites on a re-approach right after you
+## committed a counter, making a repelled rusher feel like it comes back the other way.
 func _apply_side() -> void:
 	if not randomize_side or movement_model != MODEL_PATH or _base_path.is_empty():
 		return
-	if _rng.randf() < 0.5:
-		path = _base_path.duplicate()
-	else:
+	var go_right := _rng.randf() < 0.5
+	var left_def := _side_defended(GameEnums.Side.LEFT)
+	var right_def := _side_defended(GameEnums.Side.RIGHT)
+	if left_def and not right_def:
+		go_right = _rng.randf() < 0.7
+	elif right_def and not left_def:
+		go_right = _rng.randf() < 0.3
+	if go_right:
 		path = _base_path.map(func(loc): return MapGraph.mirror(loc))
+	else:
+		path = _base_path.duplicate()
+
+## True while the guard is actively holding this door — a shut shutter or a lit doorway.
+## Used by _apply_side to lean a fresh approach toward the softer side. Safe before a
+## controller is wired (returns false → neutral coin).
+func _side_defended(side: int) -> bool:
+	if _controller == null:
+		return false
+	return _controller.is_door_closed(side) or _controller.is_light_on(side)
 
 # --- director / controller hooks -------------------------------------------
 func set_speed_mult(m: float) -> void:
