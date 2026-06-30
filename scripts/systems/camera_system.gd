@@ -11,6 +11,7 @@ var _map_buttons := {}
 var _refresh_t := 0.0
 var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
 var _fx_burst := 0.0                # decaying static spike on channel change
+var _glitch := 0.0                  # signal-tear amount, ramped while a threat is on the watched feed (backlog#21)
 var _fog := 0.0                     # extra baseline static on a "fog" night
 var _last_feed_size := Vector2.ZERO # last feed rect size — re-upload rect_aspect only on resize
 const FX_BASE := 0.06
@@ -66,11 +67,15 @@ func _build() -> void:
 	sh.code = """
 shader_type canvas_item;
 uniform float strength = 0.10;
+uniform float glitch = 0.0;          // signal-tear amount, ramped while a threat is on this feed
 uniform float rect_aspect = 1.7778;
 float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
 void fragment() {
+	// Signal-tear: shift whole rows sideways by a per-row random amount. (backlog#21)
+	vec2 guv = UV;
+	guv.x += (rand(vec2(floor(UV.y * 120.0), floor(TIME * 18.0))) - 0.5) * glitch * 0.04;
 	// COVER fit: centre-crop the 16:9 source to fill the rect at any aspect, no stretch.
-	vec2 fuv = UV;
+	vec2 fuv = guv;
 	float r = rect_aspect / 1.7778;
 	if (r > 1.0) fuv.y = (fuv.y - 0.5) / r + 0.5;
 	else fuv.x = (fuv.x - 0.5) * r + 0.5;
@@ -83,10 +88,13 @@ void fragment() {
 	c = mix(vec3(l), c, 1.5);
 	c *= vec3(0.93, 1.05, 1.01);
 	c += vec3(0.015, 0.024, 0.022);
-	// Animated CCTV noise + scanline; `strength` spikes on channel change.
+	// Animated CCTV noise + scanline; `strength` spikes on channel change, `glitch` punches it.
 	float n = rand(UV * vec2(900.0, 540.0) + vec2(TIME * 41.0, TIME * 13.0));
-	c += (n - 0.5) * strength;
+	c += (n - 0.5) * (strength + glitch * 0.12);
 	c -= (sin(UV.y * 720.0) * 0.5 + 0.5) * strength * 0.10;
+	// A dark roll bar scrolling down the feed while the signal tears. (backlog#21)
+	float roll = fract(UV.y - TIME * glitch);
+	c *= 1.0 - smoothstep(0.0, 0.14, roll) * (1.0 - smoothstep(0.14, 0.28, roll)) * glitch * 0.6;
 	// Soft vignette draws the eye to the centre of the frame.
 	float vig = distance(UV, vec2(0.5));
 	c *= 1.0 - smoothstep(0.6, 1.05, vig) * 0.5;
@@ -96,6 +104,7 @@ void fragment() {
 	var mat := ShaderMaterial.new()
 	mat.shader = sh
 	mat.set_shader_parameter("strength", FX_BASE)
+	mat.set_shader_parameter("glitch", 0.0)
 	_feed.material = mat
 	_fx_mat = mat
 	add_child(_feed)
@@ -281,6 +290,11 @@ func _process(delta: float) -> void:
 	if _fx_burst > 0.0 and _fx_mat:
 		_fx_burst = maxf(0.0, _fx_burst - delta * 3.0)
 		_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
+	# Signal-tear glitch decays each frame; _refresh_threats re-ramps it while a threat is on
+	# the watched feed, so it tears continuously then resolves once the figure leaves. (backlog#21)
+	if _glitch > 0.0 and _fx_mat:
+		_glitch = maxf(0.0, _glitch - delta * 1.2)
+		_fx_mat.set_shader_parameter("glitch", _glitch)
 	# Pulse the unclaimed clue hotspot so a player actually notices it.
 	if _clue_btn and _clue_btn.visible:
 		_clue_pulse += delta * 3.0
@@ -309,6 +323,11 @@ func _refresh_threats() -> void:
 		var tex: Texture2D = t.current_texture()
 		if tex == null:
 			continue
+		# A threat is on the feed we're watching — tear the signal (ramped here, decayed in
+		# _process so it holds while present then resolves when she leaves). (backlog#21)
+		_glitch = maxf(_glitch, 0.6)
+		if _fx_mat:
+			_fx_mat.set_shader_parameter("glitch", _glitch)
 		# First time the wronged soul appears on a feed this night, tell the player she
 		# can be tagged (the one clue most likely to be missed). The per-instance
 		# _oan_hint_shown flag keeps it to one nudge per night.

@@ -18,9 +18,9 @@
   <!-- hollow eyes -->
   <ellipse cx="205" cy="200" rx="40" ry="52" fill="url(#socket)"/>
   <ellipse cx="307" cy="200" rx="40" ry="52" fill="url(#socket)"/>
-  <!-- faint dim pupils -->
-  <circle cx="205" cy="206" r="9" fill="#aebfca" fill-opacity="0.5"/>
-  <circle cx="307" cy="206" r="9" fill="#aebfca" fill-opacity="0.5"/>
+  <!-- pupils blacked out so the sockets read as true black holes (backlog#20) -->
+  <circle cx="205" cy="206" r="9" fill="#05080c" fill-opacity="0.9"/>
+  <circle cx="307" cy="206" r="9" fill="#05080c" fill-opacity="0.9"/>
   <!-- shadowed cheeks / gaunt hollows -->
   <ellipse cx="256" cy="300" rx="70" ry="44" fill="url(#socket)" opacity="0.6"/>
   <!-- thin mouth slit -->

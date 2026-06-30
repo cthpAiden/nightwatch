@@ -43,6 +43,11 @@ var _light_on := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}
 var _lamp_mats := {}         # side -> StandardMaterial3D (visible wall fixture glow)
 var _threat_sprites := {}    # side -> Sprite3D
 var _threat_base_pos := {}   # side -> Vector3 (rest pose; sprites sway around it)
+var _threat_rim := {}        # side -> OmniLight3D co-located with the sprite (AUDIT#14)
+var _threat_hostile := {}    # side -> bool (hostile throb in _update_threat_sprites) (backlog#19)
+var _threat_accent := {}     # side -> Color (rim-light tint while a threat is present) (AUDIT#14)
+var _reveal_fired := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}  # one-shot light-reveal guard (backlog#17)
+var _reveal_fade := {GameEnums.Side.LEFT: 1.0, GameEnums.Side.RIGHT: 1.0}        # 0->1 sprite-alpha multiplier driven by the reveal tween (backlog#17)
 
 # Front-wall apparition: a faint shape that briefly bleeds through over the
 # chalkboard for atmosphere. Purely cosmetic — no gameplay effect, no counter.
@@ -51,9 +56,18 @@ var _appar_tex: Texture2D
 var _appar_cd := 14.0        # seconds until the next flicker
 var _appar_t := 0.0          # progress through the current flicker (0 = idle)
 var _appar_dur := 1.6
-var _appar_peak := 0.3       # max alpha of the flicker
+var _appar_peak := 0.3       # max alpha of the flicker (scaled UP with dread — backlog#20)
+var _appar_lunge := false    # this sighting is a rare non-lethal dolly-toward-camera (backlog#20)
+var _appar_base_x := 0.4     # rest x on the front wall (lunge dollies off this)
 
 var _ceiling: OmniLight3D
+var _moon: SpotLight3D        # the window moonlight, animated in _animate_moon (backlog#18)
+var _moon_base := 2.4         # rest energy; _animate_moon noises around it
+var _moon_rot_base := 0.35    # rest rotation.x; creeps ±0.02 so the bar-shadows drift
+var _dread_light: OmniLight3D # hidden hot-red glow behind the desk, scaled by _dread (backlog#19)
+var _water_plane: MeshInstance3D   # rising-flood plane across the floor (AUDIT#13)
+var _water_mat: ShaderMaterial
+var _water_frac := 0.0        # 0..1 flood level (set by set_water_level)
 var _tube_mat: StandardMaterial3D
 var _desk_lamp: SpotLight3D
 var _desk_lamp_mat: StandardMaterial3D
@@ -74,9 +88,12 @@ var _screen_lit := -1                # last 'lit' uniform written (-1 = unwritte
 var _screen_timer := 0.0
 var _desk_mirror := false            # true = mirror the player's operated camera
 var _desk_threat: Sprite3D           # threat figure shown on the desk CRT
+var _desk_threat_present := false    # last set_desk_threat state (null->present edge = glitch burst) (backlog#21)
+var _screen_glitch := 0.0            # desk-CRT signal-tear amount; ramped on threat, decays each frame (backlog#21)
 
 var _huong := 1.0            # incense-protection fraction (set by NightController)
 var _altar_lit := true       # false = candles guttered out (cold-draft event)
+var _draft_warn := 0.0       # cold-draft telegraph window: candles flail harder while >0 (backlog#22)
 
 var _yaw := 0.0
 var _yaw_target := 0.0
@@ -117,6 +134,7 @@ func _ready() -> void:
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
 	_build_apparition()
+	_build_water()
 	set_process(true)
 	set_process_unhandled_input(true)
 	# Dev framing hook for the screenshot harness: hold a fixed look angle.
@@ -295,6 +313,17 @@ func _build_room() -> void:
 	_build_desk_lamp()
 	_build_altar()
 
+	# Hidden low hot-red glow behind/under the desk — invisible at calm, it swells a sick
+	# crimson as dread climbs (energy = dread^2 * 2.2, pulsed in _update_dread). Shadows off
+	# so it never casts a tell-tale silhouette; it just bruises the desk island red. (backlog#19)
+	_dread_light = OmniLight3D.new()
+	_dread_light.position = Vector3(0, 0.7, -2.0)
+	_dread_light.light_color = Color(0.6, 0.05, 0.06)
+	_dread_light.light_energy = 0.0
+	_dread_light.omni_range = 4.5
+	_dread_light.shadow_enabled = false
+	add_child(_dread_light)
+
 func _build_monitor_screen() -> void:
 	var sh := Shader.new()
 	sh.code = """
@@ -303,17 +332,21 @@ render_mode unshaded, cull_disabled;
 uniform sampler2D feed : source_color;
 uniform float t = 0.0;
 uniform float lit = 1.0;
+uniform float glitch = 0.0;              // signal-tear amount, ramped when a threat is on-feed
 uniform float screen_aspect = 1.3333;   // glass W/H; feeds are 16:9 (1.7778)
 float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
 void fragment() {
 	// CONTAIN fit: letterbox the 16:9 feed inside the glass so the WHOLE frame is
 	// visible (no edge crop, no stretch), whatever the screen's own aspect is.
 	const float SRC_ASPECT = 1.7778;
-	vec2 fuv = UV;
+	vec2 guv = UV;
+	// Signal-tear: shift whole rows sideways by a per-row random amount. (backlog#21)
+	guv.x += (rand(vec2(floor(UV.y * 90.0), floor(t * 18.0))) - 0.5) * glitch * 0.04;
+	vec2 fuv = guv;
 	if (screen_aspect > SRC_ASPECT)
-		fuv.x = (UV.x - 0.5) * (screen_aspect / SRC_ASPECT) + 0.5;   // pillarbox
+		fuv.x = (guv.x - 0.5) * (screen_aspect / SRC_ASPECT) + 0.5;   // pillarbox
 	else
-		fuv.y = (UV.y - 0.5) * (SRC_ASPECT / screen_aspect) + 0.5;   // letterbox
+		fuv.y = (guv.y - 0.5) * (SRC_ASPECT / screen_aspect) + 0.5;   // letterbox
 	float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
 	vec3 col = texture(feed, fuv).rgb * inside;          // black bars outside the frame
 	// CRT effects key off the real glass coord (UV), not the letterboxed content.
@@ -321,7 +354,10 @@ void fragment() {
 	vec2 d = UV - 0.5;
 	col *= 1.0 - dot(d, d) * 0.7;                        // vignette
 	col *= 0.92 + 0.08 * sin(t * 7.0);                  // flicker
-	col += rand(UV * vec2(91.0, 75.0) + fract(t)) * 0.035;  // faint static
+	col += rand(UV * vec2(91.0, 75.0) + fract(t)) * (0.035 + glitch * 0.12);  // static punch on glitch
+	// A dark roll bar scrolls down the glass while the signal tears. (backlog#21)
+	float roll = fract(UV.y - t * glitch);
+	col *= 1.0 - smoothstep(0.0, 0.14, roll) * (1.0 - smoothstep(0.14, 0.28, roll)) * glitch * 0.6;
 	col *= vec3(0.82, 1.0, 0.92);                        // cool CRT tint
 	col *= lit;                                          // dies on blackout
 	ALBEDO = col;
@@ -339,6 +375,7 @@ void fragment() {
 	if not _screen_feeds.is_empty():
 		_screen_mat.set_shader_parameter("feed", _screen_feeds[0])
 	_screen_mat.set_shader_parameter("t", 0.0)
+	_screen_mat.set_shader_parameter("glitch", 0.0)
 	_screen_mat.set_shader_parameter("screen_aspect", 0.8 / 0.6)
 	_screen_timer = 2.6
 	# Flat glass (QuadMesh) so the full feed maps cleanly across the face — a BoxMesh's
@@ -647,6 +684,54 @@ func _build_apparition() -> void:
 	_apparition.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_apparition)
 
+func _build_water() -> void:
+	# Ma da's rising flood: a thin translucent plane across the office floor that lifts and
+	# brightens with the flood level. Cheap unshaded sine-ripple shader with a cool blue-green
+	# emissive tint; sits just above the floor (small y offset) below the desk/props. Default
+	# frac 0 = invisible. set_water_level() raises its y + alpha. (AUDIT#13)
+	var sh := Shader.new()
+	sh.code = """
+shader_type spatial;
+render_mode unshaded, cull_disabled, depth_draw_never;
+uniform float t = 0.0;
+uniform float frac = 0.0;
+void fragment() {
+	// Cheap two-axis sine ripple as a faint surface shimmer.
+	float r = 0.5 + 0.5 * sin(UV.x * 28.0 + t * 1.6) * sin(UV.y * 24.0 - t * 1.1);
+	vec3 cool = vec3(0.06, 0.20, 0.22);
+	vec3 col = cool * (0.7 + 0.5 * r);
+	ALBEDO = col;
+	EMISSION = col * 0.6;
+	// Alpha climbs with the flood level; the ripple adds a little crest sparkle.
+	ALPHA = clamp(frac, 0.0, 1.0) * (0.32 + 0.16 * r);
+}
+"""
+	_water_mat = ShaderMaterial.new()
+	_water_mat.shader = sh
+	_water_mat.set_shader_parameter("t", 0.0)
+	_water_mat.set_shader_parameter("frac", 0.0)
+	var mi := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(8.6, 8.6)
+	mi.mesh = pm
+	mi.material_override = _water_mat
+	mi.position = Vector3(0, 0.02, 0)   # just above the floor top (y=0) to avoid z-fighting
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.visible = false                   # frac 0 = invisible
+	add_child(mi)
+	_water_plane = mi
+
+## Ma da flood level 0..1 — raises a translucent water plane across the office floor. (AUDIT#13)
+func set_water_level(frac: float) -> void:
+	_water_frac = clampf(frac, 0.0, 1.0)
+	if _water_plane == null:
+		return
+	_water_plane.visible = _water_frac > 0.001
+	# Rise from the floor toward ~0.5 units at full flood; keep the small anti-z-fight offset.
+	_water_plane.position.y = 0.02 + _water_frac * 0.5
+	if _water_mat:
+		_water_mat.set_shader_parameter("frac", _water_frac)
+
 func _update_apparition(delta: float) -> void:
 	if _apparition == null or _appar_tex == null:
 		return
@@ -663,17 +748,41 @@ func _update_apparition(delta: float) -> void:
 			a = 1.0 - (f - 0.6) / 0.4           # fade out
 		else:
 			_appar_t = 0.0
-			# Next sighting sooner in a blackout, rarer while the lights hold.
-			_appar_cd = _rng_range(20.0, 45.0) * (0.5 if not _powered else 1.0)
-		# a slow drift + a faint vertical breath so it never looks like a static decal
-		_apparition.position.x = 0.4 + sin(_t * 0.7) * 0.25
-		_apparition.position.y = 1.75 + sin(_t * 0.9) * 0.04
-		_apparition.modulate.a = a * _appar_peak
+			# Next sighting sooner in a blackout, rarer while the lights hold. Dread shortens
+			# the gap further so the wall-face crowds in as the night sours. (backlog#20)
+			_appar_cd = _rng_range(20.0, 45.0) * (0.5 if not _powered else 1.0) * (1.0 - 0.4 * _dread)
+		if _appar_lunge and f >= 0.35:
+			# Rare non-lethal lunge: hold a high alpha and dolly the sprite toward the camera
+			# (z creeps inward) over the hold, then it vanishes on fade-out. (backlog#20)
+			var lf: float = clampf((f - 0.35) / 0.4, 0.0, 1.0)
+			_apparition.position.x = _appar_base_x
+			_apparition.position.y = 1.75
+			_apparition.position.z = -4.12 + lf * 2.6
+			_apparition.modulate.a = (0.7 if f < 0.9 else 0.7 * (1.0 - (f - 0.9) / 0.1)) * maxf(0.6, _appar_peak / 0.3)
+		else:
+			# Strobe in hard alpha sub-steps during the hold (no horizontal slide) so it reads
+			# as a flicker bleeding through, not a decal sliding past. (backlog#20)
+			_apparition.position.x = _appar_base_x
+			_apparition.position.y = 1.75 + sin(_t * 0.9) * 0.04
+			_apparition.position.z = -4.12
+			var step := 1.0 if f < 0.6 else (1.0 if fmod(_t * 9.0, 1.0) > 0.4 else 0.35)
+			_apparition.modulate.a = a * _appar_peak * step
 	else:
 		_appar_cd -= delta
+		# Bias a sighting to coincide with the ceiling-light stutter dip: while the mains are
+		# stuttering, drain the cooldown faster so the face tends to bleed through in the dark
+		# flicker. (backlog#20)
+		if _stutter_t > 0.0:
+			_appar_cd -= delta * 2.0
 		if _appar_cd <= 0.0:
 			_appar_t = 0.0001                   # begin a flicker next branch
 			_appar_dur = _rng_range(1.2, 2.2)
+			# Peak alpha climbs with dread — the more cornered you are, the more it resolves.
+			_appar_peak = 0.3 + 0.35 * _dread
+			# ~10% of sightings are the dolly-in lunge (with a quiet breath sting).
+			_appar_lunge = randf() < 0.1
+			if _appar_lunge:
+				Audio.play_sting("sting_breath", -14.0)
 
 func _rng_range(a: float, b: float) -> float:
 	# Real RNG (as used elsewhere in this file) so the apparition's cadence isn't pinned
@@ -692,16 +801,19 @@ func _build_window() -> void:
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for bx in [-0.45, 0.0, 0.45]:
 		_box(Vector3(0.05, 1.2, 0.06), Vector3(bx, 1.9, 4.14), frame)
+	# Living moonlight: stored as _moon and animated in _animate_moon so it breathes and the
+	# window-bar shadows creep across the floor (backlog#18).
 	var moon := SpotLight3D.new()
 	moon.position = Vector3(0, 2.4, 3.9)
-	moon.rotation = Vector3(0.35, PI, 0)
+	moon.rotation = Vector3(_moon_rot_base, PI, 0)
 	moon.light_color = Color(0.5, 0.62, 0.88)
-	moon.light_energy = 2.4
+	moon.light_energy = _moon_base
 	moon.spot_range = 9.0
 	moon.spot_angle = 42.0
 	moon.spot_attenuation = 1.0
 	moon.shadow_enabled = true
 	add_child(moon)
+	_moon = moon
 
 func _build_doorway(side: int, x: float) -> void:
 	var wall := _mat("wall.svg", Color(0.44, 0.49, 0.45), 2.0)
@@ -737,6 +849,16 @@ func _build_doorway(side: int, x: float) -> void:
 	add_child(spr)
 	_threat_sprites[side] = spr
 	_threat_base_pos[side] = spr.position
+	# Per-doorway rim light co-located with the billboard, energised from the threat's accent
+	# colour only while one is present (energy 0 otherwise so it never leaks). (AUDIT#14)
+	var rim := OmniLight3D.new()
+	rim.position = spr.position + Vector3(0, 0.1, 0)
+	rim.light_color = Color(0.7, 0.72, 0.72)
+	rim.light_energy = 0.0
+	rim.omni_range = 2.4
+	rim.shadow_enabled = false
+	add_child(rim)
+	_threat_rim[side] = rim
 	# roller shutter door
 	var door := _box(Vector3(0.16, 2.6, 2.5), Vector3(x, DOOR_OPEN_Y, 0),
 		_mat("door.svg", Color(0.55, 0.57, 0.62), 1.0, false, 0.5, 0.5))
@@ -794,16 +916,25 @@ func _process(delta: float) -> void:
 	_animate_altar(delta)
 	_animate_props(delta)
 	_animate_mains(delta)
+	_animate_moon(delta)
 	_animate_screen(delta)
 	_update_apparition(delta)
 	_update_threat_sprites()
 
-func _animate_altar(_delta: float) -> void:
+func _animate_altar(delta: float) -> void:
 	var lit := _altar_lit
 	var glow := 0.35 + 0.65 * _huong
+	# Cold-draft telegraph: while the warning window is open the flames flail harder and lean,
+	# warning the player a snuff is coming. The altar only WARNS — it is never the monster. (backlog#22)
+	if _draft_warn > 0.0:
+		_draft_warn = maxf(0.0, _draft_warn - delta)
+	var warn := _draft_warn > 0.0
 	# candle flicker (fire — independent of mains power)
 	for c in _candles:
-		var fl := 0.78 + 0.16 * sin(_t * 11.0 + c.phase) + 0.1 * sin(_t * 23.0 + c.phase)
+		var amp := 0.16 if not warn else 0.42   # gust whips the flicker amplitude up
+		var fl := 0.78 + amp * sin(_t * 11.0 + c.phase) + 0.1 * sin(_t * 23.0 + c.phase)
+		if warn:
+			fl *= 0.65 + 0.35 * randf()          # ragged near-snuff stutter
 		var light: OmniLight3D = c.light
 		var flame: MeshInstance3D = c.flame
 		var mat: StandardMaterial3D = c.mat
@@ -811,6 +942,8 @@ func _animate_altar(_delta: float) -> void:
 		flame.visible = lit
 		if lit:
 			flame.scale = Vector3(1.0, 0.82 + 0.32 * fl, 1.0)
+			# Lean the flame in the draft during the warning window.
+			flame.rotation.z = (sin(_t * 14.0 + c.phase) * 0.5) if warn else 0.0
 			mat.emission_energy_multiplier = 5.0 * fl
 	# ember light at the altar heart
 	if _altar_light:
@@ -839,6 +972,9 @@ func _animate_altar(_delta: float) -> void:
 func _animate_props(delta: float) -> void:
 	if _fan:
 		_fan.rotation.y += delta * (0.9 if _powered else 0.15)
+	# Drive the flood ripple only while the water is actually showing. (AUDIT#13)
+	if _water_mat and _water_plane and _water_plane.visible:
+		_water_mat.set_shader_parameter("t", _t)
 	if _hand_min:
 		_hand_min.rotation.z = -_t * 0.5
 	if _hand_hr:
@@ -864,10 +1000,36 @@ func _animate_mains(delta: float) -> void:
 	if _tube_mat:
 		_tube_mat.emission_energy_multiplier = TUBE_EMISSION * (base / CEILING_ENERGY)
 
+## Force a brief ceiling-light stutter on demand (creeping-dread poke). (backlog#24)
+func poke_stutter() -> void:
+	if _powered:
+		_stutter_t = maxf(_stutter_t, randf_range(0.15, 0.4))
+
+func _animate_moon(_delta: float) -> void:
+	# Living moonlight: slow value-noise on the energy with occasional deep dips (a cloud
+	# crossing), plus a glacial rotation nudge so the window-bar shadows creep over the
+	# floor instead of sitting frozen. (backlog#18)
+	if _moon == null:
+		return
+	var n := 0.82 + 0.18 * sin(_t * 0.23)
+	# Occasional 1-2s dip toward ~0.4x as something passes the window.
+	var dip := 0.5 + 0.5 * sin(_t * 0.071)
+	if dip > 0.93:
+		n *= lerpf(1.0, 0.4, (dip - 0.93) / 0.07)
+	_moon.light_energy = _moon_base * n
+	_moon.rotation.x = _moon_rot_base + 0.02 * sin(_t * 0.045)
+
 func _animate_screen(delta: float) -> void:
 	if not _screen_mat:
 		return
 	_screen_mat.set_shader_parameter("t", _t)
+	# Signal-tear glitch decays each frame; set_desk_threat ramps it while a threat is on the
+	# mirrored feed (with a burst on first appearance). (backlog#21)
+	if _screen_glitch > 0.0:
+		_screen_glitch = maxf(0.0, _screen_glitch - delta * 1.2)
+	if _desk_threat_present and _powered and _desk_mirror:
+		_screen_glitch = maxf(_screen_glitch, 0.6)   # hold the tear while it's on-feed
+	_screen_mat.set_shader_parameter("glitch", _screen_glitch)
 	# 'lit' only flips on a power-out/restore (rare), so write it on change rather than
 	# every frame. The int sentinel forces the first write so correctness never depends
 	# on the shader's default matching the initial powered state.
@@ -909,7 +1071,12 @@ func set_desk_threat(tex: Texture2D) -> void:
 		return
 	if tex == null or not _desk_mirror or not _powered:
 		_desk_threat.modulate.a = 0.0
+		_desk_threat_present = false
 		return
+	# null->present transition: punch a static burst as the figure tears onto the feed. (backlog#21)
+	if not _desk_threat_present:
+		_screen_glitch = maxf(_screen_glitch, 1.0)
+	_desk_threat_present = true
 	_desk_threat.texture = tex
 	# Sit the figure INTO the glass: lower alpha and pull the cast toward the CRT's green
 	# phosphor so it reads as part of the feed instead of floating off the screen.
@@ -920,14 +1087,31 @@ func _update_threat_sprites() -> void:
 	# a living silhouette in the doorway, not a flat decal pinned to the wall.
 	for side in _threat_sprites:
 		var spr: Sprite3D = _threat_sprites[side]
+		var rim: OmniLight3D = _threat_rim.get(side)
 		if not spr.visible:
+			if rim:
+				rim.light_energy = 0.0   # no threat here — kill the rim so it never leaks light
 			continue
 		var base: Vector3 = _threat_base_pos[side]
 		var ph: float = _t + side * 1.7
 		spr.position.x = base.x + sin(ph * 1.3) * 0.035
 		spr.position.y = base.y + sin(ph * 2.1) * 0.045
 		var s := 1.0 + 0.025 * sin(ph * 2.7)
+		var fade: float = _reveal_fade.get(side, 1.0)   # 0->1 light-reveal fade-in (backlog#17)
+		# Hostile billboards throb a hot red and creep slightly larger — a predator tightening
+		# in, not the neutral cold silhouette. (backlog#19)
+		if _threat_hostile.get(side, false):
+			var throb: float = 0.5 + 0.5 * sin(_t * 1.1 * TAU)
+			spr.modulate = Color(0.7, 0.18, 0.18).lerp(Color(0.95, 0.1, 0.1), throb)
+			s += 0.04 * (0.5 + 0.5 * sin(ph * 0.5))   # faint scale-up creep
+		spr.modulate.a = fade
 		spr.scale = Vector3(s, s, 1.0)
+		# Per-doorway rim light from the threat's own accent colour, pulsed on the sway phase
+		# so the figure is bedded into the corridor mouth instead of flat-lit. (AUDIT#14)
+		if rim:
+			var accent: Color = _threat_accent.get(side, Color(0.7, 0.72, 0.72))
+			rim.light_color = accent
+			rim.light_energy = 1.4 + 0.5 * sin(ph * 2.7)
 
 func _update_look_targets() -> void:
 	var vp := get_viewport()
@@ -1006,6 +1190,10 @@ func set_huong(frac: float) -> void:
 func set_altar_lit(lit: bool) -> void:
 	_altar_lit = lit
 
+## Cold-draft telegraph: spike the candle flicker/lean for `dur` seconds before a snuff. (backlog#22)
+func warn_draft(dur: float) -> void:
+	_draft_warn = maxf(_draft_warn, dur)
+
 ## Add screen-shake trauma (0..1). Quadratic falloff keeps it punchy then settles fast.
 func add_shake(amount: float) -> void:
 	_shake = clampf(_shake + amount, 0.0, 1.0)
@@ -1018,6 +1206,11 @@ func _update_dread(delta: float) -> void:
 	if _env == null:
 		return
 	_dread = move_toward(_dread, _dread_target, delta * 0.8)
+	# Hidden desk dread-glow throbs in as danger rises (quadratic so it stays dark until late),
+	# with a slow ~1.2Hz pulse. Energy 0 at calm so it never leaks. (backlog#19)
+	if _dread_light:
+		var pulse := 0.85 + 0.15 * sin(_t * 1.2 * TAU)
+		_dread_light.light_energy = _dread * _dread * 2.2 * pulse
 	if _dread <= 0.0001 and _dread_target <= 0.0001:
 		return
 	# Danger sours the grade via CONTRAST, exposure and fog — not by draining colour to
@@ -1061,12 +1254,52 @@ func set_light(side: int, on: bool) -> void:
 	if _lamp_mats.has(side):
 		(_lamp_mats[side] as StandardMaterial3D).emission_energy_multiplier = 3.5 if on else 0.0
 	Audio.play_sfx("light_switch", -8.0)
+	# Light just went OFF — re-arm the one-shot reveal so the next flick can strike. (backlog#17)
+	if not on:
+		_reveal_fired[side] = false
+	# Light came ON over a threat that's standing there: stage the reveal once. (backlog#17)
+	elif _threat_sprites.has(side) and (_threat_sprites[side] as Sprite3D).visible \
+			and not _reveal_fired.get(side, false):
+		_play_light_reveal(side)
 	Events.light_toggled.emit(side, on)
 
-func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null, hostile: bool = false) -> void:
+## One-shot doorway light-reveal: a fluorescent strike on the door spotlight + the threat
+## sprite fading up, a breath sting and a small jolt. Guarded by _reveal_fired so it never
+## re-fires while the light holds; reset when the light goes off or the threat leaves. (backlog#17)
+func _play_light_reveal(side: int) -> void:
+	_reveal_fired[side] = true
+	var sl: SpotLight3D = _lights.get(side)
+	if sl:
+		var tw := create_tween()
+		tw.tween_property(sl, "light_energy", DOOR_LIGHT_ENERGY * 1.4, 0.04)
+		tw.tween_property(sl, "light_energy", DOOR_LIGHT_ENERGY * 2.0, 0.04)
+		tw.tween_property(sl, "light_energy", DOOR_LIGHT_ENERGY, 0.1).set_trans(Tween.TRANS_SINE)
+	# Fade the sprite alpha 0->1 over the strike window. Driven through _reveal_fade (not
+	# modulate directly) so the per-frame hostile throb in _update_threat_sprites multiplies
+	# by it instead of clobbering the fade. (backlog#17)
+	_reveal_fade[side] = 0.0
+	var ft := create_tween()
+	ft.tween_method(func(v): _reveal_fade[side] = v, 0.0, 1.0, 0.18)
+	Audio.play_sting("sting_breath", -12.0)
+	add_shake(0.15)
+
+func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null,
+		hostile: bool = false, accent: Color = Color(0.7, 0.72, 0.72)) -> void:
 	var spr: Sprite3D = _threat_sprites[side]
 	if has_threat and tex:
 		spr.texture = tex
 	# Hostile reads as a hot rim/glow rather than a mud-dark multiply (sprites are lit).
+	# The per-frame _update_threat_sprites throb overrides this for hostile figures. (backlog#19)
 	spr.modulate = THREAT_TINT_HOSTILE if hostile else THREAT_TINT_IDLE
-	spr.visible = has_threat and _light_on.get(side, false)
+	_threat_hostile[side] = hostile
+	_threat_accent[side] = accent   # drives the doorway rim light (AUDIT#14)
+	var was_visible: bool = spr.visible
+	var now_visible: bool = has_threat and bool(_light_on.get(side, false))
+	spr.visible = now_visible
+	# One-shot light-reveal staging: when the light is already ON and a threat newly appears
+	# (off-camera arrival caught by the standing light), run the strike. (backlog#17)
+	if now_visible and not was_visible and not _reveal_fired.get(side, false):
+		_play_light_reveal(side)
+	# The threat left this side — re-arm the reveal so the NEXT arrival strikes again.
+	if not has_threat:
+		_reveal_fired[side] = false

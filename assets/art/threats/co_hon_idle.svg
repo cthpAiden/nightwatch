@@ -5,10 +5,12 @@
       <stop offset="55%" stop-color="#6f9bb3" stop-opacity="0.10"/>
       <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
     </radialGradient>
+    <!-- Eye fill dropped toward void: only a pin of cold light at the very centre so the
+         sockets read as true black holes at the small 0.74 CCTV scale. (backlog#33) -->
     <radialGradient id="honEyeL" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#cdd6d0" stop-opacity="0.9"/>
-      <stop offset="40%" stop-color="#6f9bb3" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#6f9bb3" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#6f9bb3" stop-opacity="0.45"/>
+      <stop offset="22%" stop-color="#33485a" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0a0e14" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="honBody" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#243142"/>
@@ -78,8 +80,9 @@
   <ellipse cx="272" cy="266" rx="15" ry="17" fill="#0a0e14"/>
   <ellipse cx="240" cy="266" rx="13" ry="15" fill="url(#honEyeL)"/>
   <ellipse cx="272" cy="266" rx="13" ry="15" fill="url(#honEyeL)"/>
-  <circle cx="240" cy="268" r="4" fill="#cdd6d0"/>
-  <circle cx="272" cy="268" r="4" fill="#cdd6d0"/>
+  <!-- catchlights shrunk to a faint cold pin so the eyes stay black-hole dark (backlog#33) -->
+  <circle cx="240" cy="266" r="1.6" fill="#8fb0c2" fill-opacity="0.55"/>
+  <circle cx="272" cy="266" r="1.6" fill="#8fb0c2" fill-opacity="0.55"/>
   <!-- mournful drooping brow -->
   <path d="M226 250 C232 244 244 244 252 250" stroke="#566059" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   <path d="M260 250 C268 244 280 244 286 250" stroke="#566059" stroke-width="2.5" fill="none" stroke-linecap="round"/>

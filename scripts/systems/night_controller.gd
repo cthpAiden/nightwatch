@@ -71,6 +71,8 @@ var _nhang := 0              # incense sticks in hand — each manual relight bu
 var _bell_cd := 0.0
 var _bell_cd_max := 18.0
 var _draft_cd := 35.0
+var _draft_warn_t := 0.0     # cold-draft telegraph: counts down a warning beat, then snuffs (backlog#22)
+var _unease_cd := 30.0       # creeping-dread poke scheduler: one cheap diegetic false-alarm in calm windows (backlog#24)
 var _auto_relight := false   # shrine upgrade: one free relight when it gutters
 var _tag_cds := {}           # threat_id -> camera-anomaly tag cooldown
 var _hex_t := 0.0            # Ma trơi lock-on jinx: doors/lights flail open briefly
@@ -308,6 +310,9 @@ func _on_threat_repelled() -> void:
 ## Ma da's flood, voiced as a body of water that swells from a distant trickle to an
 ## oppressive slosh as the level rises — so the silent flood mechanic is now felt.
 func _on_water_level_audio(level: float) -> void:
+	# Raise the office floodwater plane from the same flood fraction (0..1). (AUDIT#13)
+	if room and room.has_method("set_water_level"):
+		room.set_water_level(level)
 	if level > 0.02:
 		if not _water_on:
 			_water_on = true
@@ -785,7 +790,34 @@ func _update_timers(delta: float) -> void:
 			_tag_cds[k] = maxf(0.0, _tag_cds[k] - delta)
 	if _hex_t > 0.0:
 		_hex_t = maxf(0.0, _hex_t - delta)
+	_update_unease(delta)
 	_tick_offering_events(delta)
+
+## Creeping-dread pokes: in CALM windows only (nothing looming, healthy vía + hương) fire ONE
+## cheap diegetic false-alarm every ~25-50s — a distant footstep, a forced ceiling stutter, or
+## a knock with no threat. Reuses existing audio/props; never adds real pressure. The window
+## tightens as the night wears on. (backlog#24)
+func _update_unease(delta: float) -> void:
+	_unease_cd -= delta
+	if _unease_cd > 0.0:
+		return
+	# Re-arm tighter as the night progresses (25-50s early -> ~15-30s late).
+	var prog := night_progress()
+	_unease_cd = randf_range(25.0, 50.0) * (1.0 - 0.4 * prog)
+	# Only when truly calm: no rusher at either door, and both meters healthy.
+	var calm := director.threat_at_door(GameEnums.Side.LEFT) == null \
+		and director.threat_at_door(GameEnums.Side.RIGHT) == null \
+		and via >= via_max * 0.6 and huong >= huong_max * 0.5 and altar_lit
+	if not calm:
+		return
+	match randi() % 3:
+		0:
+			Audio.play_sfx("footstep_wood", -18.0)   # distant step in the dark
+		1:
+			if room and room.has_method("poke_stutter"):
+				room.poke_stutter()                   # the lights hiccup on their own
+		2:
+			Audio.play_sfx("knock", -16.0)           # a knock with nothing behind it
 
 ## Cô hồn smother: blind the office (and especially the camera feed) as the crowd
 ## swells past ~55%. Hidden behind any modal so it can't trap the player off-screen.
@@ -1065,7 +1097,8 @@ func _refresh_door_sprite(side: int, t = false) -> void:
 	if typeof(t) == TYPE_BOOL:   # sentinel: caller didn't supply it — look it up
 		t = director.threat_at_door(side)
 	if t:
-		room.refresh_threat_visibility(side, true, t.current_texture(), true)
+		# Pass the threat's accent so the doorway rim light takes its cold/warm cast. (AUDIT#14)
+		room.refresh_threat_visibility(side, true, t.current_texture(), true, t.accent_color)
 	else:
 		room.refresh_threat_visibility(side, false)
 
@@ -1338,12 +1371,24 @@ func setback_nearest() -> void:
 # --- living-altar ritual ----------------------------------------------------
 ## Per-frame incense burn, cold-draft events, and the low-protection vía bleed.
 func _update_altar(delta: float) -> void:
+	# Cold-draft telegraph: a warning beat fires first (wind swell + the altar's candles
+	# guttering harder), THEN the snuff lands — so the player gets a ~1-1.5s window to read
+	# it. The altar only WARNS here; it is never the monster (binding rule). (backlog#22)
+	if _draft_warn_t > 0.0:
+		_draft_warn_t = maxf(0.0, _draft_warn_t - delta)
+		if _draft_warn_t == 0.0 and altar_lit:
+			_gutter_candles(true)   # gust already played at the warning beat
 	# Cold-draft event: a gust snuffs the candles. Likelier (and meaner) late at night.
 	_draft_cd -= delta
 	if _draft_cd <= 0.0:
 		_draft_cd = randf_range(32.0, 62.0) * (1.0 - 0.35 * night_progress())
-		if altar_lit and randf() < 0.45 + 0.35 * night_progress():
-			_gutter_candles()
+		if altar_lit and _draft_warn_t <= 0.0 and randf() < 0.45 + 0.35 * night_progress():
+			# Telegraph, don't snuff yet: a low wind swell + the candle flicker spikes for the
+			# warning window (candle_gust SFX already leads with an inhaled breath).
+			_draft_warn_t = randf_range(1.0, 1.5)
+			Audio.play_sfx("candle_gust", -3.0)
+			if room and room.has_method("warn_draft"):
+				room.warn_draft(_draft_warn_t)
 	if altar_lit:
 		huong = maxf(0.0, huong - _huong_decay * delta)
 		if huong <= 0.0:
@@ -1369,12 +1414,14 @@ func _update_altar(delta: float) -> void:
 	if _bell_cd > 0.0:
 		_bell_cd = maxf(0.0, _bell_cd - delta)
 
-func _gutter_candles() -> void:
+func _gutter_candles(skip_gust: bool = false) -> void:
 	if not altar_lit:
 		return
 	altar_lit = false
 	huong = 0.0
-	Audio.play_sfx("candle_gust", -3.0)
+	# Telegraphed snuffs already played candle_gust at the warning beat — don't double it. (backlog#22)
+	if not skip_gust:
+		Audio.play_sfx("candle_gust", -3.0)
 	Audio.play_sting("sting_breath", -10.0, 1.0)
 	Audio.stop_loop("incense_bed")   # the room goes acoustically cold
 	if room:
