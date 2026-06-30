@@ -899,7 +899,9 @@ func _ensure_ong_ke_model(side: int) -> Node3D:
 	var m := (load(ONG_KE_SCENE) as PackedScene).instantiate()
 	var base: Vector3 = _threat_base_pos[side]
 	var dir := -1.0 if side == GameEnums.Side.LEFT else 1.0
-	m.position = Vector3(base.x, -0.1 + 0.95, 0.0)
+	# Set back deeper into the corridor than the sprite's spot, out of the doorway
+	# light's hot center — he should loom in the shadow, not stand fully lit at the door.
+	m.position = Vector3(base.x + dir * 1.4, -0.1 + 0.95, 0.0)
 	m.rotation_degrees.y = -dir * 90.0   # face the model's +Z front back into the room
 	m.scale = Vector3.ONE * 0.95
 	m.visible = false
