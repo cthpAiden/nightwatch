@@ -11,6 +11,10 @@ var night_progress: float = 0.0
 var _controller
 var _paused := false
 
+const _DOGPILE_CAP := 2          # engaged door-threats beyond which idle rushers are eased
+var _engage_lull := 0.0          # seconds since any threat was APPROACHING / AT_DOOR
+var _pincer_cd := 0.0            # cooldown gating the occasional two-door pincer
+
 func setup(controller, cfg: NightConfig) -> void:
 	_controller = controller
 	for id in cfg.threat_levels:
@@ -37,8 +41,61 @@ func setup(controller, cfg: NightConfig) -> void:
 func _process(delta: float) -> void:
 	if _paused:
 		return
+	_coordinate(delta)
 	for t in threats:
 		t.process_ai(delta, night_progress)
+
+# --- coordination ----------------------------------------------------------
+## A light pacing layer over the independent per-threat AI. It does NOT decide moves —
+## the threats still roll their own — it just keeps pure RNG from either dog-piling a
+## busy doorway or leaving long dead-air stretches, and stages the rare two-door pincer.
+func _coordinate(delta: float) -> void:
+	var engaged := 0
+	var door_sides := {}
+	for t in threats:
+		if t.phase == GameEnums.ThreatPhase.AT_DOOR:
+			engaged += 1
+			door_sides[t.threatening_side] = true
+		elif t.phase == GameEnums.ThreatPhase.APPROACHING:
+			engaged += 1
+	# Anti-dogpile: while the doors are already busy, ease the cadence of rushers that
+	# haven't engaged yet — you stay pressured, but not pile-up-killed by a bad roll.
+	var damp := engaged >= _DOGPILE_CAP
+	for t in threats:
+		if t.phase != GameEnums.ThreatPhase.AT_DOOR and t.phase != GameEnums.ThreatPhase.APPROACHING:
+			t.set_coord_mult(0.55 if damp else 1.0)
+	_pincer_cd = maxf(0.0, _pincer_cd - delta)
+	if engaged > 0:
+		_engage_lull = 0.0
+		# Rare pincer: exactly one rusher holds a door — occasionally send an idle rusher
+		# at the OTHER door for a deliberate two-front beat. Gated by a cooldown and scaled
+		# by night progress so early nights stay gentle and it never spams.
+		if door_sides.size() == 1 and _pincer_cd <= 0.0 and randf() < 0.03 * clampf(night_progress, 0.0, 1.0) * delta:
+			if _nudge_one(_opposite(door_sides.keys()[0])):
+				_pincer_cd = 50.0
+		return
+	# Anti-dead-air: nothing is looming. After a progress-scaled lull, license one idle
+	# rusher to make a run so the night never flatlines into nothing-happening.
+	_engage_lull += delta
+	if _engage_lull >= lerpf(40.0, 18.0, clampf(night_progress, 0.0, 1.0)):
+		_engage_lull = 0.0
+		_nudge_one(-1)
+
+## Stage one move for a random idle PATH door-rusher, optionally aimed at target_side
+## (-1 = let it pick its own). Returns true if a threat was nudged.
+func _nudge_one(target_side: int) -> bool:
+	var pool: Array = []
+	for t in threats:
+		if t.movement_model == ThreatBase.MODEL_PATH and t.counter_door and t.can_nudge():
+			pool.append(t)
+	if pool.is_empty():
+		return false
+	var t: ThreatBase = pool[randi() % pool.size()]
+	t.coord_advance(target_side)
+	return true
+
+func _opposite(side: int) -> int:
+	return GameEnums.Side.RIGHT if side == GameEnums.Side.LEFT else GameEnums.Side.LEFT
 
 func set_paused(p: bool) -> void:
 	_paused = p

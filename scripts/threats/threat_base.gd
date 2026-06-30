@@ -55,6 +55,7 @@ var _move_accum: float = 0.0
 var _attack_accum: float = 0.0
 var _linger_accum: float = 0.0              # time held off at the door by the active counter
 var _speed_mult: float = 1.0
+var _coord_mult: float = 1.0                # director pacing damp (separate from item _speed_mult)
 var _active: bool = false
 var _player_viewing_me: bool = false
 var _player_panning: bool = false
@@ -93,7 +94,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 		_cooldown -= delta
 		return
 
-	_move_accum += delta * _speed_mult
+	_move_accum += delta * _speed_mult * _coord_mult
 	if _move_accum >= move_interval:
 		_move_accum = 0.0
 		if _rng.randf() * 20.0 < lvl:
@@ -266,6 +267,39 @@ func _side_defended(side: int) -> bool:
 # --- director / controller hooks -------------------------------------------
 func set_speed_mult(m: float) -> void:
 	_speed_mult = maxf(0.05, m)
+
+## Director pacing channel, kept separate from the item-driven _speed_mult so the two
+## never clobber each other. The ThreatDirector eases this below 1.0 to keep a busy
+## doorway from getting dog-piled by pure RNG, and restores it to 1.0 otherwise.
+func set_coord_mult(m: float) -> void:
+	_coord_mult = clampf(m, 0.05, 1.0)
+
+## True when the director may stage a coordinated move for this threat (idle positional
+## rusher, not already committed to a door or mid-grab).
+func can_nudge() -> bool:
+	return _active and phase != GameEnums.ThreatPhase.AT_DOOR \
+		and phase != GameEnums.ThreatPhase.ATTACKING
+
+## Director-staged step: optionally re-aim this rusher at target_side (only while still at
+## spawn, so it never teleports across the map mid-route), then take one move now. Used to
+## break dead-air lulls and to stage the occasional two-door pincer.
+func coord_advance(target_side: int) -> void:
+	if not can_nudge():
+		return
+	if target_side != -1 and path_index == 0:
+		_orient_to_side(target_side)
+	_behaviour_move()
+
+## Swap a randomize_side rusher onto the wing that ends at `side`. No-op for threats that
+## don't mirror, or once they've left spawn (path[path_index] would jump wings).
+func _orient_to_side(side: int) -> void:
+	if not randomize_side or movement_model != MODEL_PATH or _base_path.is_empty():
+		return
+	var want_right := side == GameEnums.Side.RIGHT
+	if want_right:
+		path = _base_path.map(func(loc): return MapGraph.mirror(loc))
+	else:
+		path = _base_path.duplicate()
 
 ## Global aggression multiplier the meter threats fold into their per-frame growth:
 ## the altar incense (hương) suppresses them when tended, a guttered altar or a
