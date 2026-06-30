@@ -1317,6 +1317,19 @@ func broadcast_calm() -> void:
 func night_progress() -> float:
 	return clampf(game_minutes / NIGHT_MINUTES, 0.0, 1.0)
 
+## A coarse read of how the guard is faring, in [-1, +1]: positive = comfortably ahead
+## (power and vía both high), negative = on the ropes (drained meters, a dark altar).
+## Threats fold a SMALL bounded nudge of this into their effective AI level (_ai_at) so a
+## coasting player gets gently pushed and a drowning one gets a hair of mercy. It never
+## rewrites the authored difficulty curve — just leans it a little toward a fair fight.
+func performance_pressure() -> float:
+	var power_frac := clampf(power / 100.0, 0.0, 1.0)
+	var via_frac := clampf(via / via_max, 0.0, 1.0)
+	var comfort := (power_frac - 0.5) + (via_frac - 0.5)   # -1 (spent) .. +1 (flush)
+	if not altar_lit:
+		comfort -= 0.3   # a guttered altar is a genuinely bad spot — ease off
+	return clampf(comfort, -1.0, 1.0)
+
 func add_via(amount: float) -> void:
 	if amount < 0.0:
 		amount *= via_drain_mult

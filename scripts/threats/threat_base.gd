@@ -276,9 +276,14 @@ func _meter_mult() -> float:
 	return 1.0
 
 ## Effective AI level for this point in the night: lerps the starting ai_level
-## toward ai_level_end as the night progresses (0..1).
+## toward ai_level_end as the night progresses (0..1), then leans it by a small
+## bounded factor from how the guard is faring — a gentle rubber-band that pushes a
+## coasting player and eases off a drowning one without rewriting the authored curve.
 func _ai_at(night_progress: float) -> float:
-	return lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	var lvl := lerpf(ai_level, ai_level_end, clampf(night_progress, 0.0, 1.0))
+	if _controller and _controller.has_method("performance_pressure"):
+		lvl *= 1.0 + 0.15 * _controller.performance_pressure()
+	return lvl
 
 ## Continuous (per-frame) vía drain that does NOT freeze regen — meter pressure is
 ## a net bleed you can offset, not a hard regen lockout (see NightController).
