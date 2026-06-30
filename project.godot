@@ -1,16 +1,8 @@
-; Engine configuration file.
-; It's best edited using the editor UI and not directly,
-; since the parameters that go here are not all obvious.
-;
-; Format:
-;   [section] ; section goes between []
-;   param=value ; assign values to parameters
-
 config_version=5
 
 [application]
 
-config/name="Bảo Vệ Đêm"
+config/name="Nightwatch"
 config/description="A Vietnamese FNAF-style comedy-horror night-guard game."
 config/version="1.0.0"
 run/main_scene="res://scenes/screens/MainMenu.tscn"
@@ -135,8 +127,6 @@ locale/fallback="vi"
 
 [rendering]
 
-; Default driver (Vulkan on Windows) with automatic D3D12 fallback gives the
-; widest launch coverage: machines with only one of the two still start.
 rendering_device/fallback_to_d3d12=true
 anti_aliasing/quality/msaa_3d=2
 environment/defaults/default_clear_color=Color(0.03, 0.03, 0.05, 1)
