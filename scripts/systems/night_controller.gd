@@ -84,6 +84,7 @@ var _hb_on := false          # heartbeat loop currently playing (ramped with dan
 var _breath_on := false      # proximity-breathing loop (a threat looms at a door)
 var _strain_on := false      # shutter-strain loop (a closed door is being pressed)
 var _water_on := false       # ma da rising-water loop (driven by flood level)
+var _tick_on := false        # backlog#25: accelerating clock-tick loop started in the last hour
 var _oan_petty_shown := false  # one-time Oan hồn comedic line on first high grievance
 var _post_layer: CanvasLayer
 var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
@@ -673,6 +674,20 @@ func _advance_clock(delta: float) -> void:
 		if _last_hour > 0 and _last_hour < 6:
 			Audio.play_sfx("clock_chime", -10.0)
 			_earn_coins(8)   # vàng mã for each hour you survive
+		# AUDIT#22: rarely, on a late night past ~3AM, let the eerie đồng-dao motif drift in
+		# on an hour-cross. Probability scales with night_progress() so it stays sparse (at
+		# most ~1x/night). Routed via play_sting so it goes to VERB + honours the scare tier.
+		if config.night_index >= 3 and _last_hour >= 3 and _last_hour < 6:
+			if randf() < 0.18 * night_progress():
+				Audio.play_sting("dong_dao", -10.0)
+	# backlog#25: in the final hour (>=05:00) the clock starts ticking, quiet at first, then
+	# accelerates toward 06:00 as the pitch ramps — the night's pulse winding up to dawn.
+	if game_minutes >= NIGHT_MINUTES - 60.0:
+		if not _tick_on:
+			_tick_on = true
+			Audio.start_loop("clock_tick", -16.0)
+		var t := (game_minutes - (NIGHT_MINUTES - 60.0)) / 60.0
+		Audio.set_loop_pitch("clock_tick", lerpf(1.0, 1.85, clampf(t, 0.0, 1.0)))
 	if game_minutes >= NIGHT_MINUTES:
 		_win()
 
@@ -1266,6 +1281,7 @@ func _stop_tension_loops() -> void:
 	_breath_on = false
 	_strain_on = false
 	_water_on = false
+	_tick_on = false   # backlog#25: clear so the dawn tick never bleeds across scenes
 
 # --- public API used by threats & items ------------------------------------
 func is_door_closed(side: int) -> bool:

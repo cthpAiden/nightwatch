@@ -14,6 +14,7 @@ const SFX_NAMES := [
 	"stinger", "power_down", "low_power_beep", "offering_bell", "incense_whoosh",
 	"item_good", "item_bad", "footstep_wood", "knock", "rooster", "vendor_bell",
 	"candle_gust", "phone_ring", "phone_ring_warp", "drone_tension", "coin_chime",
+	"dong_dao",   # AUDIT#22: eerie đồng-dao folk motif (rare late-night sting via VERB)
 	# horror pass: anticipation, per-threat approaches, water, stinger family, loops
 	"pre_scare", "ambience_sub", "approach_drag", "approach_heavy", "approach_soft",
 	"water_loop", "water_call", "sting_low", "sting_rise", "sting_metal", "sting_breath",
@@ -27,7 +28,8 @@ const MUSIC_NAMES := ["ambience_night", "ambience_dread"]
 # it is never started, so it is intentionally left out of LOOPING.
 const LOOPING := ["static_loop", "heartbeat", "breathing",
 	"ambience_night", "ambience_dread", "drone_tension",
-	"ambience_sub", "water_loop", "shutter_strain", "incense_bed"]
+	"ambience_sub", "water_loop", "shutter_strain", "incense_bed",
+	"clock_tick"]   # backlog#25: accelerating tick into dawn (looped, pitched up 1.0->1.85)
 
 const MUSIC_BUS := "Music"
 const SFX_BUS := "SFX"

@@ -164,17 +164,24 @@ def ui_confirm():
 
 # ---------------------------------------------------------------- clock
 def clock_tick():
-    # mechanical tick: a short noise transient + a low thud + a damped resonant "tock"
-    # body so it reads as a wooden clock movement, not a bare click.
+    # backlog#25: ONE crisp resonant tock at t=0, then silence to ~1.0s, so it can be
+    # LOOPED at pitch 1.0 = ~1 tick/sec and pitched UP to accelerate toward dawn. The tock
+    # itself decays fully well before the loop seam, so the boundary is silent (seamless).
+    # Determinism: this draws more noise than the old 0.06s buffer, so save+restore the
+    # shared RNG and re-advance it by exactly the OLD draw — every sound generated after
+    # this one stays byte-identical (same convention as static_loop / footstep_wood).
+    _state = random.getstate()
     n = bandpass(noise(0.03), 1500, 6000)
     n = exp_decay(n, 0.006)
     thud = exp_decay(sine(160, 0.05), 0.012)
-    s = buf(0.09)
+    s = buf(1.0)
     add(s, n, 0.0, 0.85)
     add(s, thud, 0.0, 0.3)
     # resonant tock: two damped partials give the escapement a little wooden ring
     add(s, exp_decay(sine(800, 0.08), 0.03), 0.0, 0.18)
     add(s, exp_decay(sine(1900, 0.06), 0.022), 0.0, 0.10)
+    random.setstate(_state)
+    noise(0.03)   # restore the shared RNG to where the old clock_tick left it
     save("clock_tick.wav", s, peak=0.5)
 
 def clock_chime():
@@ -383,6 +390,28 @@ def offering_bell():
     for mult, g, tau in [(1.0, 1.0, 1.1), (2.7, 0.5, 0.7), (4.2, 0.25, 0.5)]:
         add(s, exp_decay(sine(base * mult, 1.8), tau), 0.0, g)
     save("offering_bell.wav", s, peak=0.6)
+
+def dong_dao():
+    # AUDIT#22: an eerie đồng-dao motif — an ORIGINAL (not a real nursery rhyme) short
+    # children's-rhyme-style phrase on a music-box / celesta voice. Inharmonic bell
+    # partials (modelled on offering_bell) struck per note, sequenced sparse, with the
+    # whole phrase drifting slowly FLAT (pitch sags ~3%) so it sounds like a wind-up box
+    # winding down — uncanny, not sacred. Long decay tails for a reverb-friendly bloom.
+    # Pure-sine synthesis: no RNG draws, so it never perturbs the shared stream.
+    dur = 4.4
+    s = buf(dur)
+    # An original pentatonic-ish phrase (semitone steps from a base; not a known tune).
+    base = 523.25                       # C5-ish music-box register
+    steps = [0, 3, 5, 3, 0, -2]         # original sparse contour, ends below where it began
+    times = [0.0, 0.55, 1.15, 1.85, 2.55, 3.35]
+    parts = [(1.0, 1.0, 1.3), (2.76, 0.45, 0.8), (5.40, 0.22, 0.5)]  # inharmonic, like a small bell
+    for i, (st, at) in enumerate(zip(steps, times)):
+        sag = 1.0 - 0.03 * (at / dur)   # the phrase slips slightly flat as it plays out
+        f0 = base * (2.0 ** (st / 12.0)) * sag
+        note_dur = dur - at
+        for mult, g, tau in parts:
+            add(s, exp_decay(sine(f0 * mult, note_dur), tau), at, g * (0.9 - 0.06 * i))
+    save("dong_dao.wav", s, peak=0.55)
 
 def incense_whoosh():
     # soft airy whoosh for using an item / lighting incense
@@ -788,7 +817,7 @@ if __name__ == "__main__":
     camera_switch(); static_loop(); camera_up(); camera_down()
     heartbeat(); breathing(); whisper()
     stinger(); power_down(); low_power_beep()
-    offering_bell(); incense_whoosh(); item_good(); item_bad()
+    offering_bell(); dong_dao(); incense_whoosh(); item_good(); item_bad()
     footstep_wood(); knock(); rooster(); vendor_bell()
     candle_gust(); phone_ring(); phone_ring_warp()
     drone_tension(); coin_chime()
