@@ -26,6 +26,8 @@ func show_tape(night: int) -> void:
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(dim)
 	_root = dim
+	# Click anywhere on the dim margin advances the tape too (not just the buttons).
+	dim.gui_input.connect(_on_dim_input)
 
 	var panel := PanelContainer.new()
 	UI.place(panel, 0.5, 0.5, 0.5, 0.5, -380, -180, 380, 180)
@@ -53,6 +55,7 @@ func show_tape(night: int) -> void:
 	row.add_child(skip)
 	row.add_child(_next_btn)
 	vb.add_child(row)
+	vb.add_child(UI.label("TAPE_ADVANCE", 13, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 
 	visible = true
 	Audio.start_loop("static_loop", -22.0)
@@ -65,6 +68,7 @@ func _show_line() -> void:
 		_next_btn.text = "BTN_START" if _index == _keys.size() - 1 else "BTN_CONTINUE"
 
 func _advance() -> void:
+	Audio.play_sfx("ui_click", -14.0)
 	_index += 1
 	if _index >= _keys.size():
 		_finish()
@@ -78,3 +82,15 @@ func _finish() -> void:
 		_root = null
 	visible = false
 	closed.emit()
+
+## Space / Enter / click anywhere advances the line — not just the Continue button. (backlog#37)
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible or _root == null:
+		return
+	if event.is_action_pressed("ui_accept"):
+		_advance()
+		get_viewport().set_input_as_handled()
+
+func _on_dim_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_advance()

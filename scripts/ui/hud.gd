@@ -29,17 +29,23 @@ var _answer_btn: Button
 var _drain_btn: Button
 var _incense_btn: Button
 var _bell_btn: Button
+var _offering_btn: Button
 var _invite_btn: Button
 var _help_panel: Control
 var _help_lines: VBoxContainer
 var _door_btn := {}
 var _light_btn := {}
 var _toast_t := 0.0
-var _toast_pending := ""        # one-slot queue: a notify buffered while one is on screen
-var _toast_pending_key := ""    # its key, kept so the dwell floor still applies on flush
+var _toast_queue: Array = []    # small FIFO of {key,text}; teaching lines jump ahead (backlog#10)
 var _huong_danger := false
 var _water_lure := false
 var _vendor_state := GameEnums.VendorState.IDLE
+var _light_on := {}             # side -> bool, for the persistent which-door cue
+var _pulse_t := 0.0             # drives the looming-door amber pulse
+var _bell_cooling := false      # bell-button cooldown dim state (change-guarded)
+var _calm_t := 0.0              # brief post-offering window: tracked meter drops read as relief
+var _power_num: Label
+var _dawn_bar: ProgressBar
 
 func setup(controller) -> void:
 	_c = controller
@@ -60,6 +66,11 @@ func _build() -> void:
 	_power_bar = UI.progress(100.0, Color(0.91, 0.64, 0.24))
 	_power_bar.custom_minimum_size = Vector2(240, 22)
 	prow.add_child(_power_bar)
+	# Numeric readout on the power bar (it is a hard budget you could only eyeball). (backlog#15)
+	_power_num = UI.text_label("100", 13, Color(0.08, 0.06, 0.04), HORIZONTAL_ALIGNMENT_RIGHT)
+	_power_num.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UI.place(_power_num, 0, 0, 1, 1, 0, 3, -8, 0)
+	_power_bar.add_child(_power_num)
 	meters.add_child(prow)
 	var vrow := UI.hbox(8)
 	vrow.add_child(UI.texture_rect("res://assets/art/ui/via_icon.svg", TextureRect.STRETCH_KEEP_ASPECT))
@@ -92,6 +103,13 @@ func _build() -> void:
 	_clue_lbl = UI.text_label("", 16, Color(0.86, 0.78, 0.55), HORIZONTAL_ALIGNMENT_CENTER)
 	_clue_lbl.visible = false
 	cbox.add_child(_clue_lbl)
+	# Thin dawn-progress sliver under the clock — fills toward 06:00 so "how close am I to
+	# surviving" has a shape during the calm stretches. (backlog#15 / AUDIT#29)
+	_dawn_bar = UI.progress(1.0, Color(0.5, 0.62, 0.78))
+	_dawn_bar.custom_minimum_size = Vector2(150, 4)
+	_dawn_bar.value = 0.0
+	_dawn_bar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	cbox.add_child(_dawn_bar)
 
 	# coins + offerings + crowd/water/grievance (top-right)
 	var rbox := UI.vbox(6)
@@ -129,28 +147,23 @@ func _build() -> void:
 	rcbox.add_child(_light_btn[GameEnums.Side.RIGHT])
 	rcbox.add_child(_door_btn[GameEnums.Side.RIGHT])
 
-	# center controls
+	# center controls (widened so the key-glyph labels fit between the door/light columns)
 	var center := UI.hbox(10)
-	UI.place(center, 0.5, 1, 0.5, 1, -380, -86, 380, -26)
+	UI.place(center, 0.5, 1, 0.5, 1, -420, -86, 420, -26)
 	add_child(center)
-	var cam_btn := _ctrl_btn("HUD_CAM", func(): _c.request_toggle_monitor(), 100)
-	cam_btn.clip_text = true
+	var cam_btn := _ctrl_btn("HUD_CAM", func(): _c.request_toggle_monitor(), 100, "toggle_cameras")
 	center.add_child(cam_btn)
-	_incense_btn = _ctrl_btn("HUD_INCENSE", func(): _c.request_light_incense(), 160)
-	_incense_btn.clip_text = true
+	_incense_btn = _ctrl_btn("HUD_INCENSE", _press_incense, 195, "light_incense")
 	center.add_child(_incense_btn)
-	_bell_btn = _ctrl_btn("HUD_BELL", func(): _c.request_ring_bell(), 100)
-	_bell_btn.clip_text = true
+	_bell_btn = _ctrl_btn("HUD_BELL", _press_bell, 120, "ring_bell")
 	center.add_child(_bell_btn)
-	var offering_btn := _ctrl_btn("OFFERING_PROMPT", func(): _c.request_offering(), 150)
-	offering_btn.clip_text = true
-	center.add_child(offering_btn)
+	_offering_btn = _ctrl_btn("OFFERING_PROMPT", _press_offering, 195, "place_offering")
+	center.add_child(_offering_btn)
 	var slot := UI.hbox(4)
 	_item_icon = UI.texture_rect("res://assets/art/ui/item_slot.svg", TextureRect.STRETCH_KEEP_ASPECT)
 	_item_icon.custom_minimum_size = Vector2(48, 48)
 	slot.add_child(_item_icon)
-	_use_btn = _ctrl_btn("HUD_ITEM", func(): _c.request_use_item(), 120)
-	_use_btn.clip_text = true
+	_use_btn = _ctrl_btn("HUD_ITEM", func(): _c.request_use_item(), 110, "use_item")
 	_use_btn.disabled = true
 	slot.add_child(_use_btn)
 	center.add_child(slot)
@@ -159,9 +172,9 @@ func _build() -> void:
 	var water := UI.hbox(8)
 	UI.place(water, 0.5, 1, 0.5, 1, -190, -150, 190, -100)
 	add_child(water)
-	_drain_btn = _ctrl_btn("ACTION_CLOSE_DRAIN", func(): Events.office_action.emit("close_drain"), 170)
+	_drain_btn = _ctrl_btn("ACTION_CLOSE_DRAIN", func(): Events.office_action.emit("close_drain"), 180, "close_drain")
 	_drain_btn.visible = false
-	_answer_btn = _ctrl_btn("ACTION_ANSWER", func(): _c.request_answer_phone(), 150)
+	_answer_btn = _ctrl_btn("ACTION_ANSWER", func(): _c.request_answer_phone(), 160, "answer_phone")
 	_answer_btn.visible = false
 	_answer_btn.modulate = Color(0.6, 0.9, 0.7)
 	water.add_child(_drain_btn)
@@ -240,16 +253,72 @@ func _set_bar(bar: ProgressBar, new_value: float) -> void:
 	tw.tween_property(bar, "value", new_value, 0.18)
 	_bar_tween[bar] = tw
 	if old - new_value > 2.0:
-		# brief red/white flash on a hit, then back to normal
+		# A drop on a tracked meter right after an offering is RELIEF (calm green), not a hit
+		# (red) — so feeding the souls doesn't read like taking damage. (AUDIT#28)
+		var relief := _calm_t > 0.0 and (bar == _crowd_bar or bar == _water_bar or bar == _grievance_bar)
+		var flash := Color(0.6, 1.3, 0.7) if relief else Color(1.4, 0.7, 0.7)
 		var ft := create_tween()
-		ft.tween_property(bar, "modulate", Color(1.4, 0.7, 0.7), 0.06)
+		ft.tween_property(bar, "modulate", flash, 0.06)
 		ft.tween_property(bar, "modulate", Color(1, 1, 1), 0.15)
 
-func _ctrl_btn(key: String, cb: Callable, w: float = 180.0) -> Button:
+func _ctrl_btn(key: String, cb: Callable, w: float = 180.0, action: String = "") -> Button:
 	var b := UI.button(key, w, 46)
+	b.add_theme_font_size_override("font_size", 14)   # compact so label + key glyph fit
+	b.clip_text = true
 	b.mouse_filter = Control.MOUSE_FILTER_STOP
-	b.pressed.connect(cb)
+	# Every control press now gives an audible click — the most-pressed surface in the game
+	# was silent, so a cooldown/empty no-op read as a broken button. (backlog#12)
+	b.pressed.connect(func():
+		Audio.play_sfx("ui_click", -12.0)
+		cb.call())
+	# Stamp the bound key on the button so the keyboard-first design is visible without
+	# opening the help panel; read from the InputMap so it survives rebinds. (backlog#11)
+	if action != "":
+		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		b.text = tr(key) + _key_suffix(action)
 	return b
+
+## The bound key letter for an action, e.g. "A" (or "" if unbound). Survives rebinds.
+func _key_glyph(action: String) -> String:
+	if not InputMap.has_action(action):
+		return ""
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey:
+			var kc: int = ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode
+			return OS.get_keycode_string(kc)
+	return ""
+
+func _key_suffix(action: String) -> String:
+	var g := _key_glyph(action)
+	return "  [%s]" % g if g != "" else ""
+
+## Brief danger-flash when a press can't act (cooldown / out of resource), so a no-op
+## never reads as a broken button. (backlog#12)
+func _deny_flash(b: Button) -> void:
+	if b == null:
+		return
+	var base := b.modulate
+	var tw := create_tween()
+	tw.tween_property(b, "modulate", UI.COL_DANGER, 0.08)
+	tw.tween_property(b, "modulate", base, 0.14)
+
+func _press_incense() -> void:
+	if _c._nhang <= 0:
+		_deny_flash(_incense_btn)
+	else:
+		_c.request_light_incense()
+
+func _press_bell() -> void:
+	if _c._bell_cd > 0.0:
+		_deny_flash(_bell_btn)
+	else:
+		_c.request_ring_bell()
+
+func _press_offering() -> void:
+	if _c.offerings <= 0:
+		_deny_flash(_offering_btn)
+	else:
+		_c.request_offering()
 
 # Top-right keybindings cheat-sheet, under the offerings count. Toggle with the
 # header button or the H key (request_toggle from NightController).
@@ -280,17 +349,20 @@ func toggle_help() -> void:
 		_help_lines.visible = not _help_lines.visible
 
 ## Drive the persistent Night-1 tutorial banner. Empty key hides it.
-func set_tutorial_prompt(key: String) -> void:
+func set_tutorial_prompt(key: String, step: int = -1, total: int = 0) -> void:
 	if _tut_panel == null:
 		return
 	if key == "":
 		_tut_panel.visible = false
 		return
 	_tut_panel.visible = true
-	_tut_label.text = tr(key)
+	# Show "(2/5)" progress so the lesson has a sense of length and the freeze reads as
+	# deliberate, not stuck. (AUDIT#26)
+	var prefix := "(%d/%d)  " % [step + 1, total] if step >= 0 and total > 0 else ""
+	_tut_label.text = prefix + tr(key)
 
 func _connect() -> void:
-	Events.power_changed.connect(func(c, m): _set_bar(_power_bar, c))
+	Events.power_changed.connect(func(c, m): _set_bar(_power_bar, c); _power_num.text = "%d" % int(round(c)))
 	Events.via_changed.connect(func(c, m): _set_bar(_via_bar, (c / m) * 100.0))
 	Events.via_state_changed.connect(_on_via_state)
 	Events.clock_advanced.connect(_refresh_clock)
@@ -318,7 +390,7 @@ func _connect() -> void:
 	_update_door(GameEnums.Side.RIGHT, false)
 	_update_light(GameEnums.Side.LEFT, false)
 	_update_light(GameEnums.Side.RIGHT, false)
-	Events.offering_placed.connect(func(_l): _refresh_offerings())
+	Events.offering_placed.connect(func(_l): _refresh_offerings(); _calm_t = 0.6)
 
 ## Refresh the offerings count, tinting it red when only 1-2 remain (mirrors the
 ## incense-out tint) so a player notices they're nearly out of altar fuel.
@@ -328,14 +400,19 @@ func _refresh_offerings() -> void:
 	_offerings_lbl.modulate = Color(0.95, 0.45, 0.4) if (n >= 1 and n <= 2) else Color(1, 1, 1)
 
 func _process(delta: float) -> void:
+	_pulse_t += delta
+	if _calm_t > 0.0:
+		_calm_t = maxf(0.0, _calm_t - delta)
+	_update_door_cue()
+	_update_bell_cooldown()
 	if _toast_t > 0.0:
 		_toast_t -= delta
 		_toast.modulate.a = clampf(_toast_t, 0.0, 1.0)
-		# When the current toast finishes, flush a buffered one (if any).
-		if _toast_t <= 0.0 and _toast_pending != "":
-			_show_toast(_toast_pending_key, _toast_pending)
-			_toast_pending = ""
-			_toast_pending_key = ""
+	# When nothing is showing, pull the next queued toast (teaching lines were pushed to
+	# the front so a survival hint always wins over flavor). (backlog#10)
+	if _toast_t <= 0.0 and not _toast_queue.is_empty():
+		var item: Dictionary = _toast_queue.pop_front()
+		_show_toast(item["key"], item["text"])
 	if _clue_flash > 0.0 and _clue_lbl:
 		_clue_flash = maxf(0.0, _clue_flash - delta * 1.5)
 		_clue_lbl.modulate = Color(1, 1, 1).lerp(Color(1.0, 0.92, 0.5), _clue_flash)
@@ -346,6 +423,8 @@ func _process(delta: float) -> void:
 	var key := ""
 	if _c.power <= 20.0 and _c.power > 0.0:
 		key = "WARNING_LOW_POWER"
+	if _c.via_state == GameEnums.ViaState.SHAKEN:
+		key = "WARNING_VIA_SHAKEN"   # softer amber tier before the red CRITICAL (AUDIT#24)
 	if _c.via_state == GameEnums.ViaState.CRITICAL:
 		key = "WARNING_LOW_VIA"
 	if _vendor_state == GameEnums.VendorState.HOSTILE:
@@ -355,6 +434,7 @@ func _process(delta: float) -> void:
 	if key != _warn_key:
 		_warn_key = key
 		_warn.text = tr(key) if key != "" else ""
+		_warn.add_theme_color_override("font_color", UI.COL_WARN if key == "WARNING_VIA_SHAKEN" else UI.COL_DANGER)
 		if _warn_panel:
 			_warn_panel.visible = key != ""
 
@@ -363,6 +443,8 @@ func _refresh_clock(m: int) -> void:
 	var mm := m % 60
 	var disp_h := 12 if h == 0 else h
 	_clock.text = "%d:%02d %s" % [disp_h, mm, tr("CLOCK_AM")]
+	if _dawn_bar:
+		_dawn_bar.value = _c.night_progress()
 
 ## Each in-game hour, briefly pulse the clock toward warm gold so time passing reads
 ## as a beat (same flash feel as the clue tracker).
@@ -395,16 +477,20 @@ func _update_door(side: int, closed: bool) -> void:
 	var b: Button = _door_btn[side]
 	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	var base := "DOOR_LEFT" if side == GameEnums.Side.LEFT else "DOOR_RIGHT"
-	# Pair the colour with a written state so it's readable under pressure / colour-blind.
-	b.text = "%s · %s" % [tr(base), tr("DOOR_SHUT") if closed else tr("DOOR_OPEN")]
+	var act := "left_door" if side == GameEnums.Side.LEFT else "right_door"
+	# Pair the colour with a written state so it's readable under pressure / colour-blind,
+	# and stamp the bound key so the control is self-documenting. (backlog#11)
+	b.text = "%s · %s%s" % [tr(base), tr("DOOR_SHUT") if closed else tr("DOOR_OPEN"), _key_suffix(act)]
 	b.modulate = Color(0.5, 1.0, 0.6) if closed else Color(1, 1, 1)
 
 func _update_light(side: int, on: bool) -> void:
 	var b: Button = _light_btn[side]
 	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	var base := "LIGHT_LEFT" if side == GameEnums.Side.LEFT else "LIGHT_RIGHT"
-	b.text = "%s · %s" % [tr(base), tr("LIGHT_ON") if on else tr("LIGHT_OFF")]
+	var act := "left_light" if side == GameEnums.Side.LEFT else "right_light"
+	b.text = "%s · %s%s" % [tr(base), tr("LIGHT_ON") if on else tr("LIGHT_OFF"), _key_suffix(act)]
 	b.modulate = Color(1.0, 0.95, 0.5) if on else Color(1, 1, 1)
+	_light_on[side] = on   # remembered so the per-frame door cue can restore the right tint
 
 ## Briefly pulse a doorway light button toward warm amber so a threat's arrival side
 ## is visible. Called (guarded) by night_controller when a threat reaches a door.
@@ -417,6 +503,36 @@ func flash_side(side: int) -> void:
 	var tw := create_tween()
 	tw.tween_property(b, "modulate", amber, 0.12)
 	tw.tween_property(b, "modulate", base, 0.13)
+
+## Persistent which-door cue: while a path-threat looms at a door, pulse that side's light
+## button amber so the threatened side stays legible after the arrival blink/toast fade —
+## without revealing the threat itself (you still flick the light to see it). (AUDIT#23)
+func _update_door_cue() -> void:
+	if _c.director == null:
+		return
+	var glow := 0.5 + 0.5 * sin(_pulse_t * 6.0)
+	var amber := Color(1.0, 0.55, 0.2).lerp(Color(1.0, 0.82, 0.4), glow)
+	for side in [GameEnums.Side.LEFT, GameEnums.Side.RIGHT]:
+		var b: Button = _light_btn.get(side)
+		if b == null:
+			continue
+		if _c.director.threat_at_door(side) != null:
+			b.modulate = amber
+		else:
+			b.modulate = Color(1.0, 0.95, 0.5) if _light_on.get(side, false) else Color(1, 1, 1)
+
+## Dim the bell button while its 18s cooldown runs so a mashed press reads as "waiting",
+## not a broken button. Change-guarded so it never stomps a denied-press flash. (AUDIT#25)
+func _update_bell_cooldown() -> void:
+	if _bell_btn == null:
+		return
+	var cooling: bool = _c._bell_cd > 0.0
+	if cooling != _bell_cooling:
+		_bell_cooling = cooling
+		_bell_btn.modulate = Color(0.55, 0.55, 0.62) if cooling else Color(1, 1, 1)
+
+func _is_teaching(key: String) -> bool:
+	return key.begins_with("COUNTER_") or key == "ALTAR_DRAFT" or key == "CONTROLS_HEXED"
 
 ## Story/lesson keys hold longer so the player can actually read them.
 const _TOAST_STORY_KEYS := ["MATROI_RULE", "CAT_WARN", "MADA_LURE", "INVEST_GOAL"]
@@ -435,10 +551,17 @@ func _show_toast(key: String, tr_text: String) -> void:
 
 func _on_notify(key: String, args: Array) -> void:
 	var tr_text: String = tr(key).format(args) if not args.is_empty() else tr(key)
-	# If a toast is still comfortably on screen, buffer ONE rather than clobbering it.
+	# If a toast is still comfortably on screen, QUEUE rather than clobber. Teaching lines
+	# (COUNTER_*, altar/hex warnings) jump ahead of flavor so a survival hint is never lost
+	# behind a quip; the backlog caps at 3. (backlog#10)
 	if _toast_t > 1.0:
-		_toast_pending = tr_text
-		_toast_pending_key = key
+		var item := {"key": key, "text": tr_text}
+		if _is_teaching(key):
+			_toast_queue.push_front(item)
+		else:
+			_toast_queue.push_back(item)
+		if _toast_queue.size() > 3:
+			_toast_queue = _toast_queue.slice(0, 3)
 		return
 	_show_toast(key, tr_text)
 
@@ -482,14 +605,14 @@ func _on_huong(level: float) -> void:
 func _on_incense(stock: int) -> void:
 	# Surface the finite nhang count on the incense button; red when you're out.
 	if _incense_btn:
-		_incense_btn.text = "%s (%d)" % [tr("HUD_INCENSE"), stock]
+		_incense_btn.text = "%s (%d)%s" % [tr("HUD_INCENSE"), stock, _key_suffix("light_incense")]
 		_incense_btn.modulate = Color(1, 1, 1) if stock > 0 else Color(0.95, 0.45, 0.4)
 
 func _on_phone_ring(active: bool, fake: bool) -> void:
 	_answer_btn.visible = active
 	# A warped ring is conveyed by text, not just the red tint (colour-blind safe).
 	_answer_btn.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-	_answer_btn.text = tr("ACTION_ANSWER") + ("  (?!)" if fake else "")
+	_answer_btn.text = tr("ACTION_ANSWER") + ("  (?!)" if fake else "") + _key_suffix("answer_phone")
 	_answer_btn.modulate = Color(0.95, 0.4, 0.35) if fake else Color(0.6, 0.9, 0.7)
 
 func _on_coins(amount: int) -> void:

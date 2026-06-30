@@ -6,6 +6,7 @@ var _c   # NightController
 var _feed: TextureRect
 var _threat_host: Control
 var _name_lbl: Label
+var _ts_lbl: Label                  # ticking CCTV timestamp so the feed reads as live, not a still
 var _map_buttons := {}
 var _refresh_t := 0.0
 var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is animatable)
@@ -114,6 +115,11 @@ void fragment() {
 	_name_lbl = UI.text_label("", 24, Color(0.8, 0.95, 0.85), HORIZONTAL_ALIGNMENT_LEFT)
 	UI.place(_name_lbl, 0, 0, 0, 0, 64, 50, 400, 86)
 	add_child(_name_lbl)
+	# A ticking timestamp under the cam name sells "a live haunted-school feed at 3 AM"
+	# rather than a gallery of stills. (backlog#34)
+	_ts_lbl = UI.text_label("", 16, Color(0.55, 0.78, 0.7), HORIZONTAL_ALIGNMENT_LEFT)
+	UI.place(_ts_lbl, 0, 0, 0, 0, 64, 84, 400, 108)
+	add_child(_ts_lbl)
 
 	# Investigation hotspot: a faint marker over the classroom chalkboard (her drawing).
 	# Only appears on the classroom feed once the arc is in motion (night 3+).
@@ -254,9 +260,18 @@ func tag_confirm() -> void:
 func _cam_code(cam_id: String) -> String:
 	return "CAM%d" % (MapGraph.CAMERAS.find(cam_id) + 1)
 
+## REC-style HH:MM:SS from the in-game clock (game_minutes), seconds ticking off the
+## fractional minute so the feed reads as live.
+func _fmt_ts(gm: float) -> String:
+	var total := int(gm)
+	var disp_h := 12 if (total / 60) == 0 else (total / 60)
+	return "● REC  %02d:%02d:%02d" % [disp_h, total % 60, int((gm - float(total)) * 60.0)]
+
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	if _ts_lbl and _c:
+		_ts_lbl.text = _fmt_ts(_c.game_minutes)
 	# Keep the feed's COVER fit correct for the live window aspect (so it fills any screen
 	# under `expand` without stretching) — cheap, just a uniform write.
 	if _fx_mat and _feed and _feed.size.y > 1.0 and _feed.size != _last_feed_size:

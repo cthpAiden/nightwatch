@@ -92,6 +92,7 @@ var _ending := false
 var _powered := true
 var _low_power_warned := false
 var _tut_step := -1          # -1 = no tutorial running; otherwise index into TUT_STEPS
+var _tut_look_t := 0.0       # accumulates sustained-look time so step 0 needs intent, not a twitch
 var _tut_incense := false    # set when the player hand-lights incense (tutorial step)
 var _tut_bell := false       # set when the player rings the bell (tutorial step)
 var _first_door := {}        # threat_id -> true once it has reached a door (first-contact hint)
@@ -451,8 +452,9 @@ func _begin_tutorial() -> void:
 	_tut_step = 0
 	_tut_incense = false
 	_tut_bell = false
+	_tut_look_t = 0.0
 	director.set_paused(true)
-	hud.set_tutorial_prompt(TUT_STEPS[0])
+	hud.set_tutorial_prompt(TUT_STEPS[0], 0, TUT_STEPS.size())
 
 ## Advance the lesson when the current step's action is performed. The rest of the
 ## sim is frozen (see _process) so nothing can hurt the player mid-lesson. The prompt
@@ -460,7 +462,12 @@ func _begin_tutorial() -> void:
 func _check_tutorial() -> void:
 	var done := false
 	match _tut_step:
-		0: done = get_pan_speed() > 0.5            # look around (mouse to edges)
+		0:
+			# Require a SUSTAINED look (~0.4s of panning), not a one-frame mouse twitch on
+			# startup that silently skips the lesson. (AUDIT#26)
+			if get_pan_speed() > 0.5:
+				_tut_look_t += get_process_delta_time()
+			done = _tut_look_t > 0.4
 		1: done = _tut_incense                     # press R to light incense
 		2: done = _tut_bell                        # press B to ring the bell
 		3: done = room.is_door_closed(GameEnums.Side.LEFT) or room.is_door_closed(GameEnums.Side.RIGHT)
@@ -474,7 +481,7 @@ func _check_tutorial() -> void:
 		Events.notify.emit("TUT_DONE", [])
 		_engage_night()
 	else:
-		hud.set_tutorial_prompt(TUT_STEPS[_tut_step])
+		hud.set_tutorial_prompt(TUT_STEPS[_tut_step], _tut_step, TUT_STEPS.size())
 
 func _init_altar() -> void:
 	huong = huong_max

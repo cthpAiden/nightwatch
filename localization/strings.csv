@@ -131,6 +131,8 @@ TAPE_NIGHT,Băng đêm {0},Tape — Night {0}
 POWER_OUT,MẤT ĐIỆN,POWER OUT
 WARNING_LOW_POWER,Sắp hết điện!,Power running low!
 WARNING_LOW_VIA,Vía yếu... đừng nhìn lâu.,Your spirit is weak... don't stare too long.
+WARNING_VIA_SHAKEN,Vía đang yếu dần... cẩn thận.,Your spirit is fraying... be careful.
+TAPE_ADVANCE,Nhấn Space / Enter / bấm chuột để tiếp tục,Press Space / Enter / click to continue
 WARNING_DOOR_STUCK,Cửa kẹt rồi!,The door is stuck!
 HINT_CLOSE_DOOR,Đóng cửa để chặn,Close the door to block it
 HINT_USE_LIGHT,Bật đèn để kiểm tra hành lang,Use the light to check the corridor
