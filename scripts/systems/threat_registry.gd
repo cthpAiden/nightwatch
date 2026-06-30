@@ -5,6 +5,7 @@ class_name ThreatRegistry
 const DATA := {
 	"ong_ke": {
 		"name_key": "THREAT_ONG_KE", "desc_key": "BEST_ONG_KE", "tag_key": "TAG_FOLK_THIN",
+		"lore_key": "LORE_ONG_KE",   # Wave E: origin/disclaim line shown under the desc.
 		"fear": 3, "accent": Color(0.55, 0.5, 0.62),
 		"script": "res://scripts/threats/ong_ke.gd",
 		"idle": "res://assets/art/threats/ong_ke_idle.svg",
@@ -13,6 +14,7 @@ const DATA := {
 	},
 	"ma_da": {
 		"name_key": "THREAT_MA_DA", "desc_key": "BEST_MA_DA", "tag_key": "TAG_DOCUMENTED",
+		"lore_key": "LORE_MA_DA",   # Wave E
 		"fear": 5, "accent": Color(0.43, 0.6, 0.65),
 		"script": "res://scripts/threats/ma_da.gd",
 		"idle": "res://assets/art/threats/ma_da_idle.svg",
@@ -21,6 +23,7 @@ const DATA := {
 	},
 	"co_hon": {
 		"name_key": "THREAT_CO_HON", "desc_key": "BEST_CO_HON", "tag_key": "TAG_DOCUMENTED",
+		"lore_key": "LORE_CO_HON",   # Wave E
 		"fear": 2, "accent": Color(0.7, 0.66, 0.5),
 		"script": "res://scripts/threats/co_hon.gd",
 		"idle": "res://assets/art/threats/co_hon_idle.svg",
@@ -29,6 +32,7 @@ const DATA := {
 	},
 	"quy_nhap_trang": {
 		"name_key": "THREAT_QUY", "desc_key": "BEST_QUY", "tag_key": "TAG_DOCUMENTED",
+		"lore_key": "LORE_QUY_NHAP_TRANG",   # Wave E: disclaims the Chinese jiangshi (it HOPS; ours sits up).
 		"fear": 4, "accent": Color(0.75, 0.75, 0.7),
 		"script": "res://scripts/threats/quy_nhap_trang.gd",
 		"idle": "res://assets/art/threats/quy_nhap_trang_idle.svg",
@@ -37,6 +41,7 @@ const DATA := {
 	},
 	"ma_troi": {
 		"name_key": "THREAT_MA_TROI", "desc_key": "BEST_MA_TROI", "tag_key": "TAG_SHARED",
+		"lore_key": "LORE_MA_TROI",   # Wave E: disclaims the worldwide will-o'-the-wisp / phosphine.
 		"fear": 3, "accent": Color(0.43, 0.7, 0.7),
 		"script": "res://scripts/threats/ma_troi.gd",
 		"idle": "res://assets/art/threats/ma_troi_idle.svg",
@@ -45,6 +50,7 @@ const DATA := {
 	},
 	"oan_hon": {
 		"name_key": "THREAT_OAN_HON", "desc_key": "BEST_OAN_HON", "tag_key": "TAG_DOCUMENTED",
+		"lore_key": "LORE_OAN_HON",   # Wave E
 		"fear": 5, "accent": Color(0.85, 0.86, 0.88),
 		"script": "res://scripts/threats/oan_hon.gd",
 		"idle": "res://assets/art/threats/oan_hon_idle.svg",

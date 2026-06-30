@@ -69,8 +69,8 @@ WIN_NEXT_NIGHT,Đêm Tiếp Theo,Next Night
 WIN_ALL_DONE,Anh đã qua hết các đêm. Anh là bảo vệ thật sự.,You cleared every night. You are a true guard.
 WIN_SIEU_TITLE,Siêu Thoát,Set Free
 ENDING_GOOD_L1,"Đêm thứ sáu tàn. Nhưng lần này, anh không chỉ sống sót.","The sixth night ends. But this time, you did more than survive."
-ENDING_GOOD_L2,"Anh đã ghép lại câu chuyện của em — cái tên, bức vẽ, gương mặt.","You pieced her story together — the name, the drawing, the face."
-ENDING_GOOD_L3,"Anh thắp nén nhang cuối, gọi đúng tên em. Oan tình được gỡ.","You light the last incense and call her name — Linh. The grievance unwinds."
+ENDING_GOOD_L2,"Anh ghép lại câu chuyện: em bị đổ oan một lỗi em không hề làm, rồi tên em bị gạch khỏi sổ trường.","You piece her story together: she was blamed for a wrong she never did, and her name was struck from the school's records."
+ENDING_GOOD_L3,"Anh trả lại tên cho em trong sổ, thắp nén nhang cuối, gọi đúng tên — Linh. Oan tình được gỡ.","You write her name back into the record, light the last incense, and call her by name — Linh. The grievance unwinds."
 ENDING_GOOD_L4,"Bóng trắng tan vào ánh bình minh. Ngôi trường, cuối cùng, được ngủ yên.","The pale shape melts into the dawn. The school, at last, can rest."
 ENDING_GOOD_SIGN,"Em đã siêu thoát. Bác Tư hẳn sẽ tự hào.","She is free. Bác Tư would be proud."
 EPILOGUE_TITLE,Bình Minh,Cold Dawn
@@ -257,7 +257,7 @@ ITEM_NUOC_PHEP_F,Rưới lên để gột rửa điều xấu.,Sprinkle to wash 
 ITEM_VONG,Vòng dâu tằm,Mulberry bracelet
 ITEM_VONG_F,Bảo vệ khỏi những trò hù dọa.,Guards against startling scares.
 ITEM_TOI,Tỏi,Garlic
-ITEM_TOI_F,Mùi hăng khiến vong yếu lùi lại.,Its sharp smell makes weak spirits recoil.
+ITEM_TOI_F,"Mùi hăng xua kẻ tà, hung: ông kẹ, hàng rong giả, quỷ nhập tràng. Nhưng các vong đáng thương — cô hồn, oan hồn, ma da — phải DỖ, không xua.","A sharp smell that drives off the profane and aggressive: ông kẹ, the fake vendor, quỷ nhập tràng. But the pitiable dead — cô hồn, oan hồn, ma da — must be COMFORTED, not repelled."
 ITEM_BANH_CHUNG,Bánh chưng,Sticky-rice cake
 ITEM_BANH_CHUNG_F,Dâng tổ tiên để được chở che.,Offer to the ancestors for protection.
 ITEM_CANH_GAI,Cành gai,Thorny branch
@@ -311,7 +311,7 @@ PHONE_FAKE,Đầu dây bên kia... toàn nước.,The other end... is all water.
 PHONE_MISSED,Anh không kịp nghe. Chuông tắt.,You missed the call. It falls silent.
 SHOP_NOT_ENOUGH,Không đủ vàng mã.,Not enough spirit money.
 SHRINE_TITLE,Bàn Thờ,The Shrine
-SHRINE_SUB,Dùng vàng mã (kiếm được khi sống sót) để nâng cấp.,Spend spirit money (earned by surviving) on upgrades.
+SHRINE_SUB,"Hóa vàng mã (kiếm được khi sống sót) — đốt làm lễ để nâng cấp bàn thờ.","Burn votive paper (earned by surviving) as an offering to upgrade the altar."
 SHRINE_OWNED,Đã có,Owned
 SHRINE_BUY,Thỉnh,Buy
 MENU_SHRINE,Bàn Thờ,Shrine
@@ -358,3 +358,22 @@ OFFERING_WRONG,Đồ cúng phải thanh đạm. Bỏ đồ mặn ra.,Offerings m
 GIAT_PROMPT,"Giật cô hồn! Buông cho tụi nhỏ giật lấy lộc, hay giữ mâm?","Souls scramble for the tray! Let the children snatch it for lộc, or guard it?"
 GIAT_SNATCH,Tụi nhỏ giật sạch — nhưng buông là có lộc.,The children grabbed it all — but letting go brings fortune.
 GIAT_GUARD,"Giữ được mâm, nhưng các vong phật lòng.",You kept the tray but the souls are slighted.
+LORE_ONG_KE,"Ông kẹ là nỗi sợ truyền miệng để dỗ trẻ — không có canh truyền thuyết cố định. (hư cấu dân gian)","Ông kẹ is a told-to-children bogeyman with no fixed myth — folk-thin by design. (creator's license)"
+LORE_MA_DA,"Hồn người chết đuối tìm người thế thân là mô-típ quen ở nhiều vùng sông nước. (văn hóa dân gian)","A drowned soul seeking a replacement is a motif common across river country. (documented folklore)"
+LORE_CO_HON,"Cúng cô hồn tháng Bảy mang gốc Phật giáo và tín ngưỡng chung khắp Á Đông, không riêng người Việt. (tín ngưỡng chung)","The seventh-month feeding of wandering souls is Buddhist and shared across East Asia, not uniquely Vietnamese. (shared regional)"
+LORE_QUY_NHAP_TRANG,"Mô-típ mèo nhảy qua xác làm xác bật dậy có ở nhiều nơi. Cương thi Trung Hoa thì NHẢY — quỷ nhập tràng của ta chỉ ngồi bật dậy, không phải ma cà rồng nhảy cẫng. (văn hóa dân gian)","The cat-over-a-corpse motif is widespread. The Chinese jiangshi HOPS — our quỷ nhập tràng simply sits bolt upright, not a hopping vampire. (documented folklore)"
+LORE_MA_TROI,"Đốm lửa lập lòe trên mộ cũ là hiện tượng khắp thế giới — khí phốt-phin tự cháy. Dân gian gọi là ma trơi. (tín ngưỡng chung)","Flickering flames over old graves are a worldwide phenomenon — phosphine self-igniting. Folk call it ma trơi, the will-o'-the-wisp. (shared regional)"
+LORE_OAN_HON,"Người chết oan đi đòi lẽ công bằng là mô-típ thương cảm quen thuộc; nơi nào cũng có một câu chuyện như em. (văn hóa dân gian)","A soul who died wronged, seeking justice, is a familiar, pitying motif; every place has a story like hers. (documented folklore)"
+GIO_LINH,Canh ba. Giờ thiêng — âm khí nặng nhất. Cẩn thận.,The third watch. The witching hour — the air is heaviest now. Be careful.
+DATE_STAMP,Rằm tháng Bảy · 12:00 khuya,Mid-7th-month · 12:00 AM
+COHON_GATE,Cổng mở. Tháng cô hồn — họ về theo lối cổng trường.,"The gate is open. In the hungry-ghost month, they come in through the school gate."
+OFFERING_DONE_2,"Cháo loãng, muối gạo, bánh kẹo — con mời các cô bác.","Thin porridge, salt-rice, sweets — please, eat."
+OFFERING_DONE_3,"Con dọn mâm cúng đàng hoàng. Các vong nhận cho, rồi đi an lành.",You set the tray out properly. May the souls take it and go in peace.
+OFFERING_FIRST,"Rải muối gạo ra NGOÀI cổng — để các vong nhận lộc mà đừng theo vào trong.",Scatter the salt-rice OUTWARD at the gate — so the souls take their share and don't follow you inside.
+SHRINE_BURN,"Hóa vàng mã — khói lên, lễ thành.","The votive paper is burned — the smoke rises, the offering is made."
+ALTAR_LIT_2,"Ba nén — số lẻ, đúng lệ.","Three sticks — odd, as it should be."
+ALTAR_FOURTH,Trong bát hương... có bốn nén. Anh chỉ cắm ba.,In the burner... four sticks. You only placed three.
+TABOO_NO_ANSWER,Có tiếng gọi sau lưng... đừng quay cả người lại.,Something calls from behind you... don't turn your whole body to look.
+TABOO_NO_WHISTLE,Đừng huýt sáo trong đêm — gọi nhầm thứ không nên gọi.,Don't whistle at night — it summons what shouldn't be summoned.
+TABOO_NO_LAUNDRY,Tháng cô hồn — đừng phơi đồ ngoài trời qua đêm.,The ghost month — don't leave laundry out overnight.
+TABOO_NO_MIRROR,Nửa đêm rồi — đừng soi gương trong tối.,It's midnight — don't look in a mirror in the dark.

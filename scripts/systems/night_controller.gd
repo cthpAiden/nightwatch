@@ -86,6 +86,8 @@ var _strain_on := false      # shutter-strain loop (a closed door is being press
 var _water_on := false       # ma da rising-water loop (driven by flood level)
 var _tick_on := false        # backlog#25: accelerating clock-tick loop started in the last hour
 var _oan_petty_shown := false  # one-time Oan hồn comedic line on first high grievance
+var _cohon_gate_shown := false # backlog#26: one-time "the gate is open" line on the first crowd rise
+var _offering_count := 0       # backlog#30: offerings placed this night (drives the first-offering + cycled lines)
 var _post_layer: CanvasLayer
 var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
 var _post_rect: Control        # the grain ColorRect itself, hidden when safe or occluded
@@ -269,7 +271,13 @@ func _connect_events() -> void:
 	Events.threat_repelled.connect(func(_id): _on_threat_repelled())
 	Events.threat_at_door.connect(func(id, side): _on_threat_at_door(id, side))
 	Events.threat_left_door.connect(func(_id, side): _refresh_door_sprite(side))
-	Events.crowd_changed.connect(func(level): _crowd_level = level)
+	Events.crowd_changed.connect(func(level):
+		_crowd_level = level
+		# backlog#26: the cô hồn gate "opens" the first time the crowd meter actually rises —
+		# they come in through the school gate (CAM1, the night's symbolic Quỷ Môn Quan).
+		if level > 0.0 and not _cohon_gate_shown:
+			_cohon_gate_shown = true
+			Events.notify.emit("COHON_GATE", []))
 	Events.water_level.connect(_on_water_level_audio)
 	Events.via_state_changed.connect(_on_via_state_fx)
 	# Oan hồn's petty/comedic beat — fires once when her grievance first runs high.
@@ -444,6 +452,9 @@ func _show_title_card() -> void:
 	layer.add_child(box)
 	box.add_child(UI.text_label(tr("NIGHT_LABEL").format([str(Game.current_night)]), 22, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	box.add_child(UI.label(config.title_key, 52, Color(0.93, 0.88, 0.78), HORIZONTAL_ALIGNMENT_CENTER))
+	# backlog#26: Quỷ Môn Quan / Tháng Cô Hồn framing — the night is one hungry-ghost-month
+	# vigil, dated under the title card.
+	box.add_child(UI.label("DATE_STAMP", 18, Color(0.7, 0.66, 0.52), HORIZONTAL_ALIGNMENT_CENTER))
 	box.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_property(box, "modulate:a", 1.0, 0.6)
@@ -674,6 +685,13 @@ func _advance_clock(delta: float) -> void:
 		if _last_hour > 0 and _last_hour < 6:
 			Audio.play_sfx("clock_chime", -10.0)
 			_earn_coins(8)   # vàng mã for each hour you survive
+		# backlog#27: canh ba — the 3 AM witching hour. Fire once on the cross to 3, and nudge
+		# the dread/ambience up a touch (a brief sub-bass swell) so the hour is felt, not just told.
+		if _last_hour == 3:
+			Events.notify.emit("GIO_LINH", [])
+			Audio.play_sting("sting_low", -14.0, 0.85)
+			if room:
+				room.add_shake(0.18)
 		# AUDIT#22: rarely, on a late night past ~3AM, let the eerie đồng-dao motif drift in
 		# on an hour-cross. Probability scales with night_progress() so it stays sparse (at
 		# most ~1x/night). Routed via play_sting so it goes to VERB + honours the scare tier.
@@ -825,7 +843,7 @@ func _update_unease(delta: float) -> void:
 		and via >= via_max * 0.6 and huong >= huong_max * 0.5 and altar_lit
 	if not calm:
 		return
-	match randi() % 3:
+	match randi() % 4:
 		0:
 			Audio.play_sfx("footstep_wood", -18.0)   # distant step in the dark
 		1:
@@ -833,6 +851,13 @@ func _update_unease(delta: float) -> void:
 				room.poke_stutter()                   # the lights hiccup on their own
 		2:
 			Audio.play_sfx("knock", -16.0)           # a knock with nothing behind it
+		3:
+			# backlog#36: a rare, respectful after-midnight kiêng-kỵ (taboo) surfaced as desk-whisper
+			# flavor — NOT a gameplay trap. Only fires in calm windows, never punishes. A soft murmur
+			# + one of a small pool of genuine night taboos.
+			var taboos := ["TABOO_NO_ANSWER", "TABOO_NO_WHISTLE", "TABOO_NO_LAUNDRY", "TABOO_NO_MIRROR"]
+			Audio.play_sfx("whisper", -20.0)
+			Events.notify.emit(taboos[randi() % taboos.size()], [])
 
 ## Cô hồn smother: blind the office (and especially the camera feed) as the crowd
 ## swells past ~55%. Hidden behind any modal so it can't trap the player off-screen.
@@ -1019,7 +1044,15 @@ func request_offering() -> void:
 	add_via(14.0)
 	Save.record_offering()
 	Audio.play_sfx("offering_bell", -4.0)
-	Events.notify.emit("OFFERING_DONE", [])
+	# backlog#30: the FIRST offering of the night teaches the real etiquette — scatter the
+	# muối gạo OUTWARD at the gate so the souls take their share but don't follow inside;
+	# later offerings cycle authentic confirm lines naming the humble items (cháo/muối gạo/bánh kẹo).
+	_offering_count += 1
+	if _offering_count == 1:
+		Events.notify.emit("OFFERING_FIRST", [])
+	else:
+		var done_keys := ["OFFERING_DONE", "OFFERING_DONE_2", "OFFERING_DONE_3"]
+		Events.notify.emit(done_keys[(_offering_count - 2) % done_keys.size()], [])
 	_maybe_start_scramble()
 
 ## Giật cô hồn: after a successful offering, mischievous child-spirits may scramble for the
@@ -1476,7 +1509,15 @@ func _light_incense(silent: bool) -> void:
 	Events.huong_changed.emit(huong / huong_max)
 	if not silent:
 		Audio.play_sfx("incense_whoosh", -3.0)
-		Events.notify.emit("ALTAR_LIT", [])
+		# backlog#31: occasionally echo the odd-number rule on a relight (three sticks, số lẻ).
+		Events.notify.emit("ALTAR_LIT_2" if randf() < 0.25 else "ALTAR_LIT", [])
+		# backlog#31: a RARE dread beat, gated on a near-failure state (vía shaken/critical or the
+		# incense already burning low) — the burner seems to hold a FOURTH stick (tứ→tử, the
+		# four/death taboo). The altar only WARNS; it is never the monster (binding rule 2).
+		var near_fail := via_state != GameEnums.ViaState.NORMAL or huong <= 25.0
+		if near_fail and randf() < 0.08:
+			Audio.play_sting("sting_low", -13.0, 0.9)
+			Events.notify.emit("ALTAR_FOURTH", [])
 
 ## Replenish the incense bundle (the held "nhang" item is a fresh handful of sticks).
 func add_nhang(n: int) -> void:

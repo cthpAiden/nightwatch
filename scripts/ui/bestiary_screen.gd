@@ -72,6 +72,14 @@ func _card(id: String) -> Control:
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		d.custom_minimum_size = Vector2(272, 44)
 		col.add_child(d)
+		# Wave E: an origin/disclaim aside (honest borrowed-lore framing, §1.6). Dimmer + smaller
+		# than the desc so it reads as a footnote. Only rendered when the threat declares one.
+		var lore_key: String = info.get("lore_key", "")
+		if lore_key != "":
+			var lore := UI.label(lore_key, 12, Color(0.55, 0.54, 0.6))
+			lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			lore.custom_minimum_size = Vector2(272, 0)
+			col.add_child(lore)
 		# Actionable "how to counter" line in real-button terms (the poetic desc above
 		# is flavor; this tells the player what to actually do).
 		var counter := UI.label("COUNTER_" + id.to_upper(), 13, Color(0.62, 0.82, 0.66))

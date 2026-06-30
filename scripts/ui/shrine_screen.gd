@@ -5,6 +5,7 @@ extends Control
 
 var _grid: GridContainer
 var _coins_lbl: Label
+var _burn_lbl: Label   # Wave E: transient "votive paper burned" confirm on a purchase (backlog#35)
 
 func _ready() -> void:
 	UI.full(self)
@@ -20,6 +21,11 @@ func _ready() -> void:
 	vb.add_child(UI.label("SHRINE_SUB", 17, UI.COL_DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	_coins_lbl = UI.text_label("", 22, Color(1.0, 0.85, 0.4), HORIZONTAL_ALIGNMENT_CENTER)
 	vb.add_child(_coins_lbl)
+	# Wave E: a quiet "the paper is burned, the offering is made" confirm that fades after a buy,
+	# reframing the spend as hóa vàng mã (a burned offering) rather than a transaction. (backlog#35)
+	_burn_lbl = UI.label("SHRINE_BURN", 15, Color(0.95, 0.7, 0.35), HORIZONTAL_ALIGNMENT_CENTER)
+	_burn_lbl.modulate.a = 0.0
+	vb.add_child(_burn_lbl)
 
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(852, 420)
@@ -72,5 +78,11 @@ func _buy(up: Dictionary) -> void:
 		Audio.play_sfx("ui_confirm", -4.0)
 		Events.coins_changed.emit(Save.coins)
 		_rebuild()
+		# Wave E: flash the burned-offering confirm and fade it out. (backlog#35)
+		if _burn_lbl:
+			_burn_lbl.modulate.a = 1.0
+			var tw := create_tween()
+			tw.tween_interval(1.0)
+			tw.tween_property(_burn_lbl, "modulate:a", 0.0, 0.8)
 	else:
 		Audio.play_sfx("ui_back", -4.0)

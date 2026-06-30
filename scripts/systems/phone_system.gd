@@ -7,8 +7,8 @@ extends Node
 ##
 ## Ma da imitates the ring as a LURE: a fake call. Answering a fake ring is the wrong
 ## reaction — it spikes the flood (Events.intercom_answered, which Ma da listens for).
-## The tell is the warped ring tone + a red glow on the answer button. The real
-## grandmother... pardon, the real bác Tư, is never the monster.
+## The tell is the warped ring tone + a red glow on the answer button. The impostor only
+## wears the vendor's shape; the real bác Tư is never the monster.
 
 var _c
 var _ringing := false
