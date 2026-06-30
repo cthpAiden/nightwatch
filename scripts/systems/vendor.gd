@@ -61,7 +61,10 @@ func _process(delta: float) -> void:
 			_hostile_t -= delta
 			if _c.is_door_closed(GameEnums.Side.LEFT):
 				_repelled()
-			elif _hostile_t <= 0.0:
+			# Pause the grab while controls are hexed — Ma trơi's surge flings the left door
+			# open and blocks re-closing for ~2.5s, so without this the impostor could grab
+			# with no possible counter. Mirrors ThreatBase; the 12s hostile timer just defers.
+			elif _hostile_t <= 0.0 and not (_c.has_method("is_hexed") and _c.is_hexed()):
 				_attack()
 
 func _appear() -> void:

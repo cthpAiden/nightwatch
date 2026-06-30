@@ -116,7 +116,8 @@ func set_speed_all(mult: float) -> void:
 	for t in threats:
 		t.set_speed_mult(mult)
 
-func setback_nearest() -> void:
+func setback_nearest() -> ThreatBase:
 	var t := nearest_threat()
 	if t:
 		t.reset_to_spawn()
+	return t

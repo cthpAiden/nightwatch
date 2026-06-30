@@ -50,7 +50,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 	# so the kill is signalled before it lands. Mirrors ma_troi's _warned one-shot.
 	if flood >= 85.0 and not _warned:
 		_warned = true
-		Audio.play_sfx("water_call", -4.0, 0.78, Audio.VERB_BUS)   # the water is rising
+		Audio.play_sting("water_call", -4.0, 0.78)   # the water is rising (honors REDUCED/OFF tier)
 		Events.notify.emit("COUNTER_MA_DA", [])
 	elif flood < 80.0:   # re-arm the rising-water telegraph (was <70; one offering's -22 from
 		_warned = false  # ~99 lands ~77, so the cue now re-fires before each subsequent near-kill — #33
@@ -66,7 +66,7 @@ func _start_lure() -> void:
 	# from the water — the lure you must NOT answer. Harder/lower the more it has flooded.
 	Audio.duck(14.0, 0.15, 0.5, 0.8)
 	var p: float = lerpf(1.05, 0.82, clampf(flood / 100.0, 0.0, 1.0))
-	Audio.play_sfx("water_call", -5.0, p, Audio.VERB_BUS)
+	Audio.play_sting("water_call", -5.0, p)   # the drowned lure cry (honors REDUCED/OFF tier)
 	Events.notify.emit("MADA_LURE", [])
 
 func _end_lure() -> void:

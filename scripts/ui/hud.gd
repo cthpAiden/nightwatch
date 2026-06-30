@@ -12,6 +12,7 @@ var _night: Label
 var _toast: Label
 var _warn: Label
 var _warn_panel: Control
+var _warn_key := ""
 var _offerings_lbl: Label
 var _coins_lbl: Label
 var _clue_lbl: Label
@@ -339,19 +340,23 @@ func _process(delta: float) -> void:
 		_clue_flash = maxf(0.0, _clue_flash - delta * 1.5)
 		_clue_lbl.modulate = Color(1, 1, 1).lerp(Color(1.0, 0.92, 0.5), _clue_flash)
 		_clue_lbl.scale = Vector2.ONE * (1.0 + 0.12 * _clue_flash)
-	# persistent warnings
-	var w := ""
+	# Persistent warnings — pick the active KEY from cheap state first, and only re-resolve
+	# the string + touch the Label/Panel when it actually changes (was: up to 4 tr() lookups
+	# + two unconditional writes every frame, on a banner that is usually empty). (AUDIT#3)
+	var key := ""
 	if _c.power <= 20.0 and _c.power > 0.0:
-		w = tr("WARNING_LOW_POWER")
+		key = "WARNING_LOW_POWER"
 	if _c.via_state == GameEnums.ViaState.CRITICAL:
-		w = tr("WARNING_LOW_VIA")
+		key = "WARNING_LOW_VIA"
 	if _vendor_state == GameEnums.VendorState.HOSTILE:
-		w = tr("VENDOR_HOSTILE")
+		key = "VENDOR_HOSTILE"
 	if not _c._powered:
-		w = tr("POWER_OUT")
-	_warn.text = w
-	if _warn_panel:
-		_warn_panel.visible = w != ""
+		key = "POWER_OUT"
+	if key != _warn_key:
+		_warn_key = key
+		_warn.text = tr(key) if key != "" else ""
+		if _warn_panel:
+			_warn_panel.visible = key != ""
 
 func _refresh_clock(m: int) -> void:
 	var h := int(float(m) / 60.0)

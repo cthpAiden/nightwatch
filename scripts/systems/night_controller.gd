@@ -85,6 +85,7 @@ var _water_on := false       # ma da rising-water loop (driven by flood level)
 var _oan_petty_shown := false  # one-time Oan hồn comedic line on first high grievance
 var _post_layer: CanvasLayer
 var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
+var _post_rect: Control        # the grain ColorRect itself, hidden when safe or occluded
 
 var _running := false
 var _ending := false
@@ -182,6 +183,7 @@ void fragment() {
 	_post_mat.set_shader_parameter("strength", 0.0)
 	post_rect.material = _post_mat
 	_post_layer.add_child(post_rect)
+	_post_rect = post_rect
 
 	_vignette = UI.texture_rect("res://assets/art/ui/vignette.svg", TextureRect.STRETCH_SCALE)
 	UI.full(_vignette)
@@ -555,9 +557,12 @@ func _process(delta: float) -> void:
 	room.set_look_enabled(not monitor_open and not shop.visible and not pause.visible and not cassette.visible)
 	director.night_progress = night_progress()
 	director.broadcast_pan(room.get_pan_speed() > 0.7)
-	# Re-broadcast the watched camera every frame so a threat that wanders under a
-	# held view (e.g. Oan hồn) is correctly seen/unseen — fixes the stale _viewing flag.
-	director.broadcast_view(current_cam if monitor_open else "")
+	# Re-broadcast the watched camera every frame WHILE THE MONITOR IS OPEN so a threat
+	# that wanders under a held view (e.g. Oan hồn) is correctly seen/unseen. When closed,
+	# _set_monitor already cleared every _viewing flag once via broadcast_view("") on the
+	# closing edge (L909), so skipping the per-frame all-threats loop here is safe. (AUDIT#6)
+	if monitor_open:
+		director.broadcast_view(current_cam)
 	if monitor_open:
 		room.set_desk_threat(_desk_threat_tex())   # mirror the threat onto the desk CRT
 	_update_altar(delta)
@@ -580,6 +585,11 @@ func _update_atmosphere(loom_l, loom_r) -> void:
 		room.set_dread(dread)
 	if _post_mat:
 		_post_mat.set_shader_parameter("strength", dread)
+	# The grain pass keeps a faint always-on floor, so hide the whole layer when the office
+	# is safe (dread ~0) or fully occluded by the open monitor — no full-screen pass for
+	# nothing. It re-shows the instant dread climbs again. (AUDIT#12)
+	if _post_rect:
+		_post_rect.visible = dread > 0.001 and not monitor_open
 	# The sub floor breathes up with danger (subliminal calm -> oppressive at the edge).
 	Audio.set_loop_volume("ambience_sub", lerpf(-34.0, -12.0, dread))
 	# Heartbeat swells with danger from SHAKEN onward AND speeds up — a constant-tempo
@@ -763,7 +773,7 @@ func _update_timers(delta: float) -> void:
 		if speed_timer == 0.0:
 			director.set_speed_all(1.0)
 			_aggro_mult = 1.0
-	for k in _tag_cds.keys():
+	for k in _tag_cds:
 		if _tag_cds[k] > 0.0:
 			_tag_cds[k] = maxf(0.0, _tag_cds[k] - delta)
 	if _hex_t > 0.0:
@@ -1411,13 +1421,15 @@ func request_ring_bell() -> void:
 	Audio.play_sfx("offering_bell", -2.0)
 	# The bell now does ONE job — shove the nearest rusher back from the door — so it's
 	# a positioning tool, not a second free altar. (Meter spirits are the incense's job.)
-	director.setback_nearest()
+	var pushed := director.setback_nearest()
 	add_via(6.0)
 	# Make the bell's push-back visible: a small jolt + a brief reveal of the map.
 	if room:
 		room.add_shake(0.12)
 	start_reveal(1.5)
-	Events.notify.emit("BELL_RUNG", [])
+	# When there is nothing to set back (only meter spirits, or the risen corpse — a
+	# CREEPER that is door-only), say so, instead of a silent no-op that reads as broken. (AUDIT#36)
+	Events.notify.emit("BELL_RUNG" if pushed else "BELL_NO_TARGET", [])
 
 ## Combined threat-aggression multiplier (read by the meter threats each frame):
 ## tending the incense suppresses them; a guttered altar or the bánh-lạ curse

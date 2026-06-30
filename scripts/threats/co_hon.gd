@@ -35,7 +35,7 @@ func process_ai(delta: float, night_progress: float) -> void:
 	# _warned one-shot (reuses COUNTER_CO_HON — no new string).
 	if crowd >= 70.0 and not _warned:
 		_warned = true
-		Audio.play_sfx("whisper", -10.0, 1.0, Audio.VERB_BUS)   # the murmuring crowd presses in
+		Audio.play_sting("whisper", -10.0, 1.0)   # the murmuring crowd presses in (honors REDUCED/OFF tier)
 		Events.notify.emit("COUNTER_CO_HON", [])
 	elif crowd < 55.0:
 		_warned = false

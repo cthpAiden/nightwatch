@@ -823,12 +823,17 @@ func _animate_altar(_delta: float) -> void:
 	# instead of reading as four identical strands pumping in lockstep.
 	for s in _smoke:
 		var node: Sprite3D = s.node
+		# Skip the per-puff trig + Vector3 build while the altar is dark — the smoke is
+		# invisible then anyway; just hold its alpha at 0. (AUDIT#7)
+		if not lit:
+			node.modulate.a = 0.0
+			continue
 		var cyc := 3.0
 		var ph: float = fmod(_t + s.phase, cyc) / cyc
 		var t2: float = _t + s.phase
 		var dx: float = (sin(t2 * s.sway) * s.drift + sin(t2 * s.sway * 2.3) * s.curl) * ph
 		node.position = s.base + Vector3(dx, ph * 0.85, 0)
-		node.modulate.a = (sin(ph * PI) * s.amax * _huong) if lit else 0.0
+		node.modulate.a = sin(ph * PI) * s.amax * _huong
 		node.scale = Vector3.ONE * (0.5 + ph * 1.2)
 
 func _animate_props(delta: float) -> void:

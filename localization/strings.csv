@@ -301,6 +301,7 @@ ALTAR_AUTORELIGHT,Bàn thờ tự bén lửa lại.,The altar rekindles itself.
 ALTAR_NO_NHANG,Hết nhang rồi... phải dành mà thắp.,Out of incense... you must spend it wisely.
 CONTROLS_HEXED,"Tay chân cứng đờ! Cửa tự bung ra!","Your hands won't obey! The doors swing open!"
 BELL_RUNG,Tiếng chuông ngân... mọi thứ chững lại.,The bell rings out... everything stills.
+BELL_NO_TARGET,Tiếng chuông ngân... nhưng không có kẻ nào rình ngoài cửa để đẩy lùi.,The bell rings out... but nothing lurks at a door to drive back.
 ANOMALY_TAGGED,Đã đánh dấu. Anh thấy nó rồi.,Tagged. You've spotted it.
 ANOMALY_HINT,Bấm vào bóng dáng để đánh dấu,Click the figure to tag it
 PHONE_RING,Điện thoại reo. Bác Tư gọi?,The phone rings. Bác Tư calling?
