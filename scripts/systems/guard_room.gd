@@ -901,13 +901,21 @@ func _ensure_ong_ke_model(side: int) -> Node3D:
 	var dir := -1.0 if side == GameEnums.Side.LEFT else 1.0
 	# Set back deeper into the corridor than the sprite's spot, out of the doorway
 	# light's hot center — he should loom in the shadow, not stand fully lit at the door.
-	m.position = Vector3(base.x + dir * 1.4, -0.1 + 0.95, 0.0)
+	m.position = Vector3(base.x + dir * 3.0, -0.1 + 0.95, 0.0)
 	m.rotation_degrees.y = -dir * 90.0   # face the model's +Z front back into the room
 	m.scale = Vector3.ONE * 0.95
 	m.visible = false
 	add_child(m)
 	_threat_models[side] = m
 	_threat_model_base_pos[side] = m.position
+	# The hallway goes pitch black past the doorway's near stretch (by design — see the
+	# corridor comment above), so his own rim light has to follow him back here or he's
+	# an invisible silhouette against pure black. Tighter range keeps it from bleeding
+	# back out into the office.
+	var rim: OmniLight3D = _threat_rim.get(side)
+	if rim:
+		rim.position = m.position + Vector3(0, 0.3, 0)
+		rim.omni_range = 1.1
 	return m
 
 # --- look controls ----------------------------------------------------------
@@ -1147,7 +1155,12 @@ func _update_threat_sprites() -> void:
 		if rim:
 			var accent: Color = _threat_accent.get(side, Color(0.7, 0.72, 0.72))
 			rim.light_color = accent
-			rim.light_energy = (1.4 + 0.5 * sin(ph * 2.7)) * (1.6 if (model_active and hostile) else 1.0)
+			var rim_e := 1.4 + 0.5 * sin(ph * 2.7)
+			if model_active:
+				# He's set back in the dark on purpose — this rim is the only thing making
+				# him visible at all, so keep it a faint ghostly outline, not a second spotlight.
+				rim_e *= 0.55 if hostile else 0.3
+			rim.light_energy = rim_e
 
 func _update_look_targets() -> void:
 	var vp := get_viewport()
