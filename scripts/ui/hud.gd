@@ -33,6 +33,7 @@ var _offering_btn: Button
 var _invite_btn: Button
 var _help_panel: Control
 var _help_lines: VBoxContainer
+var _help_col: VBoxContainer
 var _door_btn := {}
 var _light_btn := {}
 var _toast_t := 0.0
@@ -333,6 +334,7 @@ func _build_help() -> void:
 	var col := UI.vbox(3)
 	UI.place(col, 0, 0, 1, 1, 12, 8, -12, -8)
 	_help_panel.add_child(col)
+	_help_col = col
 	var hdr := UI.button("HELP_TITLE", 0, 30)
 	hdr.flat = true
 	hdr.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -343,10 +345,21 @@ func _build_help() -> void:
 	col.add_child(_help_lines)
 	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_RITUAL", "HELP_ITEM", "HELP_DRAIN", "HELP_PHONE", "HELP_OFFERING2", "HELP_PAUSE"]:
 		_help_lines.add_child(UI.label(k, 15, UI.COL_DIM))
+	_fit_help_panel()
 
 func toggle_help() -> void:
 	if _help_lines:
 		_help_lines.visible = not _help_lines.visible
+		_fit_help_panel()
+
+# Shrink/grow the panel so its background covers only the visible content. With
+# the hint lines hidden the box wraps just the "Phím tắt" title instead of
+# leaving an empty rectangle. col is inset 8px top + 8px bottom inside the panel.
+func _fit_help_panel() -> void:
+	if not (_help_panel and _help_col):
+		return
+	await get_tree().process_frame
+	_help_panel.offset_bottom = _help_panel.offset_top + _help_col.get_combined_minimum_size().y + 16
 
 ## Drive the persistent Night-1 tutorial banner. Empty key hides it.
 func set_tutorial_prompt(key: String, step: int = -1, total: int = 0) -> void:
