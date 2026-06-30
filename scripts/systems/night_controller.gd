@@ -1140,7 +1140,7 @@ func _refresh_door_sprite(side: int, t = false) -> void:
 		t = director.threat_at_door(side)
 	if t:
 		# Pass the threat's accent so the doorway rim light takes its cold/warm cast. (AUDIT#14)
-		room.refresh_threat_visibility(side, true, t.current_texture(), true, t.accent_color)
+		room.refresh_threat_visibility(side, true, t.current_texture(), true, t.accent_color, t.id)
 	else:
 		room.refresh_threat_visibility(side, false)
 

@@ -44,6 +44,9 @@ var _lamp_mats := {}         # side -> StandardMaterial3D (visible wall fixture 
 var _threat_sprites := {}    # side -> Sprite3D
 var _threat_base_pos := {}   # side -> Vector3 (rest pose; sprites sway around it)
 var _threat_rim := {}        # side -> OmniLight3D co-located with the sprite (AUDIT#14)
+const ONG_KE_SCENE := "res://assets/ong_ke_texture.glb"
+var _threat_models := {}        # side -> Node3D (ông kẹ's 3D figure; stands in for his Sprite3D)
+var _threat_model_base_pos := {}   # side -> Vector3 (rest pose; model sways around it)
 var _threat_hostile := {}    # side -> bool (hostile throb in _update_threat_sprites) (backlog#19)
 var _threat_accent := {}     # side -> Color (rim-light tint while a threat is present) (AUDIT#14)
 var _reveal_fired := {GameEnums.Side.LEFT: false, GameEnums.Side.RIGHT: false}  # one-shot light-reveal guard (backlog#17)
@@ -885,6 +888,26 @@ func _build_doorway(side: int, x: float) -> void:
 	add_child(sl)
 	_lights[side] = sl
 
+## Lazily instances ông kẹ's 3D figure in place of his Sprite3D, standing in the same
+## doorway spot. Built once per side and reused (the GLB is static, no skeleton/animation —
+## _update_threat_sprites sways it the same way it sways the billboards).
+func _ensure_ong_ke_model(side: int) -> Node3D:
+	if _threat_models.has(side):
+		return _threat_models[side]
+	if not ResourceLoader.exists(ONG_KE_SCENE):
+		return null
+	var m := (load(ONG_KE_SCENE) as PackedScene).instantiate()
+	var base: Vector3 = _threat_base_pos[side]
+	var dir := -1.0 if side == GameEnums.Side.LEFT else 1.0
+	m.position = Vector3(base.x, -0.1 + 0.95, 0.0)
+	m.rotation_degrees.y = -dir * 90.0   # face the model's +Z front back into the room
+	m.scale = Vector3.ONE * 0.95
+	m.visible = false
+	add_child(m)
+	_threat_models[side] = m
+	_threat_model_base_pos[side] = m.position
+	return m
+
 # --- look controls ----------------------------------------------------------
 func _process(delta: float) -> void:
 	_t += delta
@@ -1087,31 +1110,42 @@ func _update_threat_sprites() -> void:
 	# a living silhouette in the doorway, not a flat decal pinned to the wall.
 	for side in _threat_sprites:
 		var spr: Sprite3D = _threat_sprites[side]
+		var model: Node3D = _threat_models.get(side)
+		var model_active: bool = model != null and model.visible
 		var rim: OmniLight3D = _threat_rim.get(side)
-		if not spr.visible:
+		if not spr.visible and not model_active:
 			if rim:
 				rim.light_energy = 0.0   # no threat here — kill the rim so it never leaks light
 			continue
-		var base: Vector3 = _threat_base_pos[side]
 		var ph: float = _t + side * 1.7
-		spr.position.x = base.x + sin(ph * 1.3) * 0.035
-		spr.position.y = base.y + sin(ph * 2.1) * 0.045
-		var s := 1.0 + 0.025 * sin(ph * 2.7)
+		var hostile: bool = _threat_hostile.get(side, false)
 		var fade: float = _reveal_fade.get(side, 1.0)   # 0->1 light-reveal fade-in (backlog#17)
-		# Hostile billboards throb a hot red and creep slightly larger — a predator tightening
-		# in, not the neutral cold silhouette. (backlog#19)
-		if _threat_hostile.get(side, false):
-			var throb: float = 0.5 + 0.5 * sin(_t * 1.1 * TAU)
-			spr.modulate = Color(0.7, 0.18, 0.18).lerp(Color(0.95, 0.1, 0.1), throb)
-			s += 0.04 * (0.5 + 0.5 * sin(ph * 0.5))   # faint scale-up creep
-		spr.modulate.a = fade
-		spr.scale = Vector3(s, s, 1.0)
+		if model_active:
+			var mbase: Vector3 = _threat_model_base_pos[side]
+			model.position.x = mbase.x + sin(ph * 1.3) * 0.035
+			model.position.y = mbase.y + sin(ph * 2.1) * 0.045
+			var ms := 0.95 + 0.025 * sin(ph * 2.7)
+			if hostile:
+				ms += 0.04 * (0.5 + 0.5 * sin(ph * 0.5))   # faint scale-up creep
+			model.scale = Vector3(ms, ms, ms)
+		else:
+			var base: Vector3 = _threat_base_pos[side]
+			spr.position.x = base.x + sin(ph * 1.3) * 0.035
+			spr.position.y = base.y + sin(ph * 2.1) * 0.045
+			var s := 1.0 + 0.025 * sin(ph * 2.7)
+			# Hostile billboards throb a hot red and creep slightly larger — a predator tightening
+			# in, not the neutral cold silhouette. (backlog#19)
+			if hostile:
+				spr.modulate = Color(0.7, 0.18, 0.18).lerp(Color(0.95, 0.1, 0.1), 0.5 + 0.5 * sin(_t * 1.1 * TAU))
+				s += 0.04 * (0.5 + 0.5 * sin(ph * 0.5))
+			spr.modulate.a = fade
+			spr.scale = Vector3(s, s, 1.0)
 		# Per-doorway rim light from the threat's own accent colour, pulsed on the sway phase
 		# so the figure is bedded into the corridor mouth instead of flat-lit. (AUDIT#14)
 		if rim:
 			var accent: Color = _threat_accent.get(side, Color(0.7, 0.72, 0.72))
 			rim.light_color = accent
-			rim.light_energy = 1.4 + 0.5 * sin(ph * 2.7)
+			rim.light_energy = (1.4 + 0.5 * sin(ph * 2.7)) * (1.6 if (model_active and hostile) else 1.0)
 
 func _update_look_targets() -> void:
 	var vp := get_viewport()
@@ -1284,8 +1318,13 @@ func _play_light_reveal(side: int) -> void:
 	add_shake(0.15)
 
 func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = null,
-		hostile: bool = false, accent: Color = Color(0.7, 0.72, 0.72)) -> void:
+		hostile: bool = false, accent: Color = Color(0.7, 0.72, 0.72), id: String = "") -> void:
 	var spr: Sprite3D = _threat_sprites[side]
+	# Ông kẹ stands in the doorway as his 3D figure instead of the flat billboard.
+	var use_model: bool = has_threat and id == "ong_ke"
+	if use_model:
+		_ensure_ong_ke_model(side)
+	var model: Node3D = _threat_models.get(side)
 	if has_threat and tex:
 		spr.texture = tex
 	# Hostile reads as a hot rim/glow rather than a mud-dark multiply (sprites are lit).
@@ -1293,9 +1332,11 @@ func refresh_threat_visibility(side: int, has_threat: bool, tex: Texture2D = nul
 	spr.modulate = THREAT_TINT_HOSTILE if hostile else THREAT_TINT_IDLE
 	_threat_hostile[side] = hostile
 	_threat_accent[side] = accent   # drives the doorway rim light (AUDIT#14)
-	var was_visible: bool = spr.visible
+	var was_visible: bool = spr.visible or (model != null and model.visible)
 	var now_visible: bool = has_threat and bool(_light_on.get(side, false))
-	spr.visible = now_visible
+	spr.visible = now_visible and not use_model
+	if model:
+		model.visible = now_visible and use_model
 	# One-shot light-reveal staging: when the light is already ON and a threat newly appears
 	# (off-camera arrival caught by the standing light), run the strike. (backlog#17)
 	if now_visible and not was_visible and not _reveal_fired.get(side, false):
