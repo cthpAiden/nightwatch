@@ -14,3 +14,7 @@ Thumbs.db
 
 # Dev screenshot harness output
 .shots/
+
+# Python bytecode (BMAD skill scripts / tools)
+__pycache__/
+*.pyc
