@@ -84,8 +84,6 @@ var _hb_on := false          # heartbeat loop currently playing (ramped with dan
 var _breath_on := false      # proximity-breathing loop (a threat looms at a door)
 var _strain_on := false      # shutter-strain loop (a closed door is being pressed)
 var _water_on := false       # ma da rising-water loop (driven by flood level)
-var _oan_petty_shown := false  # one-time Oan hồn comedic line on first high grievance
-var _cohon_gate_shown := false # backlog#26: one-time "the gate is open" line on the first crowd rise
 var _offering_count := 0       # backlog#30: offerings placed this night (drives the first-offering + cycled lines)
 var _post_layer: CanvasLayer
 var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
@@ -271,19 +269,9 @@ func _connect_events() -> void:
 	Events.threat_at_door.connect(func(id, side): _on_threat_at_door(id, side))
 	Events.threat_left_door.connect(func(_id, side): _refresh_door_sprite(side))
 	Events.crowd_changed.connect(func(level):
-		_crowd_level = level
-		# backlog#26: the cô hồn gate "opens" the first time the crowd meter actually rises —
-		# they come in through the school gate (CAM1, the night's symbolic Quỷ Môn Quan).
-		if level > 0.0 and not _cohon_gate_shown:
-			_cohon_gate_shown = true
-			Events.notify.emit("COHON_GATE", []))
+		_crowd_level = level)
 	Events.water_level.connect(_on_water_level_audio)
 	Events.via_state_changed.connect(_on_via_state_fx)
-	# Oan hồn's petty/comedic beat — fires once when her grievance first runs high.
-	Events.grievance_changed.connect(func(level):
-		if level > 0.7 and not _oan_petty_shown:
-			_oan_petty_shown = true
-			Events.notify.emit("OAN_HON_PETTY", []))
 
 ## A figure arriving at the door: refresh its sprite, and land a small scare beat
 ## (jolt + low sting) so the doorway threat has weight instead of a silent pop-in.
@@ -687,7 +675,6 @@ func _advance_clock(delta: float) -> void:
 		# backlog#27: canh ba — the 3 AM witching hour. Fire once on the cross to 3, and nudge
 		# the dread/ambience up a touch (a brief sub-bass swell) so the hour is felt, not just told.
 		if _last_hour == 3:
-			Events.notify.emit("GIO_LINH", [])
 			Audio.play_sting("sting_low", -14.0, 0.85)
 			if room:
 				room.add_shake(0.18)
@@ -916,7 +903,6 @@ func request_toggle_door(side: int) -> void:
 	if not _powered or not _running:
 		return
 	if _hex_t > 0.0:
-		Events.notify.emit("CONTROLS_HEXED", [])
 		return
 	var closed: bool = not room.is_door_closed(side)
 	room.set_door(side, closed)
@@ -926,7 +912,6 @@ func request_toggle_light(side: int) -> void:
 	if not _powered or not _running:
 		return
 	if _hex_t > 0.0:
-		Events.notify.emit("CONTROLS_HEXED", [])
 		return
 	var on: bool = not room.is_light_on(side)
 	room.set_light(side, on)
@@ -1434,7 +1419,6 @@ func _update_altar(delta: float) -> void:
 			if _auto_relight:
 				_auto_relight = false
 				_light_incense(true)
-				Events.notify.emit("ALTAR_AUTORELIGHT", [])
 			else:
 				_gutter_candles()
 	# When the altar is dark — or the incense is nearly out — the spirits press in.
@@ -1499,15 +1483,12 @@ func _light_incense(silent: bool) -> void:
 	Events.huong_changed.emit(huong / huong_max)
 	if not silent:
 		Audio.play_sfx("incense_whoosh", -3.0)
-		# backlog#31: occasionally echo the odd-number rule on a relight (three sticks, số lẻ).
-		Events.notify.emit("ALTAR_LIT_2" if randf() < 0.25 else "ALTAR_LIT", [])
 		# backlog#31: a RARE dread beat, gated on a near-failure state (vía shaken/critical or the
 		# incense already burning low) — the burner seems to hold a FOURTH stick (tứ→tử, the
-		# four/death taboo). The altar only WARNS; it is never the monster (binding rule 2).
+		# four/death taboo). Audio-only cue; the altar only WARNS, it is never the monster.
 		var near_fail := via_state != GameEnums.ViaState.NORMAL or huong <= 25.0
 		if near_fail and randf() < 0.08:
 			Audio.play_sting("sting_low", -13.0, 0.9)
-			Events.notify.emit("ALTAR_FOURTH", [])
 
 ## Replenish the incense bundle (the held "nhang" item is a fresh handful of sticks).
 func add_nhang(n: int) -> void:
@@ -1530,7 +1511,8 @@ func request_ring_bell() -> void:
 	start_reveal(1.5)
 	# When there is nothing to set back (only meter spirits, or the risen corpse — a
 	# CREEPER that is door-only), say so, instead of a silent no-op that reads as broken. (AUDIT#36)
-	Events.notify.emit("BELL_RUNG" if pushed else "BELL_NO_TARGET", [])
+	if not pushed:
+		Events.notify.emit("BELL_NO_TARGET", [])
 
 ## Combined threat-aggression multiplier (read by the meter threats each frame):
 ## tending the incense suppresses them; a guttered altar or the bánh-lạ curse
@@ -1575,7 +1557,6 @@ func tag_anomaly(threat_id: String) -> void:
 	if monitor and monitor.has_method("tag_confirm"):
 		monitor.tag_confirm()
 	Events.anomaly_tagged.emit(threat_id)
-	Events.notify.emit("ANOMALY_TAGGED", [])
 	# Tagging the wronged soul on camera reveals her face — an investigation clue.
 	if threat_id == "oan_hon":
 		find_clue("clue_photo", "CLUE_GOT_PHOTO")

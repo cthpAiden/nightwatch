@@ -548,7 +548,7 @@ func _is_teaching(key: String) -> bool:
 	return key.begins_with("COUNTER_") or key == "ALTAR_DRAFT" or key == "CONTROLS_HEXED"
 
 ## Story/lesson keys hold longer so the player can actually read them.
-const _TOAST_STORY_KEYS := ["MATROI_RULE", "CAT_WARN", "MADA_LURE", "INVEST_GOAL"]
+const _TOAST_STORY_KEYS := ["MATROI_RULE", "CAT_WARN", "INVEST_GOAL"]
 
 func _toast_hold(key: String, tr_text: String) -> float:
 	# Scale dwell to text length, with a longer floor for story/lesson beats.

@@ -133,10 +133,6 @@ func _run(c) -> void:
 	print("\n--- MA DA ---")
 	var md = d.get_threat("ma_da")
 	if md:
-		md.flood = 30.0
-		md._lure_active = true
-		Events.intercom_answered.emit()
-		check("ma_da: answering raises flood", md.flood > 30.0)
 		md.flood = 50.0
 		Events.office_action.emit("close_drain")
 		check("ma_da: close_drain lowers flood", md.flood < 50.0)
@@ -431,18 +427,18 @@ func _run(c) -> void:
 	var ph = c.phone
 	ph.begin()
 	ph._start_real()
-	check("real phone call rings", ph.is_ringing() and not ph.is_fake())
+	check("real phone call rings", ph.is_ringing())
 	c.via = 50.0
 	ph.answer()
 	check("answering real call stops the ring", not ph.is_ringing())
-	ph._on_water_lure(true)
-	check("ma da lure rings a FAKE call", ph.is_ringing() and ph.is_fake())
+	check("answering a real call grants the boon (vía up)", c.via > 50.0)
+	# The phone is bác Tư only now — no spirit rings it, so answering never harms the player.
 	var md3 = d.get_threat("ma_da")
 	if md3:
 		md3.flood = 30.0
-		md3._lure_active = true
+		ph._start_real()
 		ph.answer()
-		check("answering the fake ring spikes flood", md3.flood > 30.0)
+		check("answering the phone never touches ma da's flood", md3.flood == 30.0)
 
 	print("\n--- CAMERA ANOMALY TAG ---")
 	var ot = d.get_threat("ong_ke")

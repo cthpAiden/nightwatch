@@ -160,7 +160,6 @@ func _arrive_at_door(side: int) -> void:
 	# or what it is — you have to check the doorway lights to find out, then react
 	# (light it up and hold still, or shut the door). That's the tension.
 	Audio.play_sting(approach_sfx, -4.0, 1.0)
-	Events.notify.emit("THREAT_NEARBY", [])
 
 ## Shared "held off at the door" handling. A threat blocked by its counter (a shut
 ## door / a held light) no longer vanishes the instant you react — it presses at

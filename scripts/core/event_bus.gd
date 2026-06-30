@@ -46,8 +46,7 @@ signal item_effect_applied(effect_id: String, payload: Dictionary)
 signal offering_placed(location_id: String)
 
 # --- Gameplay specials (per-threat mechanics) -------------------------------
-signal water_lure(active: bool)                  # Ma da: false cry begins/ends
-signal intercom_answered()                        # player took the bait (bad)
+signal water_lure(active: bool)                  # Ma da: water cry telegraph begins/ends
 signal office_action(action: String)              # close_drain / make_noise / dot_via / light_incense
 signal crowd_changed(level: float)                # Cô hồn swarm pressure 0..1
 signal water_level(level: float)                  # Ma da flood pressure 0..1
