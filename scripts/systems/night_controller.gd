@@ -980,6 +980,7 @@ func _set_monitor(open: bool) -> void:
 		monitor.show_feed(current_cam)
 		director.broadcast_view(current_cam)
 		room.set_desk_mirror(current_cam)   # desk CRT mirrors what you're watching
+		room.set_crt_active(false)          # ...but pause its render — the panel hides the desk
 	else:
 		Audio.play_sfx("camera_down", -6.0)
 		# Fade the panel out to match the raise, then hide it on completion. The next open
@@ -991,6 +992,7 @@ func _set_monitor(open: bool) -> void:
 		Audio.stop_loop("static_loop")
 		director.broadcast_view("")
 		room.set_desk_idle()                # back to the idle slideshow
+		room.set_crt_active(true)           # desk visible again — resume the live 3D feed
 	Events.cameras_toggled.emit(open)
 
 func on_camera_changed(cam_id: String) -> void:

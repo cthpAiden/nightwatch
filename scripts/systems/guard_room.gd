@@ -89,9 +89,23 @@ var _fan: Node3D
 var _hand_min: Node3D
 var _hand_hr: Node3D
 var _screen_mat: ShaderMaterial      # desk CRT showing the camera feed
-var _screen_feeds: Array = []        # feeds in CAMERAS order (idle slideshow)
-var _feed_by_cam := {}               # cam_id -> Texture2D
-var _screen_idx := 0
+# Desk CRT renders the live 3D room feed (one room at a time) instead of the old flat cam
+# art. Mirrors camera_system.ROOM_SCENES — kept in sync by hand (both list the 10 cameras).
+const ROOM_SCENES := {
+	"gate": "res://scenes/rooms/Gate.tscn",
+	"courtyard": "res://scenes/rooms/Courtyard.tscn",
+	"canteen": "res://scenes/rooms/Canteen.tscn",
+	"classroom": "res://scenes/rooms/Classroom.tscn",
+	"library": "res://scenes/rooms/Library.tscn",
+	"left_hall": "res://scenes/rooms/LeftHall.tscn",
+	"gym": "res://scenes/rooms/Gym.tscn",
+	"restroom": "res://scenes/rooms/Restroom.tscn",
+	"infirmary": "res://scenes/rooms/Infirmary.tscn",
+	"right_hall": "res://scenes/rooms/RightHall.tscn",
+}
+var _crt_vp: SubViewport             # single viewport the CRT samples; its room is swapped
+var _crt_room: Node                  # room scene currently loaded in _crt_vp
+var _crt_cur := ""                   # cam_id currently on the CRT
 var _screen_lit := -1                # last 'lit' uniform written (-1 = unwritten) — avoids a per-frame re-upload
 var _screen_timer := 0.0
 var _desk_mirror := false            # true = mirror the player's operated camera
@@ -374,14 +388,9 @@ void fragment() {
 """
 	_screen_mat = ShaderMaterial.new()
 	_screen_mat.shader = sh
-	for cam in MapGraph.CAMERAS:
-		var p := "res://assets/art/cameras/cam_%s.svg" % cam
-		if ResourceLoader.exists(p):
-			var tex: Texture2D = load(p)
-			_screen_feeds.append(tex)
-			_feed_by_cam[cam] = tex
-	if not _screen_feeds.is_empty():
-		_screen_mat.set_shader_parameter("feed", _screen_feeds[0])
+	# Show a live 3D room straight away (idle slideshow cycles the rest in _animate_screen).
+	if not MapGraph.CAMERAS.is_empty():
+		_crt_show(MapGraph.CAMERAS[0])
 	_screen_mat.set_shader_parameter("t", 0.0)
 	_screen_mat.set_shader_parameter("glitch", 0.0)
 	_screen_mat.set_shader_parameter("screen_aspect", 0.8 / 0.6)
@@ -1090,25 +1099,61 @@ func _animate_screen(delta: float) -> void:
 		return
 	if _desk_threat:
 		_desk_threat.modulate.a = 0.0
+	# Idle slideshow: swap the CRT's live 3D room to the next camera on a slow cadence
+	# (slower than the 2D version — each swap loads a room scene).
 	_screen_timer -= delta
-	if _screen_timer <= 0.0 and not _screen_feeds.is_empty():
-		_screen_timer = 2.6
-		_screen_idx = (_screen_idx + 1) % _screen_feeds.size()
-		_screen_mat.set_shader_parameter("feed", _screen_feeds[_screen_idx])
+	if _screen_timer <= 0.0:
+		_screen_timer = 3.4
+		var cams: Array = MapGraph.CAMERAS
+		if not cams.is_empty():
+			var i: int = cams.find(_crt_cur)
+			_crt_show(cams[(i + 1) % cams.size()])
 
 ## Desk CRT mirrors the camera the player is operating. cam_id "" -> idle slideshow.
 func set_desk_mirror(cam_id: String) -> void:
-	if cam_id == "" or not _feed_by_cam.has(cam_id):
+	if cam_id == "" or not ROOM_SCENES.has(cam_id):
 		_desk_mirror = false
 		set_desk_threat(null)
 		return
 	_desk_mirror = true
-	if _screen_mat:
-		_screen_mat.set_shader_parameter("feed", _feed_by_cam[cam_id])
+	_crt_show(cam_id)
 
 func set_desk_idle() -> void:
 	_desk_mirror = false
 	set_desk_threat(null)
+
+## Load cam_id's room into the single desk-CRT viewport (freeing the previous room) and
+## point the CRT glass at its live texture. One room renders at a time to stay cheap.
+func _crt_show(cam_id: String) -> bool:
+	if cam_id == _crt_cur and is_instance_valid(_crt_room):
+		return true
+	if not ROOM_SCENES.has(cam_id):
+		return false
+	var path: String = ROOM_SCENES[cam_id]
+	if not ResourceLoader.exists(path):
+		return false
+	if _crt_vp == null:
+		_crt_vp = SubViewport.new()
+		_crt_vp.size = Vector2i(480, 270)
+		_crt_vp.own_world_3d = true
+		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		add_child(_crt_vp)
+		if _screen_mat:
+			_screen_mat.set_shader_parameter("feed", _crt_vp.get_texture())
+	if is_instance_valid(_crt_room):
+		_crt_vp.remove_child(_crt_room)   # detach now so its CCTV cam can't fight the new room's
+		_crt_room.queue_free()
+	_crt_room = (load(path) as PackedScene).instantiate()
+	_crt_vp.add_child(_crt_room)
+	_crt_cur = cam_id
+	return true
+
+## Pause the CRT render while the raised monitor covers the office (nothing to see there),
+## resume when it's lowered — the one small viewport otherwise renders a room every frame.
+func set_crt_active(on: bool) -> void:
+	if _crt_vp:
+		_crt_vp.render_target_update_mode = \
+			SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
 
 ## Show (or clear) the threat figure composited on the desk CRT.
 func set_desk_threat(tex: Texture2D) -> void:
