@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://c3wnightcourt01"]
+[gd_scene load_steps=11 format=3 uid="uid://c3wnightcourt01"]
 
 ; --- CSG blockout: sân trường (courtyard), ngoài trời, đêm ---
 ; Sân lát bao quanh bởi mặt tiền toà nhà (có cửa sổ) + 2 tường bên; cột cờ trên bồn
 ; giữa sân; 2 băng ghế. Ánh sáng: moonlight + 2 đèn cột.
 
 [ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/room/wall.svg" id="TexWall"]
+[ext_resource type="Texture2D" path="res://assets/art/room/floor.svg" id="TexFloor"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -17,17 +19,35 @@ fog_light_color = Color(0.04, 0.05, 0.07, 1)
 fog_density = 0.018
 
 [sub_resource type="StandardMaterial3D" id="MatGround"]
-albedo_color = Color(0.14, 0.14, 0.16, 1)
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+albedo_texture = ExtResource("TexFloor")
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="MatWall"]
-albedo_color = Color(0.2, 0.19, 0.2, 1)
+albedo_color = Color(0.44, 0.46, 0.47, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="MatMetal"]
 albedo_color = Color(0.13, 0.14, 0.16, 1)
 metallic = 0.5
 roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="MatWood"]
+albedo_color = Color(0.15, 0.11, 0.08, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="MatFoliage"]
+albedo_color = Color(0.08, 0.12, 0.08, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="MatBin"]
+albedo_color = Color(0.12, 0.15, 0.14, 1)
+roughness = 0.85
 
 [node name="Courtyard" type="Node3D"]
 
@@ -119,6 +139,70 @@ material = SubResource("MatMetal")
 [node name="BenchR" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0.25, -2.4)
 size = Vector3(2.2, 0.5, 0.5)
+material = SubResource("MatMetal")
+
+; ---------- CÂY TRONG BỒN (góc sân) ----------
+[node name="TreeTrunkL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.8, 0.9, 3.6)
+size = Vector3(0.3, 1.8, 0.3)
+material = SubResource("MatWood")
+
+[node name="TreeCanopyL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.8, 2.1, 3.6)
+size = Vector3(1.6, 1.4, 1.6)
+material = SubResource("MatFoliage")
+
+[node name="TreeTrunkR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8, 0.9, 3.6)
+size = Vector3(0.3, 1.8, 0.3)
+material = SubResource("MatWood")
+
+[node name="TreeCanopyR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.8, 2.1, 3.6)
+size = Vector3(1.6, 1.4, 1.6)
+material = SubResource("MatFoliage")
+
+; ---------- THÙNG RÁC ----------
+[node name="TrashBinL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, 0.45, -0.5)
+size = Vector3(0.5, 0.9, 0.5)
+material = SubResource("MatBin")
+
+[node name="TrashBinR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0, 0.45, 0.5)
+size = Vector3(0.5, 0.9, 0.5)
+material = SubResource("MatBin")
+
+; ---------- BẢNG THÔNG BÁO ----------
+[node name="NoticeBoardPostL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0, 0.6, 4.7)
+size = Vector3(0.1, 1.2, 0.1)
+material = SubResource("MatWood")
+
+[node name="NoticeBoardPostR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0.6, 4.7)
+size = Vector3(0.1, 1.2, 0.1)
+material = SubResource("MatWood")
+
+[node name="NoticeBoardPanel" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3, 1.4, 4.7)
+size = Vector3(1.8, 1.1, 0.08)
+material = SubResource("MatWall")
+
+; ---------- GIÁ ĐỂ XE ĐẠP ----------
+[node name="BikeRackPostL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0, 0.2, 4.6)
+size = Vector3(0.08, 0.4, 0.08)
+material = SubResource("MatMetal")
+
+[node name="BikeRackPostR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0.2, 4.6)
+size = Vector3(0.08, 0.4, 0.08)
+material = SubResource("MatMetal")
+
+[node name="BikeRackBar" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 0.4, 4.6)
+size = Vector3(1.7, 0.08, 0.08)
 material = SubResource("MatMetal")
 
 ; ---------- ÁNH SÁNG ----------

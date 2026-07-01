@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3wnightrhall01"]
+[gd_scene load_steps=15 format=3 uid="uid://c3wnightrhall01"]
 
 ; --- CSG blockout: hành lang phải (right_hall) ---
 ; Đối xứng với hành lang trái nhưng camera gắn ở góc bên kia, tường ám xanh lạnh và
 ; bố trí cửa lệch đi để 2 cánh (trái/phải) nhìn khác nhau trong camera.
 
 [ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/room/wall.svg" id="TexWall"]
+[ext_resource type="Texture2D" path="res://assets/art/room/floor.svg" id="TexFloor"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -17,12 +19,18 @@ fog_light_color = Color(0.028, 0.033, 0.046, 1)
 fog_density = 0.035
 
 [sub_resource type="StandardMaterial3D" id="MatWall"]
-albedo_color = Color(0.19, 0.21, 0.24, 1)
+albedo_color = Color(0.44, 0.46, 0.47, 1)
+albedo_texture = ExtResource("TexWall")
 roughness = 1.0
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="MatFloor"]
-albedo_color = Color(0.15, 0.16, 0.18, 1)
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+albedo_texture = ExtResource("TexFloor")
 roughness = 0.8
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 
 [sub_resource type="StandardMaterial3D" id="MatDoor"]
 albedo_color = Color(0.24, 0.2, 0.15, 1)
@@ -31,6 +39,30 @@ roughness = 0.9
 [sub_resource type="StandardMaterial3D" id="MatCeil"]
 albedo_color = Color(0.16, 0.17, 0.2, 1)
 roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="MatLocker"]
+albedo_color = Color(0.17, 0.2, 0.21, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatMetal"]
+albedo_color = Color(0.13, 0.14, 0.15, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="MatBoard"]
+albedo_color = Color(0.13, 0.11, 0.09, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="MatPipe"]
+albedo_color = Color(0.14, 0.15, 0.16, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="MatClock"]
+albedo_color = Color(0.22, 0.22, 0.2, 1)
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="MatSign"]
+albedo_color = Color(0.28, 0.24, 0.08, 1)
+roughness = 0.85
 
 [node name="RightHall" type="Node3D"]
 
@@ -135,3 +167,72 @@ fov = 72.0
 current = true
 script = ExtResource("1")
 target = Vector3(0.2, 1.2, 4.0)
+
+; ---------- TỦ ĐỰNG ĐỒ (dãy locker sát tường trái) ----------
+[node name="Locker1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 1.06, -6.6)
+size = Vector3(0.35, 1.8, 0.4)
+material = SubResource("MatLocker")
+
+[node name="Locker2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 1.06, -6.15)
+size = Vector3(0.35, 1.8, 0.4)
+material = SubResource("MatLocker")
+
+[node name="Locker3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 1.06, -5.7)
+size = Vector3(0.35, 1.8, 0.4)
+material = SubResource("MatLocker")
+
+[node name="Locker4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 1.06, 4.9)
+size = Vector3(0.35, 1.8, 0.4)
+material = SubResource("MatLocker")
+
+[node name="Locker5" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.375, 1.06, 5.35)
+size = Vector3(0.35, 1.8, 0.4)
+material = SubResource("MatLocker")
+
+; ---------- TIỆN ÍCH TƯỜNG (vòi nước, bảng tin, đồng hồ) ----------
+[node name="WaterFountain" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.42, 0.66, -6.0)
+size = Vector3(0.26, 1.0, 0.4)
+material = SubResource("MatMetal")
+
+[node name="NoticeBoard" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.51, 1.5, -1.5)
+size = Vector3(0.05, 1.0, 1.8)
+material = SubResource("MatBoard")
+
+[node name="WallClock" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2.4, 0.5)
+size = Vector3(0.06, 0.4, 0.4)
+material = SubResource("MatClock")
+
+; ---------- ĐƯỜNG ỐNG TRẦN (chạy dọc gần trần) ----------
+[node name="Pipe1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.45, 2.82, 0.0)
+size = Vector3(0.12, 0.12, 12.0)
+material = SubResource("MatPipe")
+
+[node name="Pipe2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2.9, 1.0)
+size = Vector3(0.1, 0.1, 10.0)
+material = SubResource("MatPipe")
+
+; ---------- ĐỒ VỤN GÓC HÀNH LANG (thùng rác, ghế xếp chồng, biển sàn ướt) ----------
+[node name="TrashBin" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, 0.51, 3.4)
+size = Vector3(0.34, 0.7, 0.34)
+material = SubResource("MatMetal")
+
+[node name="StackedChairs" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.36, 0.71, 6.6)
+size = Vector3(0.44, 1.1, 0.5)
+material = SubResource("MatMetal")
+
+[node name="WetFloorSign" type="CSGBox3D" parent="."]
+transform = Transform3D(0.966, 0.259, 0, -0.259, 0.966, 0, 0, 0, 1, -0.9, 0.42, 3.0)
+size = Vector3(0.28, 0.55, 0.04)
+material = SubResource("MatSign")

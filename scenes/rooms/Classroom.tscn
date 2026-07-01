@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3wnightclass01"]
+[gd_scene load_steps=15 format=3 uid="uid://c3wnightclass01"]
 
 ; --- CSG blockout: lớp học (classroom) cho camera feed 3D ---
 ; Shell rỗng dựng bằng CSG (union - subtraction), khoét cửa + cửa sổ.
@@ -7,6 +7,8 @@
 ; Phòng: rộng 11m (x ±5.5) × sâu 9m (z ±4.5) × cao 3.4m.
 
 [ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/room/wall.svg" id="TexWall"]
+[ext_resource type="Texture2D" path="res://assets/art/room/floor.svg" id="TexFloor"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -19,11 +21,17 @@ fog_light_color = Color(0.03, 0.035, 0.05, 1)
 fog_density = 0.03
 
 [sub_resource type="StandardMaterial3D" id="MatWall"]
-albedo_color = Color(0.21, 0.21, 0.25, 1)
+albedo_color = Color(0.44, 0.45, 0.48, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="MatFloor"]
-albedo_color = Color(0.12, 0.12, 0.14, 1)
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+albedo_texture = ExtResource("TexFloor")
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="MatBoard"]
@@ -32,6 +40,26 @@ roughness = 0.95
 
 [sub_resource type="StandardMaterial3D" id="MatDesk"]
 albedo_color = Color(0.34, 0.22, 0.12, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="MatChair"]
+albedo_color = Color(0.18, 0.15, 0.13, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="MatPaper"]
+albedo_color = Color(0.4, 0.39, 0.35, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="MatBook"]
+albedo_color = Color(0.22, 0.16, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="MatMetal"]
+albedo_color = Color(0.15, 0.16, 0.18, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatGlobe"]
+albedo_color = Color(0.17, 0.2, 0.24, 1)
 roughness = 0.85
 
 [node name="Classroom" type="Node3D"]
@@ -168,3 +196,120 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0, 2.9, -4.0)
 fov = 68.0
 current = true
 script = ExtResource("1")
+
+; ---------- GHẾ HỌC SINH (sau ~6 bàn, phía xa bảng) ----------
+[node name="ChairR1C1Seat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0.44, 0.9)
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("MatChair")
+
+[node name="ChairR1C1Back" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0.66, 0.67)
+size = Vector3(0.5, 0.4, 0.06)
+material = SubResource("MatChair")
+
+[node name="ChairR1C3Seat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0.44, 0.9)
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("MatChair")
+
+[node name="ChairR1C3Back" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0.66, 0.67)
+size = Vector3(0.5, 0.4, 0.06)
+material = SubResource("MatChair")
+
+[node name="ChairR2C2Seat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44, -0.5)
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("MatChair")
+
+[node name="ChairR2C2Back" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, -0.73)
+size = Vector3(0.5, 0.4, 0.06)
+material = SubResource("MatChair")
+
+[node name="ChairR3C1Seat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0.44, -1.9)
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("MatChair")
+
+[node name="ChairR3C1Back" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0.66, -2.13)
+size = Vector3(0.5, 0.4, 0.06)
+material = SubResource("MatChair")
+
+[node name="ChairR3C3Seat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0.44, -1.9)
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("MatChair")
+
+[node name="ChairR3C3Back" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0.66, -2.13)
+size = Vector3(0.5, 0.4, 0.06)
+material = SubResource("MatChair")
+
+[node name="ChairR4C2Seat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.44, -3.3)
+size = Vector3(0.5, 0.06, 0.5)
+material = SubResource("MatChair")
+
+[node name="ChairR4C2Back" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66, -3.53)
+size = Vector3(0.5, 0.4, 0.06)
+material = SubResource("MatChair")
+
+; ---------- GHẾ ĐỔ (nằm trên sàn, gây bất an) ----------
+[node name="ChairFallenBack" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 0.19, -3.05)
+size = Vector3(0.5, 0.06, 0.4)
+material = SubResource("MatChair")
+
+[node name="ChairFallenSeat" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 0.41, -2.85)
+size = Vector3(0.5, 0.5, 0.06)
+material = SubResource("MatChair")
+
+; ---------- SÁCH VỞ / GIẤY TRÊN MẶT BÀN (~y=0.78) ----------
+[node name="PaperR1C2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.78, 1.55)
+size = Vector3(0.3, 0.02, 0.42)
+material = SubResource("MatPaper")
+
+[node name="BookR2C1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.35, 0.795, 0.15)
+size = Vector3(0.32, 0.05, 0.24)
+material = SubResource("MatBook")
+
+[node name="BookR3C3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.1, 0.795, -1.25)
+size = Vector3(0.34, 0.05, 0.26)
+material = SubResource("MatBook")
+
+[node name="PaperR4C1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0, 0.78, -2.65)
+size = Vector3(0.3, 0.02, 0.42)
+material = SubResource("MatPaper")
+
+; ---------- QUẢ ĐỊA CẦU TRÊN BÀN GV ----------
+[node name="Globe" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0.94, 3.4)
+size = Vector3(0.26, 0.3, 0.26)
+material = SubResource("MatGlobe")
+
+; ---------- MÁNG PHẤN DƯỚI BẢNG ----------
+[node name="ChalkTray" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.07, 4.36)
+size = Vector3(5.0, 0.05, 0.16)
+material = SubResource("MatDesk")
+
+; ---------- ĐỒNG HỒ TREO TƯỜNG (cao trên tường bảng) ----------
+[node name="WallClock" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 2.9, 4.43)
+size = Vector3(0.4, 0.4, 0.05)
+material = SubResource("MatMetal")
+
+; ---------- THÙNG RÁC (góc trước-trái) ----------
+[node name="TrashBin" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.0, 0.42, -3.9)
+size = Vector3(0.4, 0.52, 0.4)
+material = SubResource("MatMetal")

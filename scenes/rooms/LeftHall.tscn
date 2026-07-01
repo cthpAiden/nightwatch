@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3wnightlhall01"]
+[gd_scene load_steps=18 format=3 uid="uid://c3wnightlhall01"]
 
 ; --- CSG blockout: hành lang trái (left_hall) ---
 ; Hành lang dài theo z: sàn + trần + 2 tường bên + tường cuối (có 1 cửa). Cửa lớp
 ; dọc hai bên. Ánh sáng: hàng đèn trần lùi dần về cuối (tạo chiều sâu horror).
 
 [ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/room/wall.svg" id="TexWall"]
+[ext_resource type="Texture2D" path="res://assets/art/room/floor.svg" id="TexFloor"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -17,11 +19,17 @@ fog_light_color = Color(0.028, 0.032, 0.042, 1)
 fog_density = 0.035
 
 [sub_resource type="StandardMaterial3D" id="MatWall"]
-albedo_color = Color(0.2, 0.22, 0.21, 1)
+albedo_color = Color(0.44, 0.46, 0.47, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="MatFloor"]
-albedo_color = Color(0.16, 0.16, 0.17, 1)
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+albedo_texture = ExtResource("TexFloor")
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 roughness = 0.8
 
 [sub_resource type="StandardMaterial3D" id="MatDoor"]
@@ -31,6 +39,38 @@ roughness = 0.9
 [sub_resource type="StandardMaterial3D" id="MatCeil"]
 albedo_color = Color(0.17, 0.17, 0.19, 1)
 roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="MatLocker"]
+albedo_color = Color(0.16, 0.19, 0.2, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="MatLockerSeam"]
+albedo_color = Color(0.1, 0.12, 0.13, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatBench"]
+albedo_color = Color(0.22, 0.15, 0.1, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="MatBoard"]
+albedo_color = Color(0.19, 0.17, 0.13, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="MatBin"]
+albedo_color = Color(0.13, 0.16, 0.14, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatPipe"]
+albedo_color = Color(0.14, 0.14, 0.15, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="MatExting"]
+albedo_color = Color(0.24, 0.09, 0.07, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="MatMop"]
+albedo_color = Color(0.15, 0.15, 0.14, 1)
+roughness = 0.9
 
 [node name="LeftHall" type="Node3D"]
 
@@ -135,3 +175,96 @@ fov = 72.0
 current = true
 script = ExtResource("1")
 target = Vector3(-0.2, 1.2, 4.0)
+
+; ---------- TỦ ĐỒ HỌC SINH (dãy tủ sắt, sát tường phải) ----------
+[node name="Locker1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.36, 1.1, -6.13)
+size = Vector3(0.38, 2.2, 0.72)
+material = SubResource("MatLocker")
+
+[node name="Locker2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.36, 1.1, -5.37)
+size = Vector3(0.38, 2.2, 0.72)
+material = SubResource("MatLocker")
+
+[node name="Locker3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.36, 1.1, -4.63)
+size = Vector3(0.38, 2.2, 0.72)
+material = SubResource("MatLocker")
+
+[node name="Locker4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.36, 1.1, -3.87)
+size = Vector3(0.38, 2.2, 0.72)
+material = SubResource("MatLocker")
+
+; Khe dọc giữa các cánh tủ (mí chìm mỏng)
+[node name="LockerSeam1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.17, 1.1, -5.75)
+size = Vector3(0.02, 2.1, 0.04)
+material = SubResource("MatLockerSeam")
+
+[node name="LockerSeam2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.17, 1.1, -5.0)
+size = Vector3(0.02, 2.1, 0.04)
+material = SubResource("MatLockerSeam")
+
+[node name="LockerSeam3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.17, 1.1, -4.25)
+size = Vector3(0.02, 2.1, 0.04)
+material = SubResource("MatLockerSeam")
+
+; ---------- BĂNG GHẾ GỖ (sát tường trái) ----------
+[node name="Bench" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 0.45, -6.0)
+size = Vector3(0.35, 0.1, 1.6)
+material = SubResource("MatBench")
+
+[node name="BenchLegF" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 0.2, -6.65)
+size = Vector3(0.3, 0.4, 0.08)
+material = SubResource("MatBench")
+
+[node name="BenchLegB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.35, 0.2, -5.35)
+size = Vector3(0.3, 0.4, 0.08)
+material = SubResource("MatBench")
+
+; ---------- BẢNG THÔNG BÁO (gắn tường trái) ----------
+[node name="NoticeBoard" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.51, 1.5, 2.5)
+size = Vector3(0.05, 1.0, 1.6)
+material = SubResource("MatBoard")
+
+; ---------- THÙNG RÁC (góc cuối, sát tường trái) ----------
+[node name="TrashBin" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.36, 0.4, 6.6)
+size = Vector3(0.36, 0.8, 0.36)
+material = SubResource("MatBin")
+
+; ---------- ỐNG DẪN TRẦN (chạy dọc, sát trần) ----------
+[node name="PipeL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.42, 2.82, 0)
+size = Vector3(0.12, 0.12, 14.0)
+material = SubResource("MatPipe")
+
+[node name="PipeR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.42, 2.82, 0)
+size = Vector3(0.12, 0.12, 14.0)
+material = SubResource("MatPipe")
+
+; ---------- BÌNH CỨU HỎA (gắn tường phải) ----------
+[node name="FireExt" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.46, 1.1, 6.0)
+size = Vector3(0.18, 0.5, 0.22)
+material = SubResource("MatExting")
+
+; ---------- CÂY LAU NHÀ + XÔ BỊ BỎ QUÊN (góc cuối trái) ----------
+[node name="MopBucket" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.34, 0.2, 7.1)
+size = Vector3(0.3, 0.4, 0.3)
+material = SubResource("MatBin")
+
+[node name="MopHandle" type="CSGBox3D" parent="."]
+transform = Transform3D(0.996, 0.087, 0, -0.087, 0.996, 0, 0, 0, 1, -1.25, 1.0, 7.1)
+size = Vector3(0.04, 1.7, 0.04)
+material = SubResource("MatMop")

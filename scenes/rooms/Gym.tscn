@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3wnightgym01"]
+[gd_scene load_steps=16 format=3 uid="uid://c3wnightgym01"]
 
 ; --- CSG blockout: nhà thi đấu / gym ---
 ; Phòng lớn trần cao; 2 khung rổ hai đầu (bảng + vành + cột); dãy khán đài bậc thang
 ; dọc một bên. Ánh sáng: đèn cao áp.
 
 [ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/room/wall.svg" id="TexWall"]
+[ext_resource type="Texture2D" path="res://assets/art/room/floor.svg" id="TexFloor"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -17,12 +19,18 @@ fog_light_color = Color(0.03, 0.035, 0.05, 1)
 fog_density = 0.02
 
 [sub_resource type="StandardMaterial3D" id="MatWall"]
-albedo_color = Color(0.22, 0.22, 0.24, 1)
+albedo_color = Color(0.44, 0.46, 0.47, 1)
+albedo_texture = ExtResource("TexWall")
 roughness = 1.0
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="MatFloor"]
-albedo_color = Color(0.36, 0.26, 0.15, 1)
+albedo_color = Color(0.4, 0.4, 0.42, 1)
+albedo_texture = ExtResource("TexFloor")
 roughness = 0.6
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 
 [sub_resource type="StandardMaterial3D" id="MatMetal"]
 albedo_color = Color(0.15, 0.16, 0.18, 1)
@@ -32,6 +40,30 @@ roughness = 0.5
 [sub_resource type="StandardMaterial3D" id="MatBoard"]
 albedo_color = Color(0.7, 0.7, 0.72, 1)
 roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatBall"]
+albedo_color = Color(0.34, 0.18, 0.09, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="MatMat"]
+albedo_color = Color(0.16, 0.19, 0.24, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="MatLine"]
+albedo_color = Color(0.44, 0.34, 0.22, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="MatBars"]
+albedo_color = Color(0.28, 0.24, 0.16, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="MatScore"]
+albedo_color = Color(0.1, 0.11, 0.13, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatScoreFace"]
+albedo_color = Color(0.16, 0.2, 0.15, 1)
+roughness = 0.5
 
 [node name="Gym" type="Node3D"]
 
@@ -137,3 +169,73 @@ fov = 78.0
 current = true
 script = ExtResource("1")
 target = Vector3(-1.8, 1.4, 2.6)
+
+; ---------- VẠCH SÂN (court lines) ----------
+[node name="LineCenter" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
+size = Vector3(9.0, 0.02, 0.06)
+material = SubResource("MatLine")
+
+[node name="LineHalf" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.17, 0)
+size = Vector3(0.06, 0.02, 5.0)
+material = SubResource("MatLine")
+
+; ---------- BÓNG RỔ (basketballs) ----------
+[node name="Ball1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0.28, 1.6)
+size = Vector3(0.24, 0.24, 0.24)
+material = SubResource("MatBall")
+
+[node name="Ball2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 0.28, 2.3)
+size = Vector3(0.24, 0.24, 0.24)
+material = SubResource("MatBall")
+
+[node name="Ball3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0.28, -3.4)
+size = Vector3(0.24, 0.24, 0.24)
+material = SubResource("MatBall")
+
+; ---------- ĐỆM THỂ DỤC (gym mats, góc -x/+z) ----------
+[node name="MatStack1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6, 0.26, 4.6)
+size = Vector3(2.2, 0.2, 1.2)
+material = SubResource("MatMat")
+
+[node name="MatStack2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.46, 4.7)
+size = Vector3(2.1, 0.2, 1.1)
+material = SubResource("MatMat")
+
+; ---------- THANG GIÓNG TƯỜNG (wall climbing bars, tường -x) ----------
+[node name="BarPostA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.85, 1.6, -1.6)
+size = Vector3(0.08, 2.8, 0.1)
+material = SubResource("MatBars")
+
+[node name="BarPostB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.85, 1.6, 0.4)
+size = Vector3(0.08, 2.8, 0.1)
+material = SubResource("MatBars")
+
+[node name="BarRung1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.85, 0.9, -0.6)
+size = Vector3(0.06, 0.06, 2.2)
+material = SubResource("MatBars")
+
+[node name="BarRung2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.85, 1.6, -0.6)
+size = Vector3(0.06, 0.06, 2.2)
+material = SubResource("MatBars")
+
+; ---------- BẢNG ĐIỂM (scoreboard, cao trên tường -z) ----------
+[node name="ScoreBoard" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 4.4, -5.85)
+size = Vector3(1.8, 0.9, 0.12)
+material = SubResource("MatScore")
+
+[node name="ScoreFace" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 4.4, -5.77)
+size = Vector3(1.5, 0.6, 0.04)
+material = SubResource("MatScoreFace")
