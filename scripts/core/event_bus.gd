@@ -46,11 +46,8 @@ signal item_effect_applied(effect_id: String, payload: Dictionary)
 signal offering_placed(location_id: String)
 
 # --- Gameplay specials (per-threat mechanics) -------------------------------
-signal water_lure(active: bool)                  # Ma da: water cry telegraph begins/ends
-signal office_action(action: String)              # close_drain / make_noise / dot_via / light_incense
+signal office_action(action: String)              # make_noise / dot_via / light_incense
 signal crowd_changed(level: float)                # Cô hồn swarm pressure 0..1
-signal water_level(level: float)                  # Ma da flood pressure 0..1
-signal water_drain_ready(ready: bool)             # Ma da: drain grate cleared (true) / shut & backed up (false)
 signal cat_moved(location: String)                # Mun the cat
 signal cat_triggered()                            # Mun crossed the draped body
 signal investigation_updated(clues: int)          # Oan hồn arc progress

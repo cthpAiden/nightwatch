@@ -133,25 +133,28 @@ func _run(c) -> void:
 	print("\n--- MA DA ---")
 	var md = d.get_threat("ma_da")
 	if md:
-		md.flood = 50.0
-		Events.office_action.emit("close_drain")
-		check("ma_da: close_drain lowers flood", md.flood < 50.0)
-		md.flood = 50.0
-		md.on_calm()
-		check("ma_da: incense lowers flood", md.flood < 50.0)
-		md.flood = 50.0
-		md.on_offering("")
-		check("ma_da: offering lowers flood", md.flood < 50.0)
-		# The rising-water telegraph re-arms once an offering drops the flood (was stuck if it
-		# oscillated in the 70-85 band, so the kill could land with no cue). (balance #33)
-		md._active = true
-		md._lure_active = false
-		md._lure_cd = 99.0
-		md._warned = true
-		md.flood = 99.0
-		md.on_offering("")          # -22 -> ~77
-		md.process_ai(0.1, 0.5)     # the elif flood < 80 re-arms _warned
-		check("ma_da: telegraph re-arms after an offering drops flood below 80", not md._warned)
+		# Ma da now roams the right wing like a normal wanderer; door is the counter.
+		check("ma_da is a wanderer", md.movement_model == ThreatBase.MODEL_WANDER)
+		check("ma_da is countered by the door", md.counter_door)
+		check("ma_da spawns in the restroom", md.spawn_location == MapGraph.RESTROOM)
+		# It never strays out of its authored wet-wing zone (no leak to the left wing / office).
+		md.reset_to_spawn()
+		var in_zone := true
+		for _i in 30:
+			md._behaviour_move()
+			if not md.wander_zone.has(md.current_location):
+				in_zone = false
+				break
+		check("ma_da stays inside its wander zone", in_zone)
+		# Holding the right door shut presses it off and sends it back (shared linger logic).
+		md.reset_to_spawn()
+		md._arrive_at_door(GameEnums.Side.RIGHT)
+		c.request_toggle_door(GameEnums.Side.RIGHT)
+		d.broadcast_door(GameEnums.Side.RIGHT, true)
+		for _i in 50:
+			md._process_attack(0.1)
+		check("holding the right door shut repels ma_da", not md.is_at_door())
+		c.request_toggle_door(GameEnums.Side.RIGHT)
 
 	print("\n--- CO HON ---")
 	var ch = d.get_threat("co_hon")
@@ -313,15 +316,14 @@ func _run(c) -> void:
 	c._ending = false
 	ve._attack()   # -> LEAVING, emits jumpscare -> _on_jumpscare -> repel_to_idle
 	check("ward resets vendor even via the real _attack/LEAVING path", ve.state == GameEnums.VendorState.IDLE and not c._ending)
-	# Meter threat: a ward must actually break the meter's hold, not just dent it.
+	# A ward against ma_da's grab must keep the night alive and revive it (not leave it dead).
 	var md2 = d.get_threat("ma_da")
 	if md2:
-		md2.flood = 100.0
 		md2._active = false
 		c.ward_tokens = 1
 		c._ending = false
 		c._on_jumpscare("ma_da")
-		check("ward fully breaks ma_da flood", md2.flood <= 25.0)
+		check("ward keeps the night alive against ma_da", not c._ending)
 		check("ward revives ma_da (not stuck dead)", md2._active)
 
 	print("\n--- MONITOR TOGGLE RACE ---")
@@ -397,10 +399,9 @@ func _run(c) -> void:
 	c._hb_on = true
 	c._breath_on = true
 	c._strain_on = true
-	c._water_on = true
 	c._stop_tension_loops()
 	check("_stop_tension_loops clears every loop-state flag",
-		not c._drone_on and not c._hb_on and not c._breath_on and not c._strain_on and not c._water_on)
+		not c._drone_on and not c._hb_on and not c._breath_on and not c._strain_on)
 	# play_sting honours the REDUCED accessibility tier (attenuates) and leaves FULL bit-identical.
 	var prev_scare: int = Settings.scare_intensity
 	Settings.scare_intensity = Settings.Scare.FULL
@@ -432,13 +433,6 @@ func _run(c) -> void:
 	ph.answer()
 	check("answering real call stops the ring", not ph.is_ringing())
 	check("answering a real call grants the boon (vía up)", c.via > 50.0)
-	# The phone is bác Tư only now — no spirit rings it, so answering never harms the player.
-	var md3 = d.get_threat("ma_da")
-	if md3:
-		md3.flood = 30.0
-		ph._start_real()
-		ph.answer()
-		check("answering the phone never touches ma da's flood", md3.flood == 30.0)
 
 	print("\n--- CAMERA ANOMALY TAG ---")
 	var ot = d.get_threat("ong_ke")

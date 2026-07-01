@@ -118,11 +118,11 @@ func nearest_threat() -> ThreatBase:
 	var best_d := _NO_THREAT_DIST
 	for t in threats:
 		# Only positional rushers can be meaningfully "set back" to spawn; meter
-		# threats store their danger in flood/crowd/agro/lock, not in position.
+		# threats store their danger in crowd/agro/lock, not in position.
 		if t.movement_model != ThreatBase.MODEL_PATH and t.movement_model != ThreatBase.MODEL_FLYER:
 			continue
-		# Ma da is MODEL_PATH but its danger is the flood meter, not its tile, so a
-		# positional setback does nothing useful — skip it (its counter is incense).
+		# A door-repel is the only meaningful setback; skip rushers whose counter isn't
+		# the door (e.g. a light-countered flyer), where sending it to spawn does nothing.
 		if not t.counter_door:
 			continue
 		if t.phase == GameEnums.ThreatPhase.ATTACKING or t.phase == GameEnums.ThreatPhase.DORMANT:

@@ -73,9 +73,6 @@ var _moon: SpotLight3D        # the window moonlight, animated in _animate_moon 
 var _moon_base := 2.4         # rest energy; _animate_moon noises around it
 var _moon_rot_base := 0.35    # rest rotation.x; creeps ±0.02 so the bar-shadows drift
 var _dread_light: OmniLight3D # hidden hot-red glow behind the desk, scaled by _dread (backlog#19)
-var _water_plane: MeshInstance3D   # rising-flood plane across the floor (AUDIT#13)
-var _water_mat: ShaderMaterial
-var _water_frac := 0.0        # 0..1 flood level (set by set_water_level)
 var _tube_mat: StandardMaterial3D
 var _desk_lamp: SpotLight3D
 var _desk_lamp_mat: StandardMaterial3D
@@ -156,7 +153,6 @@ func _ready() -> void:
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
 	_build_apparition()
-	_build_water()
 	set_process(true)
 	set_process_unhandled_input(true)
 	# Dev framing hook for the screenshot harness: hold a fixed look angle.
@@ -701,53 +697,6 @@ func _build_apparition() -> void:
 	_apparition.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_apparition)
 
-func _build_water() -> void:
-	# Ma da's rising flood: a thin translucent plane across the office floor that lifts and
-	# brightens with the flood level. Cheap unshaded sine-ripple shader with a cool blue-green
-	# emissive tint; sits just above the floor (small y offset) below the desk/props. Default
-	# frac 0 = invisible. set_water_level() raises its y + alpha. (AUDIT#13)
-	var sh := Shader.new()
-	sh.code = """
-shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never;
-uniform float t = 0.0;
-uniform float frac = 0.0;
-void fragment() {
-	// Cheap two-axis sine ripple as a faint surface shimmer.
-	float r = 0.5 + 0.5 * sin(UV.x * 28.0 + t * 1.6) * sin(UV.y * 24.0 - t * 1.1);
-	vec3 cool = vec3(0.06, 0.20, 0.22);
-	vec3 col = cool * (0.7 + 0.5 * r);
-	ALBEDO = col;
-	EMISSION = col * 0.6;
-	// Alpha climbs with the flood level; the ripple adds a little crest sparkle.
-	ALPHA = clamp(frac, 0.0, 1.0) * (0.32 + 0.16 * r);
-}
-"""
-	_water_mat = ShaderMaterial.new()
-	_water_mat.shader = sh
-	_water_mat.set_shader_parameter("t", 0.0)
-	_water_mat.set_shader_parameter("frac", 0.0)
-	var mi := MeshInstance3D.new()
-	var pm := PlaneMesh.new()
-	pm.size = Vector2(8.6, 8.6)
-	mi.mesh = pm
-	mi.material_override = _water_mat
-	mi.position = Vector3(0, 0.02, 0)   # just above the floor top (y=0) to avoid z-fighting
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	mi.visible = false                   # frac 0 = invisible
-	add_child(mi)
-	_water_plane = mi
-
-## Ma da flood level 0..1 — raises a translucent water plane across the office floor. (AUDIT#13)
-func set_water_level(frac: float) -> void:
-	_water_frac = clampf(frac, 0.0, 1.0)
-	if _water_plane == null:
-		return
-	_water_plane.visible = _water_frac > 0.001
-	# Rise from the floor toward ~0.5 units at full flood; keep the small anti-z-fight offset.
-	_water_plane.position.y = 0.02 + _water_frac * 0.5
-	if _water_mat:
-		_water_mat.set_shader_parameter("frac", _water_frac)
 
 func _update_apparition(delta: float) -> void:
 	if _apparition == null or _appar_tex == null:
@@ -1026,9 +975,6 @@ func _animate_altar(delta: float) -> void:
 func _animate_props(delta: float) -> void:
 	if _fan:
 		_fan.rotation.y += delta * (0.9 if _powered else 0.15)
-	# Drive the flood ripple only while the water is actually showing. (AUDIT#13)
-	if _water_mat and _water_plane and _water_plane.visible:
-		_water_mat.set_shader_parameter("t", _t)
 	if _hand_min:
 		_hand_min.rotation.z = -_t * 0.5
 	if _hand_hr:

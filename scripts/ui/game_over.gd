@@ -9,7 +9,7 @@ func _ready() -> void:
 	add_child(vb)
 
 	var cause := Game.last_cause
-	# A no-kill defeat (vía drained by the crowd / flood / panic) gets a softer
+	# A no-kill defeat (vía drained by the crowd / panic) gets a softer
 	# "the night swallowed you" card; a violent grab names who caught you.
 	var soft := cause == "" or cause == "via"
 	if soft:

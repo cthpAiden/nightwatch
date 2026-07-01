@@ -1,6 +1,6 @@
 extends Control
 ## The night HUD: power + vía meters, clock, night label, the door/light/camera/
-## offering/item controls, the Ma-da water buttons, and transient toasts/warnings.
+## offering/item controls, the phone answer button, and transient toasts/warnings.
 ## Built in code; reads the controller and listens to Events.
 
 var _c   # NightController
@@ -20,13 +20,11 @@ var _clue_flash := 0.0
 var _tut_panel: Control
 var _tut_label: Label
 var _crowd_bar: ProgressBar
-var _water_bar: ProgressBar
 var _huong_bar: ProgressBar
 var _grievance_bar: ProgressBar
 var _item_icon: TextureRect
 var _use_btn: Button
 var _answer_btn: Button
-var _drain_btn: Button
 var _incense_btn: Button
 var _bell_btn: Button
 var _offering_btn: Button
@@ -39,7 +37,6 @@ var _light_btn := {}
 var _toast_t := 0.0
 var _toast_queue: Array = []    # small FIFO of {key,text}; teaching lines jump ahead (backlog#10)
 var _huong_danger := false
-var _water_lure := false
 var _vendor_state := GameEnums.VendorState.IDLE
 var _light_on := {}             # side -> bool, for the persistent which-door cue
 var _pulse_t := 0.0             # drives the looming-door amber pulse
@@ -123,7 +120,6 @@ func _build() -> void:
 	# Each conditional meter gets a short label so a new player can tell what the bar
 	# that just popped in is actually tracking (no more anonymous coloured bars).
 	_crowd_bar = _bar_row(rbox, "HUD_CROWD", Color(0.7, 0.66, 0.5))
-	_water_bar = _bar_row(rbox, "HUD_WATER", Color(0.43, 0.6, 0.65))
 	_grievance_bar = _bar_row(rbox, "HUD_GRIEVANCE", Color(0.85, 0.86, 0.9))
 
 	# left controls
@@ -170,16 +166,13 @@ func _build() -> void:
 	center.add_child(slot)
 
 	# Ma da water buttons (hidden until relevant)
-	var water := UI.hbox(8)
-	UI.place(water, 0.5, 1, 0.5, 1, -190, -150, 190, -100)
-	add_child(water)
-	_drain_btn = _ctrl_btn("ACTION_CLOSE_DRAIN", func(): Events.office_action.emit("close_drain"), 180, "close_drain")
-	_drain_btn.visible = false
+	var phone_row := UI.hbox(8)
+	UI.place(phone_row, 0.5, 1, 0.5, 1, -190, -150, 190, -100)
+	add_child(phone_row)
 	_answer_btn = _ctrl_btn("ACTION_ANSWER", func(): _c.request_answer_phone(), 160, "answer_phone")
 	_answer_btn.visible = false
 	_answer_btn.modulate = Color(0.6, 0.9, 0.7)
-	water.add_child(_drain_btn)
-	water.add_child(_answer_btn)
+	phone_row.add_child(_answer_btn)
 
 	# vendor invite (top-center, under clock; shown only while she is at the gate)
 	_invite_btn = _ctrl_btn("SHOP_INVITE", func(): _c.open_shop(), 160)
@@ -256,7 +249,7 @@ func _set_bar(bar: ProgressBar, new_value: float) -> void:
 	if old - new_value > 2.0:
 		# A drop on a tracked meter right after an offering is RELIEF (calm green), not a hit
 		# (red) — so feeding the souls doesn't read like taking damage. (AUDIT#28)
-		var relief := _calm_t > 0.0 and (bar == _crowd_bar or bar == _water_bar or bar == _grievance_bar)
+		var relief := _calm_t > 0.0 and (bar == _crowd_bar or bar == _grievance_bar)
 		var flash := Color(0.6, 1.3, 0.7) if relief else Color(1.4, 0.7, 0.7)
 		var ft := create_tween()
 		ft.tween_property(bar, "modulate", flash, 0.06)
@@ -343,7 +336,7 @@ func _build_help() -> void:
 	col.add_child(hdr)
 	_help_lines = UI.vbox(2)
 	col.add_child(_help_lines)
-	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_RITUAL", "HELP_ITEM", "HELP_DRAIN", "HELP_PHONE", "HELP_OFFERING2", "HELP_PAUSE"]:
+	for k in ["HELP_LOOK", "HELP_CAM", "HELP_DOORS", "HELP_LIGHTS", "HELP_RITUAL", "HELP_ITEM", "HELP_PHONE", "HELP_OFFERING2", "HELP_PAUSE"]:
 		_help_lines.add_child(UI.label(k, 15, UI.COL_DIM))
 	_fit_help_panel()
 
@@ -383,9 +376,6 @@ func _connect() -> void:
 	Events.door_toggled.connect(func(s, closed): _update_door(s, closed))
 	Events.light_toggled.connect(func(s, on): _update_light(s, on))
 	Events.notify.connect(_on_notify)
-	Events.water_lure.connect(_on_water_lure)
-	Events.water_level.connect(_on_water_level)
-	Events.water_drain_ready.connect(_on_water_drain_ready)
 	Events.crowd_changed.connect(_on_crowd)
 	Events.grievance_changed.connect(_on_grievance)
 	Events.huong_changed.connect(_on_huong)
@@ -578,28 +568,6 @@ func _on_notify(key: String, args: Array) -> void:
 			_toast_queue = _toast_queue.slice(0, 3)
 		return
 	_show_toast(key, tr_text)
-
-func _on_water_lure(active: bool) -> void:
-	# The lure also makes the drain action relevant; the phone's answer button is
-	# driven separately by phone_ring (the lure rings the phone with a warped tone).
-	_water_lure = active
-	_refresh_drain()
-
-func _on_water_level(level: float) -> void:
-	_water_bar.get_parent().visible = level > 0.01
-	_water_bar.value = level
-	_refresh_drain()
-
-func _refresh_drain() -> void:
-	# Show the "close drain" action only while the flood is rising or the lure cries;
-	# hide it again once the water recedes so it isn't a permanent dead button.
-	_drain_btn.visible = _water_lure or _water_bar.value > 0.01
-
-func _on_water_drain_ready(ready: bool) -> void:
-	# Grey the button out while the grate is shut & backed up, so the cooldown is legible
-	# instead of presses silently doing nothing.
-	_drain_btn.disabled = not ready
-	_drain_btn.modulate.a = 1.0 if ready else 0.45
 
 func _on_crowd(level: float) -> void:
 	_crowd_bar.get_parent().visible = level > 0.01

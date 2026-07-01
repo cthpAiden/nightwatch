@@ -89,7 +89,6 @@ var _crowd_pulse_t := 0.0    # phase for the subtle surge of the crowd overlay
 var _hb_on := false          # heartbeat loop currently playing (ramped with danger)
 var _breath_on := false      # proximity-breathing loop (a threat looms at a door)
 var _strain_on := false      # shutter-strain loop (a closed door is being pressed)
-var _water_on := false       # ma da rising-water loop (driven by flood level)
 var _offering_count := 0       # backlog#30: offerings placed this night (drives the first-offering + cycled lines)
 var _post_layer: CanvasLayer
 var _post_mat: ShaderMaterial  # full-screen grain/scanline/vignette over the 3D office
@@ -288,7 +287,6 @@ func _connect_events() -> void:
 	Events.threat_left_door.connect(func(_id, side): _refresh_door_sprite(side))
 	Events.crowd_changed.connect(func(level):
 		_crowd_level = level)
-	Events.water_level.connect(_on_water_level_audio)
 	Events.via_state_changed.connect(_on_via_state_fx)
 
 ## A figure arriving at the door: refresh its sprite, and land a small scare beat
@@ -321,21 +319,6 @@ func _on_threat_repelled() -> void:
 	if room:
 		room.add_shake(0.12)
 
-## Ma da's flood, voiced as a body of water that swells from a distant trickle to an
-## oppressive slosh as the level rises — so the silent flood mechanic is now felt.
-func _on_water_level_audio(level: float) -> void:
-	# Raise the office floodwater plane from the same flood fraction (0..1). (AUDIT#13)
-	if room and room.has_method("set_water_level"):
-		room.set_water_level(level)
-	if level > 0.02:
-		if not _water_on:
-			_water_on = true
-			Audio.start_loop("water_loop", -30.0)
-		Audio.set_loop_volume("water_loop", lerpf(-30.0, -8.0, clampf(level, 0.0, 1.0)))
-		Audio.set_loop_pitch("water_loop", lerpf(0.85, 1.05, clampf(level, 0.0, 1.0)))
-	elif _water_on:
-		_water_on = false
-		Audio.stop_loop("water_loop")
 
 ## Reactive vignette: the screen edges bruise toward red as your vía fails.
 func _on_via_state_fx(state: int) -> void:
@@ -792,7 +775,7 @@ func _update_via_state() -> void:
 func _via_zero() -> void:
 	if try_block_death("via"):
 		via = via_max * 0.4
-		# A meter threat (flood/crowd/agro) bled you to zero; without breaking its
+		# A meter threat (crowd/agro) bled you to zero; without breaking its
 		# hold the refilled vía is drained right back. Spend the ward to clear it.
 		for t in director.threats:
 			t.on_ward_save()
@@ -911,10 +894,6 @@ func _unhandled_input(e: InputEvent) -> void:
 		request_answer_phone()
 	elif e.is_action_pressed("use_item"):
 		request_use_item()
-	elif e.is_action_pressed("close_drain"):
-		if _tut_step >= 0:
-			return
-		Events.office_action.emit("close_drain")
 
 # --- requests from UI / input ----------------------------------------------
 func request_toggle_door(side: int) -> void:
@@ -1408,7 +1387,6 @@ func _stop_tension_loops() -> void:
 	_hb_on = false
 	_breath_on = false
 	_strain_on = false
-	_water_on = false
 
 # --- public API used by threats & items ------------------------------------
 func is_door_closed(side: int) -> bool:
@@ -1501,7 +1479,7 @@ func start_reveal(d: float) -> void:
 
 func set_global_speed(mult: float, d: float) -> void:
 	director.set_speed_all(mult)       # positional cadence (path/wander threats)
-	_aggro_mult = mult                 # meter-growth multiplier (flood/crowd/agro/lock)
+	_aggro_mult = mult                 # meter-growth multiplier (crowd/agro/lock)
 	speed_timer = d
 
 func add_taint(d: float) -> void:

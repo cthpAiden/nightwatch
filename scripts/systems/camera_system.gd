@@ -39,6 +39,7 @@ const THREAT_GLB := {
 }
 const FIGURE_Y := 1.01              # room floor top (0.16) + the GLB's mid-height origin (~0.85)
 var _room_figures := {}             # cam_id -> {"node": Node3D, "id": String}
+var _threat_packed := {}            # id -> PackedScene, loaded once (the GLB is heavy)
 var _last_feed_size := Vector2.ZERO # last feed rect size — re-upload rect_aspect only on resize
 const FX_BASE := 0.06
 var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
@@ -318,18 +319,21 @@ func _mount_room(cam_id: String) -> bool:
 	return true
 
 ## Stand threat `id`'s 3D GLB in cam_id's live room feed, at the point the CCTV is aimed
-## (so it lands centre-frame) and facing the camera. Cached; rebuilt if a different threat
-## arrives. Returns false when the cam has no live room or the threat has no model — the
-## caller then draws the flat billboard instead.
+## (so it lands centre-frame) and facing the camera. Cached and merely SHOWN/HIDDEN as the
+## threat comes and goes (the GLB is heavy — re-instancing it on every re-entry stutters);
+## only rebuilt if a DIFFERENT threat takes the cam. Returns false when the cam has no live
+## room or the threat has no model — the caller then draws the flat billboard instead.
 func _ensure_room_figure(cam_id: String, id: String) -> bool:
 	if not _room_vps.has(cam_id):
 		return false
-	var path: String = THREAT_GLB.get(id, "")
-	if path == "" or not ResourceLoader.exists(path):
-		return false
 	var cur: Dictionary = _room_figures.get(cam_id, {})
-	if cur.get("id", "") == id and is_instance_valid(cur.get("node")):
+	var cur_node = cur.get("node")
+	if cur.get("id", "") == id and is_instance_valid(cur_node):
+		cur_node.visible = true
 		return true
+	var packed := _packed_for(id)
+	if packed == null:
+		return false
 	_clear_room_figure(cam_id)
 	var room: Node = _room_vps[cam_id].get_child(0)
 	if room == null:
@@ -338,7 +342,7 @@ func _ensure_room_figure(cam_id: String, id: String) -> bool:
 	var aim := Vector3(0.0, 1.3, 2.0)
 	if cam and "target" in cam:
 		aim = cam.target
-	var fig: Node3D = (load(path) as PackedScene).instantiate()
+	var fig: Node3D = packed.instantiate()
 	fig.position = Vector3(aim.x, FIGURE_Y, aim.z)
 	if cam:
 		var to_cam := cam.position - fig.position
@@ -347,6 +351,23 @@ func _ensure_room_figure(cam_id: String, id: String) -> bool:
 	room.add_child(fig)
 	_room_figures[cam_id] = {"node": fig, "id": id}
 	return true
+
+## Load a threat GLB once and keep the PackedScene, so re-instancing never re-reads disk.
+func _packed_for(id: String) -> PackedScene:
+	if not _threat_packed.has(id):
+		var path: String = THREAT_GLB.get(id, "")
+		if path == "" or not ResourceLoader.exists(path):
+			return null
+		_threat_packed[id] = load(path)
+	return _threat_packed[id]
+
+## Keep the (cached) figure but stop showing it — cheap, and re-showing it on the threat's
+## next visit is instant. Used when a threat merely leaves the watched cam.
+func _hide_room_figure(cam_id: String) -> void:
+	var d: Dictionary = _room_figures.get(cam_id, {})
+	var n = d.get("node")
+	if is_instance_valid(n):
+		n.visible = false
 
 func _clear_room_figure(cam_id: String) -> void:
 	var d: Dictionary = _room_figures.get(cam_id, {})
@@ -479,13 +500,14 @@ func _refresh_threats() -> void:
 		var tid: String = t.id
 		tag.pressed.connect(func(): _c.tag_anomaly(tid))
 		_threat_host.add_child(tag)
-	# Drop the in-world 3D figure once its threat leaves the watched cam, and never leave one
-	# standing in a room we've switched away from.
+	# Hide (don't destroy) the in-world 3D figure once its threat leaves the watched cam, and
+	# never leave one showing in a room we've switched away from — the cached node re-shows
+	# instantly on the threat's next visit instead of re-instancing the heavy GLB.
 	if not fig_here:
-		_clear_room_figure(_c.current_cam)
+		_hide_room_figure(_c.current_cam)
 	for cid in _room_figures.keys():
 		if cid != _c.current_cam:
-			_clear_room_figure(cid)
+			_hide_room_figure(cid)
 	# The roaming vendor shows on the gate feed while she's at the window (shop/hostile).
 	if _c.vendor and _c.vendor.has_method("on_camera") and _c.vendor.on_camera() and _c.current_cam == MapGraph.GATE:
 		var vtex: Texture2D = _c.vendor.cam_texture()

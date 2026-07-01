@@ -170,7 +170,7 @@ TUT_CAM,Mở camera quan sát trường — bấm C.,Raise the cameras to watch 
 TUT_DONE,Tốt. Ca trực bắt đầu — cầm cự tới 6 giờ sáng.,Good. Your shift begins — hold out until 6 AM.
 COUNTER_ONG_KE,"Ông kẹ: đóng cửa lại, hoặc bật đèn rồi ngồi im.","Ông kẹ: shut the door, or light it and sit still."
 COUNTER_QUY_NHAP_TRANG,Quỷ nhập tràng: đóng cửa bên đó để chặn con mèo.,Quỷ nhập tràng: shut that door to block the cat.
-COUNTER_MA_DA,"Ma da: đừng nghe tiếng dưới nước — khóa cống (D).","Ma da: don't answer the water — close the drain (D)."
+COUNTER_MA_DA,"Ma da lảng vảng cánh phải — đóng cửa để đẩy nó về.","Ma da's roaming the right wing — shut the door to push it back."
 COUNTER_CO_HON,"Cô hồn: đặt mâm cúng (F) cho họ, đừng chống lại.","Cô hồn: lay out an offering (F) — feed them, don't fight."
 COUNTER_MA_TROI,"Ma trơi: ngừng quơ camera, ngồi yên cho nó tan.","Ma trơi: stop whipping the cameras around — be still."
 COUNTER_OAN_HON,"Oan hồn: liếc nhanh thôi, thắp nhang; đi tìm manh mối về em.","Oan hồn: brief glances + incense; gather her clues."
@@ -240,7 +240,7 @@ TAG_URBAN,Truyền thuyết đô thị,Urban legend
 TAG_FOLK_THIN,Hư cấu dân gian,Folk-thin (creator's license)
 TAG_SHARED,Tín ngưỡng chung khu vực,Shared regional belief
 BEST_ONG_KE,"Nỗi sợ tuổi thơ: 'không ngoan là ông kẹ bắt'. Đóng cửa, hoặc ngoan ngồi yên.","A childhood fear: 'behave or the bogeyman takes you.' Shut the door, or just behave."
-BEST_MA_DA,"Hồn người chết đuối đi tìm người thế thân. Đừng trả lời tiếng kêu dưới nước.",A drowned soul seeking a replacement. Never answer the cry from the water.
+BEST_MA_DA,"Hồn người chết đuối lang thang tìm người thế thân. Đóng cửa khi nó tới để đẩy lùi.","A drowned soul roaming for a replacement. Shut the door when it reaches you to drive it back."
 BEST_CO_HON,"Những vong hồn đói lạnh tháng Bảy. Đừng sợ — hãy cúng cho họ.",Hungry souls of the seventh month. Don't fear them — make them an offering.
 BEST_QUY,Xác chưa chôn bật dậy khi mèo nhảy qua. Giữ con mèo tránh xa.,A corpse rises if a cat leaps over it. Keep the cat away.
 BEST_MA_TROI,"Đốm lửa ma trên đồng cũ. Thấy thì đi chậm, đừng chạy.","Ghost-flames over the old field. Walk slow, never run."
