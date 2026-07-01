@@ -89,3 +89,8 @@ func current_texture() -> Texture2D:
 	if not triggered:
 		return _mun_tex if _mun_tex else tex_idle
 	return super.current_texture()
+
+## Only stand as the risen-corpse 3D figure once Mun has crossed; before that the on-cam
+## telegraph must stay the cat (drawn as its 2D sprite), not the corpse.
+func wants_room_figure() -> bool:
+	return triggered

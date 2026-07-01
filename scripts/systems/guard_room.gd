@@ -48,6 +48,8 @@ var _threat_rim := {}        # side -> OmniLight3D co-located with the sprite (A
 const THREAT_SCENES := {
 	"ong_ke": "res://assets/ong_ke_texture.glb",
 	"ma_da": "res://assets/ma_da.glb",
+	# Quỷ nhập tràng rushes the right door once risen — placeholder until real art lands.
+	"quy_nhap_trang": "res://assets/placeholders/quy_nhap_trang.tscn",
 }
 var _threat_models := {}        # side -> Node3D (the 3D figure; stands in for the Sprite3D)
 var _threat_model_id := {}      # side -> String (which threat the cached model was built for)

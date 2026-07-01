@@ -36,6 +36,11 @@ var _room_cur := ""                 # cam_id of the room currently rendering
 const THREAT_GLB := {
 	"ong_ke": "res://assets/ong_ke_texture.glb",
 	"ma_da": "res://assets/ma_da.glb",
+	# Placeholder blockouts until real art lands (swap the path when a GLB exists).
+	"co_hon": "res://assets/placeholders/co_hon.tscn",
+	"ma_troi": "res://assets/placeholders/ma_troi.tscn",
+	"oan_hon": "res://assets/placeholders/oan_hon.tscn",
+	"quy_nhap_trang": "res://assets/placeholders/quy_nhap_trang.tscn",
 }
 const FIGURE_Y := 1.01              # room floor top (0.16) + the GLB's mid-height origin (~0.85)
 var _room_figures := {}             # cam_id -> {"node": Node3D, "id": String}
@@ -343,10 +348,17 @@ func _ensure_room_figure(cam_id: String, id: String) -> bool:
 	if cam and "target" in cam:
 		aim = cam.target
 	# Stand at the room's authored figure_spot when it has one (keeps the figure on open
-	# floor); otherwise fall back to the camera's aim point.
+	# floor); otherwise stand a few metres in front of the camera along its view line —
+	# that's usually open floor, framed centre, rather than at the aim point (a far wall).
 	var spot := aim
 	if cam and "figure_spot" in cam and is_finite(cam.figure_spot.x):
 		spot = cam.figure_spot
+	elif cam:
+		# Most of the way from the camera to where it looks — scales with room size, so the
+		# figure lands mid-frame on open floor instead of on top of the lens or at the wall.
+		var flat_cam := Vector3(cam.position.x, 0.0, cam.position.z)
+		var flat_aim := Vector3(aim.x, 0.0, aim.z)
+		spot = flat_cam.lerp(flat_aim, 0.72)
 	var fig: Node3D = packed.instantiate()
 	fig.position = Vector3(spot.x, FIGURE_Y, spot.z)
 	if cam:
@@ -453,9 +465,10 @@ func _refresh_threats() -> void:
 		_glitch = maxf(_glitch, 0.3)
 		if _fx_mat:
 			_fx_mat.set_shader_parameter("glitch", _glitch)
-		# ong_ke / ma_da stand in the live 3D room as their real GLB instead of the flat
-		# billboard. Keep a centred tag hotspot over the figure; skip the 2D sprite.
-		if THREAT_GLB.has(t.id) and _ensure_room_figure(_c.current_cam, t.id):
+		# Threats with a 3D model stand in the live room instead of the flat billboard.
+		# wants_room_figure() lets a threat opt out while it isn't itself yet (quy nhập
+		# tràng shows the cat Mun until it rises). Keep a centred tag hotspot; skip the sprite.
+		if THREAT_GLB.has(t.id) and t.wants_room_figure() and _ensure_room_figure(_c.current_cam, t.id):
 			fig_here = true
 			var ftag := Button.new()
 			ftag.flat = true

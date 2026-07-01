@@ -369,6 +369,12 @@ func distance_to_office() -> int:
 func is_at_door() -> bool:
 	return phase == GameEnums.ThreatPhase.AT_DOOR
 
+## Whether this threat should be drawn as its 3D room figure right now (vs its 2D sprite).
+## Default yes; a threat that masquerades as something else first (quy nhập tràng = the cat
+## Mun until it rises) overrides this to gate the figure on its own state.
+func wants_room_figure() -> bool:
+	return true
+
 func current_texture() -> Texture2D:
 	if phase == GameEnums.ThreatPhase.ATTACKING and tex_attack:
 		return tex_attack
