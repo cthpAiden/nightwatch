@@ -342,8 +342,13 @@ func _ensure_room_figure(cam_id: String, id: String) -> bool:
 	var aim := Vector3(0.0, 1.3, 2.0)
 	if cam and "target" in cam:
 		aim = cam.target
+	# Stand at the room's authored figure_spot when it has one (keeps the figure on open
+	# floor); otherwise fall back to the camera's aim point.
+	var spot := aim
+	if cam and "figure_spot" in cam and is_finite(cam.figure_spot.x):
+		spot = cam.figure_spot
 	var fig: Node3D = packed.instantiate()
-	fig.position = Vector3(aim.x, FIGURE_Y, aim.z)
+	fig.position = Vector3(spot.x, FIGURE_Y, spot.z)
 	if cam:
 		var to_cam := cam.position - fig.position
 		fig.rotation.y = atan2(to_cam.x, to_cam.z)   # face the model's +Z front at the camera

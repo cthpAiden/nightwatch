@@ -219,3 +219,4 @@ fov = 74.0
 current = true
 script = ExtResource("1")
 target = Vector3(-1.2, 1.1, 1.6)
+figure_spot = Vector3(0.4, 0.0, -0.2)
