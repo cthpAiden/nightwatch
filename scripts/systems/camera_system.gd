@@ -13,6 +13,23 @@ var _fx_mat: ShaderMaterial         # the static/scanline shader (strength is an
 var _fx_burst := 0.0                # decaying static spike on channel change
 var _glitch := 0.0                  # signal-tear amount, ramped while a threat is on the watched feed (backlog#21)
 var _fog := 0.0                     # extra baseline static on a "fog" night
+# A camera whose feed has a 3D blockout renders it into its own SubViewport (isolated
+# 3D world) and pipes the live texture through the same CCTV shader as the SVG feeds.
+# Cameras without a scene here (or whose scene file is missing) fall back to the SVG.
+const ROOM_SCENES := {
+	"gate": "res://scenes/rooms/Gate.tscn",
+	"courtyard": "res://scenes/rooms/Courtyard.tscn",
+	"canteen": "res://scenes/rooms/Canteen.tscn",
+	"classroom": "res://scenes/rooms/Classroom.tscn",
+	"library": "res://scenes/rooms/Library.tscn",
+	"left_hall": "res://scenes/rooms/LeftHall.tscn",
+	"gym": "res://scenes/rooms/Gym.tscn",
+	"restroom": "res://scenes/rooms/Restroom.tscn",
+	"infirmary": "res://scenes/rooms/Infirmary.tscn",
+	"right_hall": "res://scenes/rooms/RightHall.tscn",
+}
+var _room_vps := {}                 # cam_id -> SubViewport (created on first visit)
+var _room_cur := ""                 # cam_id of the room currently rendering
 var _last_feed_size := Vector2.ZERO # last feed rect size — re-upload rect_aspect only on resize
 const FX_BASE := 0.06
 var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
@@ -48,8 +65,16 @@ func setup(controller) -> void:
 func _notification(what: int) -> void:
 	# Re-assert a full-screen rect whenever the panel is shown (cheap insurance so the
 	# CCTV always covers the whole viewport).
-	if what == NOTIFICATION_VISIBILITY_CHANGED and is_inside_tree() and visible:
-		UI.full(self)
+	if what == NOTIFICATION_VISIBILITY_CHANGED and is_inside_tree():
+		if visible:
+			UI.full(self)
+			# Resume the live 3D feed for the room being watched (paused while lowered).
+			if _room_cur != "" and _room_vps.has(_room_cur):
+				_room_vps[_room_cur].render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		else:
+			# Monitor lowered: stop every 3D room rendering so hidden feeds cost nothing.
+			for id in _room_vps:
+				_room_vps[id].render_target_update_mode = SubViewport.UPDATE_DISABLED
 
 func _build() -> void:
 	var bg := UI.color_rect(Color(0.01, 0.012, 0.02))
@@ -246,9 +271,10 @@ func _select(cam_id: String) -> void:
 	Audio.play_sfx("camera_switch", -10.0)
 
 func show_feed(cam_id: String) -> void:
-	var path := "res://assets/art/cameras/cam_%s.svg" % cam_id
-	if ResourceLoader.exists(path):
-		_feed.texture = load(path)
+	if not _mount_room(cam_id):
+		var path := "res://assets/art/cameras/cam_%s.svg" % cam_id
+		if ResourceLoader.exists(path):
+			_feed.texture = load(path)
 	_fx_burst = 0.5   # a burst of static as the channel resolves to the new feed
 	if _fx_mat:
 		_fx_mat.set_shader_parameter("strength", FX_BASE + _fog + _fx_burst)
@@ -257,6 +283,30 @@ func show_feed(cam_id: String) -> void:
 		_map_buttons[cam].modulate = Color(1, 0.85, 0.4) if cam == cam_id else Color(1, 1, 1)
 	_update_clue_hotspot(cam_id)
 	_refresh_threats()
+
+## Point _feed at the live 3D render for a camera that has a blockout scene. Returns
+## false (so the caller uses the SVG) when the cam has no scene or the file is missing.
+## Only the active room renders; the rest are held at UPDATE_DISABLED to save the GPU.
+func _mount_room(cam_id: String) -> bool:
+	if not ROOM_SCENES.has(cam_id):
+		return false
+	var scene_path: String = ROOM_SCENES[cam_id]
+	if not ResourceLoader.exists(scene_path):
+		return false
+	if not _room_vps.has(cam_id):
+		var vp := SubViewport.new()
+		vp.size = Vector2i(960, 540)
+		vp.own_world_3d = true
+		vp.add_child(load(scene_path).instantiate())
+		add_child(vp)
+		_room_vps[cam_id] = vp
+	for id in _room_vps:
+		_room_vps[id].render_target_update_mode = SubViewport.UPDATE_DISABLED
+	var cur: SubViewport = _room_vps[cam_id]
+	cur.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_feed.texture = cur.get_texture()
+	_room_cur = cam_id
+	return true
 
 ## Confirm an anomaly tag with a brief static/brightness spike on the live feed —
 ## reuses the same channel-change burst so the feed "pops" when you nail a tag.

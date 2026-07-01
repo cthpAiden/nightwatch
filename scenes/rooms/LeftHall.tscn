@@ -1,0 +1,137 @@
+[gd_scene load_steps=7 format=3 uid="uid://c3wnightlhall01"]
+
+; --- CSG blockout: hành lang trái (left_hall) ---
+; Hành lang dài theo z: sàn + trần + 2 tường bên + tường cuối (có 1 cửa). Cửa lớp
+; dọc hai bên. Ánh sáng: hàng đèn trần lùi dần về cuối (tạo chiều sâu horror).
+
+[ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.008, 0.01, 0.016, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.1, 0.11, 0.15, 1)
+ambient_light_energy = 0.5
+fog_enabled = true
+fog_light_color = Color(0.028, 0.032, 0.042, 1)
+fog_density = 0.035
+
+[sub_resource type="StandardMaterial3D" id="MatWall"]
+albedo_color = Color(0.2, 0.22, 0.21, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="MatFloor"]
+albedo_color = Color(0.16, 0.16, 0.17, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="MatDoor"]
+albedo_color = Color(0.28, 0.19, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="MatCeil"]
+albedo_color = Color(0.17, 0.17, 0.19, 1)
+roughness = 1.0
+
+[node name="LeftHall" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+; ---------- KHUNG HÀNH LANG ----------
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+size = Vector3(3.4, 0.2, 16.0)
+material = SubResource("MatFloor")
+
+[node name="Ceiling" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 0)
+size = Vector3(3.4, 0.2, 16.0)
+material = SubResource("MatCeil")
+
+[node name="WallL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 1.5, 0)
+size = Vector3(0.3, 3.2, 16.0)
+material = SubResource("MatWall")
+
+[node name="WallR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 1.5, 0)
+size = Vector3(0.3, 3.2, 16.0)
+material = SubResource("MatWall")
+
+; ---------- TƯỜNG CUỐI (có cửa) ----------
+[node name="EndWall" type="CSGCombiner3D" parent="."]
+
+[node name="EndOuter" type="CSGBox3D" parent="EndWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 7.9)
+size = Vector3(3.6, 3.2, 0.3)
+material = SubResource("MatWall")
+
+[node name="EndDoorHole" type="CSGBox3D" parent="EndWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 7.9)
+operation = 2
+size = Vector3(1.1, 2.2, 0.5)
+
+[node name="EndDoorPanel" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 8.02)
+size = Vector3(1.05, 2.15, 0.06)
+material = SubResource("MatDoor")
+
+; ---------- CỬA DỌC HAI BÊN ----------
+[node name="DoorL1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.53, 1.05, -3.5)
+size = Vector3(0.1, 2.1, 1.0)
+material = SubResource("MatDoor")
+
+[node name="DoorL2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.53, 1.05, 0.5)
+size = Vector3(0.1, 2.1, 1.0)
+material = SubResource("MatDoor")
+
+[node name="DoorL3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.53, 1.05, 4.5)
+size = Vector3(0.1, 2.1, 1.0)
+material = SubResource("MatDoor")
+
+[node name="DoorR1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.53, 1.05, -1.5)
+size = Vector3(0.1, 2.1, 1.0)
+material = SubResource("MatDoor")
+
+[node name="DoorR2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.53, 1.05, 2.5)
+size = Vector3(0.1, 2.1, 1.0)
+material = SubResource("MatDoor")
+
+; ---------- HÀNG ĐÈN TRẦN (lùi dần) ----------
+[node name="Hl1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, -5.0)
+light_color = Color(0.98, 0.93, 0.8, 1)
+light_energy = 1.5
+omni_range = 5.5
+shadow_enabled = true
+
+[node name="Hl2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, -1.0)
+light_color = Color(0.96, 0.9, 0.78, 1)
+light_energy = 1.3
+omni_range = 5.0
+
+[node name="Hl3" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, 3.0)
+light_color = Color(0.8, 0.82, 0.85, 1)
+light_energy = 1.0
+omni_range = 4.5
+
+[node name="Hl4" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, 6.5)
+light_color = Color(0.7, 0.75, 0.85, 1)
+light_energy = 0.7
+omni_range = 4.0
+
+; ---------- CAMERA CCTV (đầu hành lang, nhìn dọc) ----------
+[node name="CCTV" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.15, 2.7, -7.4)
+fov = 72.0
+current = true
+script = ExtResource("1")
+target = Vector3(-0.2, 1.2, 4.0)

@@ -1,0 +1,139 @@
+[gd_scene load_steps=7 format=3 uid="uid://c3wnightgym01"]
+
+; --- CSG blockout: nhà thi đấu / gym ---
+; Phòng lớn trần cao; 2 khung rổ hai đầu (bảng + vành + cột); dãy khán đài bậc thang
+; dọc một bên. Ánh sáng: đèn cao áp.
+
+[ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.01, 0.012, 0.018, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.12, 0.13, 0.17, 1)
+ambient_light_energy = 0.7
+fog_enabled = true
+fog_light_color = Color(0.03, 0.035, 0.05, 1)
+fog_density = 0.02
+
+[sub_resource type="StandardMaterial3D" id="MatWall"]
+albedo_color = Color(0.22, 0.22, 0.24, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="MatFloor"]
+albedo_color = Color(0.36, 0.26, 0.15, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="MatMetal"]
+albedo_color = Color(0.15, 0.16, 0.18, 1)
+metallic = 0.5
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="MatBoard"]
+albedo_color = Color(0.7, 0.7, 0.72, 1)
+roughness = 0.7
+
+[node name="Gym" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+; ---------- SHELL (trần cao) ----------
+[node name="Shell" type="CSGCombiner3D" parent="."]
+
+[node name="Outer" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
+size = Vector3(16.4, 6.2, 12.4)
+material = SubResource("MatWall")
+
+[node name="Inner" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.0, 0)
+operation = 2
+size = Vector3(16.0, 6.0, 12.0)
+
+[node name="DoorHole" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, 1.2, -6.0)
+operation = 2
+size = Vector3(1.6, 2.4, 0.8)
+
+[node name="WinH1" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.6, 6.0)
+operation = 2
+size = Vector3(9.0, 1.4, 0.8)
+
+; ---------- SÀN GỖ ----------
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.13, 0)
+size = Vector3(15.9, 0.06, 11.9)
+material = SubResource("MatFloor")
+
+; ---------- KHUNG RỔ (đầu +z) ----------
+[node name="PoleN" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 5.6)
+size = Vector3(0.16, 3.4, 0.16)
+material = SubResource("MatMetal")
+
+[node name="BoardN" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, 5.2)
+size = Vector3(1.8, 1.1, 0.08)
+material = SubResource("MatBoard")
+
+[node name="RimN" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.65, 4.85)
+size = Vector3(0.55, 0.06, 0.55)
+material = SubResource("MatMetal")
+
+; ---------- KHUNG RỔ (đầu -z) ----------
+[node name="PoleS" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -5.6)
+size = Vector3(0.16, 3.4, 0.16)
+material = SubResource("MatMetal")
+
+[node name="BoardS" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.1, -5.2)
+size = Vector3(1.8, 1.1, 0.08)
+material = SubResource("MatBoard")
+
+[node name="RimS" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.65, -4.85)
+size = Vector3(0.55, 0.06, 0.55)
+material = SubResource("MatMetal")
+
+; ---------- KHÁN ĐÀI (bậc thang dọc tường +x) ----------
+[node name="Tier1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4, 0.25, 0)
+size = Vector3(1.0, 0.5, 10.0)
+material = SubResource("MatMetal")
+
+[node name="Tier2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.9, 0.75, 0)
+size = Vector3(1.0, 0.5, 10.0)
+material = SubResource("MatMetal")
+
+[node name="Tier3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.4, 1.25, 0)
+size = Vector3(1.0, 0.5, 10.0)
+material = SubResource("MatMetal")
+
+; ---------- ÁNH SÁNG (đèn cao áp) ----------
+[node name="Bay1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 5.4, 2.0)
+light_color = Color(0.95, 0.94, 0.88, 1)
+light_energy = 2.0
+omni_range = 13.0
+shadow_enabled = true
+
+[node name="Bay2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 5.4, -2.0)
+light_color = Color(0.9, 0.92, 0.9, 1)
+light_energy = 1.8
+omni_range = 13.0
+shadow_enabled = true
+
+; ---------- CAMERA CCTV (góc cao) ----------
+[node name="CCTV" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6, 4.7, -5.4)
+fov = 78.0
+current = true
+script = ExtResource("1")
+target = Vector3(-1.8, 1.4, 2.6)

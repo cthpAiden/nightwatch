@@ -1,0 +1,142 @@
+[gd_scene load_steps=7 format=3 uid="uid://c3wnightrest01"]
+
+; --- CSG blockout: nhà vệ sinh (restroom) ---
+; Phòng nhỏ ốp tile; dãy buồng vệ sinh (vách + cửa + bệ) dọc tường sau; quầy lavabo
+; + gương dọc tường trái. Ánh sáng: 2 bóng (1 cái leo lét).
+
+[ext_resource type="Script" path="res://scenes/rooms/cctv_aim.gd" id="1"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.01, 0.012, 0.018, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.12, 0.14, 0.16, 1)
+ambient_light_energy = 0.7
+fog_enabled = true
+fog_light_color = Color(0.03, 0.035, 0.045, 1)
+fog_density = 0.03
+
+[sub_resource type="StandardMaterial3D" id="MatTile"]
+albedo_color = Color(0.3, 0.32, 0.33, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="MatFloor"]
+albedo_color = Color(0.2, 0.21, 0.22, 1)
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="MatStall"]
+albedo_color = Color(0.35, 0.33, 0.28, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="MatMirror"]
+albedo_color = Color(0.14, 0.18, 0.22, 1)
+metallic = 0.8
+roughness = 0.2
+
+[node name="Restroom" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+; ---------- SHELL ----------
+[node name="Shell" type="CSGCombiner3D" parent="."]
+
+[node name="Outer" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+size = Vector3(8.4, 3.4, 6.4)
+material = SubResource("MatTile")
+
+[node name="Inner" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+operation = 2
+size = Vector3(8.0, 3.2, 6.0)
+
+[node name="DoorHole" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 1.2, -3.0)
+operation = 2
+size = Vector3(1.3, 2.4, 0.8)
+
+[node name="WinHole" type="CSGBox3D" parent="Shell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.0, 2.6, 1.5)
+operation = 2
+size = Vector3(0.8, 0.8, 1.6)
+
+; ---------- SÀN ----------
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.13, 0)
+size = Vector3(7.9, 0.06, 5.9)
+material = SubResource("MatFloor")
+
+; ---------- BUỒNG VỆ SINH (vách dọc tường sau z+) ----------
+[node name="PartA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 1.0, 2.2)
+size = Vector3(0.08, 1.8, 1.5)
+material = SubResource("MatStall")
+
+[node name="PartB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 1.0, 2.2)
+size = Vector3(0.08, 1.8, 1.5)
+material = SubResource("MatStall")
+
+[node name="PartC" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.0, 2.2)
+size = Vector3(0.08, 1.8, 1.5)
+material = SubResource("MatStall")
+
+[node name="PartD" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 1.0, 2.2)
+size = Vector3(0.08, 1.8, 1.5)
+material = SubResource("MatStall")
+
+[node name="StallDoor1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 1.05, 1.5)
+size = Vector3(1.2, 1.7, 0.06)
+material = SubResource("MatStall")
+
+[node name="StallDoor2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1.05, 1.5)
+size = Vector3(1.2, 1.7, 0.06)
+material = SubResource("MatStall")
+
+[node name="Toilet1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 0.3, 2.5)
+size = Vector3(0.5, 0.6, 0.5)
+material = SubResource("MatTile")
+
+[node name="Toilet2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.3, 2.5)
+size = Vector3(0.5, 0.6, 0.5)
+material = SubResource("MatTile")
+
+; ---------- QUẦY LAVABO + GƯƠNG (tường trái x-) ----------
+[node name="SinkCounter" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0.85, -0.4)
+size = Vector3(0.7, 0.2, 3.6)
+material = SubResource("MatTile")
+
+[node name="Mirror" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.94, 1.75, -0.4)
+size = Vector3(0.04, 1.0, 3.4)
+material = SubResource("MatMirror")
+
+; ---------- ÁNH SÁNG ----------
+[node name="Light1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 3.0, -0.5)
+light_color = Color(0.85, 0.9, 0.92, 1)
+light_energy = 1.6
+omni_range = 8.0
+shadow_enabled = true
+
+[node name="Light2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3.0, 1.5)
+light_color = Color(0.8, 0.86, 0.9, 1)
+light_energy = 1.0
+omni_range = 7.0
+
+; ---------- CAMERA CCTV ----------
+[node name="CCTV" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.8, -2.6)
+fov = 74.0
+current = true
+script = ExtResource("1")
+target = Vector3(-1.2, 1.1, 1.6)
