@@ -312,6 +312,7 @@ func _mount_room(cam_id: String) -> bool:
 		var vp := SubViewport.new()
 		vp.size = Vector2i(960, 540)
 		vp.own_world_3d = true
+		vp.msaa_3d = Viewport.MSAA_2X
 		vp.add_child(load(scene_path).instantiate())
 		add_child(vp)
 		_room_vps[cam_id] = vp

@@ -1084,6 +1084,7 @@ func _crt_show(cam_id: String) -> bool:
 		_crt_vp = SubViewport.new()
 		_crt_vp.size = Vector2i(480, 270)
 		_crt_vp.own_world_3d = true
+		_crt_vp.msaa_3d = Viewport.MSAA_2X
 		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		add_child(_crt_vp)
 		if _screen_mat:

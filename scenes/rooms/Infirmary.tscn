@@ -17,16 +17,31 @@ ambient_light_energy = 0.7
 fog_enabled = true
 fog_light_color = Color(0.03, 0.035, 0.045, 1)
 fog_density = 0.028
+tonemap_mode = 2
+tonemap_white = 3.0
+ssao_enabled = true
+ssao_radius = 1.1
+ssao_intensity = 1.6
+glow_enabled = true
+glow_intensity = 0.25
+glow_strength = 0.9
+glow_bloom = 0.05
+glow_blend_mode = 2
+glow_hdr_threshold = 1.3
+adjustment_enabled = true
+adjustment_brightness = 1.0
+adjustment_contrast = 1.1
+adjustment_saturation = 1.06
 
 [sub_resource type="StandardMaterial3D" id="MatWall"]
-albedo_color = Color(0.44, 0.46, 0.47, 1)
+albedo_color = Color(0.88, 0.9, 0.91, 1)
 albedo_texture = ExtResource("TexWall")
 roughness = 1.0
 uv1_triplanar = true
-uv1_scale = Vector3(0.5, 0.5, 0.5)
+uv1_scale = Vector3(0.4, 0.4, 0.4)
 
 [sub_resource type="StandardMaterial3D" id="MatFloor"]
-albedo_color = Color(0.4, 0.4, 0.42, 1)
+albedo_color = Color(0.85, 0.85, 0.88, 1)
 albedo_texture = ExtResource("TexFloor")
 roughness = 0.7
 uv1_triplanar = true
@@ -79,16 +94,19 @@ material = SubResource("MatWall")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
 operation = 2
 size = Vector3(9.0, 3.2, 7.0)
+material = SubResource("MatWall")
 
 [node name="DoorHole" type="CSGBox3D" parent="Shell"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0, 1.2, -3.5)
 operation = 2
 size = Vector3(1.3, 2.4, 0.8)
+material = SubResource("MatWall")
 
 [node name="WinHole" type="CSGBox3D" parent="Shell"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.0, 1.0)
 operation = 2
 size = Vector3(0.8, 1.3, 1.8)
+material = SubResource("MatWall")
 
 ; ---------- SÀN ----------
 [node name="Floor" type="CSGBox3D" parent="."]
