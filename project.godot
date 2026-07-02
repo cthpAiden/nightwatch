@@ -19,6 +19,7 @@ config/icon="res://assets/art/ui/icon_app.svg"
 
 Events="*res://scripts/core/event_bus.gd"
 Settings="*res://scripts/core/settings_manager.gd"
+Graphics="*res://scripts/core/graphics_quality.gd"
 Save="*res://scripts/core/save_manager.gd"
 Locale="*res://scripts/core/locale_manager.gd"
 Audio="*res://scripts/core/audio_manager.gd"

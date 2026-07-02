@@ -78,6 +78,7 @@ func setup(controller) -> void:
 	_c = controller
 	UI.full(self)
 	_build()
+	Events.settings_changed.connect(apply_quality)
 
 func _notification(what: int) -> void:
 	# Re-assert a full-screen rect whenever the panel is shown (cheap insurance so the
@@ -312,12 +313,17 @@ func _mount_room(cam_id: String) -> bool:
 		return false
 	if not _room_vps.has(cam_id):
 		var vp := SubViewport.new()
-		vp.size = Vector2i(960, 540)
+		vp.size = Graphics.cctv_viewport_size()
 		vp.own_world_3d = true
-		vp.msaa_3d = Viewport.MSAA_2X
-		vp.add_child(load(scene_path).instantiate())
+		var room_inst: Node = load(scene_path).instantiate()
+		vp.add_child(room_inst)
 		add_child(vp)
 		_room_vps[cam_id] = vp
+		# Overlay the active graphics preset onto this feed's MSAA + the room's own Environment
+		# (SSAO/glow/volumetrics). Each room instances its own Environment, so this can't bleed.
+		Graphics.apply_to_viewport(vp, false)
+		Graphics.apply_to_env(_room_env(room_inst))
+		Graphics.apply_to_lights(room_inst)
 	for id in _room_vps:
 		_room_vps[id].render_target_update_mode = SubViewport.UPDATE_DISABLED
 	var cur: SubViewport = _room_vps[cam_id]
@@ -325,6 +331,22 @@ func _mount_room(cam_id: String) -> bool:
 	_feed.texture = cur.get_texture()
 	_room_cur = cam_id
 	return true
+
+## The room scene's own Environment (each room authors its mood; Graphics only overlays perf).
+func _room_env(room: Node) -> Environment:
+	var we := room.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	return we.environment if we else null
+
+## Re-apply the current preset to every mounted room feed (called on a live preset switch).
+func apply_quality() -> void:
+	for id in _room_vps:
+		var vp: SubViewport = _room_vps[id]
+		vp.size = Graphics.cctv_viewport_size()
+		Graphics.apply_to_viewport(vp, false)
+		var room: Node = vp.get_child(0) if vp.get_child_count() > 0 else null
+		if room:
+			Graphics.apply_to_env(_room_env(room))
+			Graphics.apply_to_lights(room)
 
 ## Stand threat `id`'s 3D GLB in cam_id's live room feed, at the point the CCTV is aimed
 ## (so it lands centre-frame) and facing the camera. Cached and merely SHOWN/HIDDEN as the

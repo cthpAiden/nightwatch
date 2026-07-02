@@ -80,3 +80,40 @@ one commit per phase.
 - Don't touch: CCTV/CRT/menu/jumpscare shaders (already tuned), placeholder threat figure
   geometry (Aiden is making real assets later), and don't reintroduce BMad/heavy planning
   frameworks — plain implement-test-commit.
+
+---
+
+# Graphics-quality presets + FPS overhaul (separate pass, branch `graphics-overhaul`)
+
+A distinct effort from the mass-improve pass above: a player-selectable **Low/Medium/High**
+graphics preset that reconciles "richer atmosphere" with "runs on weak hardware." Low is the
+integrated-GPU floor. Environments are **not** centralised (each room keeps its authored mood);
+instead a runtime applier overlays the preset's perf knobs.
+
+## What landed
+- **`scripts/core/graphics_quality.gd`** — new autoload `Graphics`. `apply_to_env` (SSAO/glow on
+  Medium+, volumetric fog + optional SDFGI on High), `apply_to_viewport` (Low = FSR2 @ 0.7 render
+  scale + FXAA, Medium = MSAA 2×, High = TAA; positional shadow atlas 2048/4096/8192),
+  `apply_to_lights` (positional shadows dropped below Medium, authored state stashed in node meta
+  so a live switch restores exactly), `cctv_viewport_size` (640×360 Low / 960×540 else).
+- **`settings_manager.gd`** — `graphics_quality` (+ `sdfgi_enabled`) persisted under `[display]`;
+  first-run default auto-detected from the GPU name (integrated → Low).
+- **Wire-in**: `camera_system.gd::_mount_room` (per-room feed env + msaa + lights, size from preset)
+  and `guard_room.gd::_build_environment`/end of `_ready` (office env + root viewport + lights).
+  Both re-apply on `Events.settings_changed` for a live mid-night preset switch.
+- **`scripts/ui/debug_overlay.gd`** — F3 perf HUD (FPS, cpu/phys ms, draw calls, prims, VRAM,
+  nodes, current preset). Hidden by default; added in `night_controller._build_ui`.
+- **Settings UI + L10n**: preset dropdown + GI toggle in `settings_menu.gd`; new `SET_GRAPHICS`,
+  `GFX_*`, `SET_SDFGI(_HELP)`, `SET_GFX_HELP` keys in `strings.csv` (`.translation` rebuilt).
+
+## Verified
+- SelfTest **119/0**, IntegrityCheck **36/0**, FlowTest death+win **PASS** (win needs `NW_FASTWIN=1`).
+- Real-renderer boot clean (Vulkan/Forward+). **Still TODO: measure FPS per preset via F3 in an
+  actual played night** — needs interactive driving, not done here.
+
+## Corrections to the reference notes above
+- This machine's Godot binary is `C:\Users\DELL\Desktop\Godot_v4.7-stable_win64_console.exe`
+  (the `datdo\OneDrive` path above is a different device).
+- The dev GPU here is a **GTX 1050** (low-end discrete), not an RTX 3060 — reinforces the Low floor.
+- A killed headless run corrupts `.godot/imported` (missing fonts/samples → cascading Nil UI). If
+  that happens, delete `.godot` and re-run `--import` to completion.

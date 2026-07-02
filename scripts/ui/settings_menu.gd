@@ -49,6 +49,19 @@ func _build() -> void:
 	diff.item_selected.connect(func(i): Settings.apply({"difficulty": i}))
 	_help(vb, "SET_DIFF_HELP")
 
+	# Graphics preset (Low/Medium/High) + optional real-time GI. Applied live by the
+	# Graphics autoload; on the menu there's no night loaded, so it takes effect next launch.
+	var gfx := _option(vb, "SET_GRAPHICS", ["GFX_LOW", "GFX_MEDIUM", "GFX_HIGH"], Settings.graphics_quality)
+	gfx.item_selected.connect(func(i): Settings.apply({"graphics_quality": i}))
+	_help(vb, "SET_GFX_HELP")
+
+	var gi_row := _row(vb, "SET_SDFGI")
+	var gi := CheckButton.new()
+	gi.button_pressed = Settings.sdfgi_enabled
+	gi.toggled.connect(func(on): Settings.apply({"sdfgi_enabled": on}))
+	gi_row.add_child(gi)
+	_help(vb, "SET_SDFGI_HELP")
+
 	var buttons := UI.hbox(12)
 	vb.add_child(buttons)
 	var back := UI.button("SET_BACK", 240, 48)

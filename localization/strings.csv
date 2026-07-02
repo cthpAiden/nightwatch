@@ -32,6 +32,11 @@ DIFF_EASY,Dễ,Easy
 DIFF_NORMAL,Thường,Normal
 DIFF_HARD,Khó,Hard
 DIFF_NIGHTMARE,Ác Mộng,Nightmare
+SET_GRAPHICS,Đồ Họa,Graphics
+GFX_LOW,Thấp,Low
+GFX_MEDIUM,Trung Bình,Medium
+GFX_HIGH,Cao,High
+SET_SDFGI,Chiếu Sáng Động (GI),Dynamic Lighting (GI)
 BTN_CONTINUE,Tiếp tục,Continue
 BTN_RETRY,Thử lại,Retry
 BTN_QUIT,Thoát,Quit
@@ -353,6 +358,8 @@ STATS_ENDINGS,Kết cục,Endings
 STATS_NEMESIS,Bị bắt nhiều nhất bởi,Most caught by
 SET_DIFF_HELP,Dễ: ma chậm và hiền hơn. Ác Mộng: nhanh và dồn dập.,"Easy: slower, gentler threats. Nightmare: fast and relentless."
 SET_SCARE_HELP,"Giảm: rung nhẹ, không giật hình. Tắt: không có ảnh hù.","Reduced: softer shake, no screen jitter. Off: no jump image."
+SET_GFX_HELP,"Thấp: cho máy yếu (tắt SSAO/bóng phụ, dựng hình ở 70%). Cao: sương thể tích, GI tuỳ chọn.","Low: for weak GPUs (SSAO/extra shadows off, 70% render). High: volumetric fog, optional GI."
+SET_SDFGI_HELP,"Chiếu sáng động chân thực nhưng nặng — chỉ bật khi máy khoẻ và đang ở mức Cao.","Realistic dynamic lighting, but heavy — enable only on strong hardware at High."
 BESTIARY_DISCOVERED,Đã khám phá,Discovered
 OFFERING_WRONG,Đồ cúng phải thanh đạm. Bỏ đồ mặn ra.,Offerings must be humble — take the meat out.
 GIAT_PROMPT,"Giật cô hồn! Buông cho tụi nhỏ giật lấy lộc, hay giữ mâm?","Souls scramble for the tray! Let the children snatch it for lộc, or guard it?"

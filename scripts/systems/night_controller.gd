@@ -221,6 +221,9 @@ void fragment() {
 	pause.setup(self)
 	pause.visible = false
 
+	# Perf readout (F3). Its own high layer; hidden until toggled, so it's free in play.
+	add_child(load("res://scripts/ui/debug_overlay.gd").new())
+
 	# Cô hồn "smother": a wall of pressing faces that fades in over the whole screen
 	# (and the camera feed) as the crowd swells — information denial until you feed them.
 	_crowd_layer = CanvasLayer.new()

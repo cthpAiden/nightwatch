@@ -155,6 +155,9 @@ func _ready() -> void:
 	_build_doorway(GameEnums.Side.LEFT, -3.9)
 	_build_doorway(GameEnums.Side.RIGHT, 3.9)
 	_build_apparition()
+	# Lights exist now — apply the preset's shadow-caster budget (positional shadows
+	# are dropped below Medium; the moon cascade stays at every tier).
+	Graphics.apply_to_lights(self)
 	set_process(true)
 	set_process_unhandled_input(true)
 	# Dev framing hook for the screenshot harness: hold a fixed look angle.
@@ -169,6 +172,11 @@ func _ready() -> void:
 		_cam.fov = float(OS.get_environment("NW_LOOK_FOV"))
 
 # --- build ------------------------------------------------------------------
+func _on_settings_changed() -> void:
+	Graphics.apply_to_env(_env, "office")
+	Graphics.apply_to_viewport(get_viewport(), true)
+	Graphics.apply_to_lights(self)
+
 func _build_environment() -> void:
 	var we := WorldEnvironment.new()
 	var env := Environment.new()
@@ -204,6 +212,12 @@ func _build_environment() -> void:
 	we.environment = env
 	_env = env
 	add_child(we)
+
+	# Overlay the active graphics preset: SSAO/glow/volumetrics on the office Environment,
+	# render-scale/AA/shadow-atlas on the root viewport. Re-applied on a live preset switch.
+	Graphics.apply_to_env(_env, "office")
+	Graphics.apply_to_viewport(get_viewport(), true)
+	Events.settings_changed.connect(_on_settings_changed)
 
 	_pivot = Node3D.new()
 	_pivot.position = PIVOT_BASE
