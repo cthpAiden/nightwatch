@@ -451,6 +451,11 @@ func _refresh_threats() -> void:
 	# full teardown/rebuild — the 4Hz free+recreate+reconnect churn was pure waste on the
 	# common identical-state pass. (AUDIT#1, minimal-first-step variant)
 	var sig := "%s|%s" % [_c.current_cam, _c.is_revealed()]
+	# The vendor sprite is drawn by this rebuild too, so her state must be part of the
+	# fingerprint or she'd appear/linger/keep the shop face stale while the threats sit
+	# still (her sprite swaps on SHOP -> HOSTILE while on_camera() stays true).
+	if _c.vendor and _c.vendor.has_method("on_camera"):
+		sig += "|v%d" % _c.vendor.state
 	for t in _c.director.threats:
 		var stex: Texture2D = t.current_texture()
 		sig += "|%s@%s#%d" % [t.id, t.current_location, stex.get_instance_id() if stex else 0]
