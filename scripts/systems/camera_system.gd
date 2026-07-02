@@ -50,6 +50,8 @@ const FX_BASE := 0.06
 var _clue_btn: TextureButton        # classroom-camera investigation hotspot (her drawing)
 var _clue_pulse := 0.0              # animates the unclaimed hotspot so the eye catches it
 var _oan_hint_shown := false        # one-time "tag her" hint on first oan_hon sighting
+var _threats_sig := ""              # last overlay state — skip the 4Hz rebuild when unchanged (AUDIT#1)
+var _sig_on_feed := false           # a figure was on the watched feed at that signature
 
 ## A foggy night runs every feed heavier with static (set once at night start).
 func set_fog_level(v: float) -> void:
@@ -442,10 +444,28 @@ func _process(delta: float) -> void:
 		_refresh_threats()
 
 func _refresh_threats() -> void:
-	for c in _threat_host.get_children():
-		c.queue_free()
 	if _c == null or _c.director == null:
 		return
+	# Fingerprint everything the overlay is built from (watched cam, reveal state, each
+	# threat's location + current frame). If nothing changed since the last pass, skip the
+	# full teardown/rebuild — the 4Hz free+recreate+reconnect churn was pure waste on the
+	# common identical-state pass. (AUDIT#1, minimal-first-step variant)
+	var sig := "%s|%s" % [_c.current_cam, _c.is_revealed()]
+	for t in _c.director.threats:
+		var stex: Texture2D = t.current_texture()
+		sig += "|%s@%s#%d" % [t.id, t.current_location, stex.get_instance_id() if stex else 0]
+	if sig == _threats_sig:
+		# Keep the signal-tear held while a figure stays on the watched feed (the rebuild
+		# used to re-ramp it every pass; without this the tear would decay mid-sighting).
+		if _sig_on_feed:
+			_glitch = maxf(_glitch, 0.3)
+			if _fx_mat:
+				_fx_mat.set_shader_parameter("glitch", _glitch)
+		return
+	_threats_sig = sig
+	_sig_on_feed = false
+	for c in _threat_host.get_children():
+		c.queue_free()
 	# Reset map dots to base every pass so reveal highlights never go stale.
 	for cam in _map_buttons:
 		_map_buttons[cam].modulate = Color(1, 0.85, 0.4) if cam == _c.current_cam else Color(1, 1, 1)
@@ -463,6 +483,7 @@ func _refresh_threats() -> void:
 		# A threat is on the feed we're watching — tear the signal (ramped here, decayed in
 		# _process so it holds while present then resolves when she leaves). (backlog#21)
 		# Kept subtle (was 0.6) — a hint of interference, not a screen full of noise.
+		_sig_on_feed = true
 		_glitch = maxf(_glitch, 0.3)
 		if _fx_mat:
 			_fx_mat.set_shader_parameter("glitch", _glitch)
