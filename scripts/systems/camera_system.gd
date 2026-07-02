@@ -30,6 +30,7 @@ const ROOM_SCENES := {
 }
 var _room_vps := {}                 # cam_id -> SubViewport (created on first visit)
 var _room_cur := ""                 # cam_id of the room currently rendering
+var _feed_accum := 0.0              # throttles the watched feed's re-render to Graphics.feed_render_interval()
 # ong_ke / ma_da show on the feed as their real 3D GLB standing in the room (lit by the
 # room lights, occluded by props) instead of a flat SVG billboard. Threats without a model
 # yet keep the 2D overlay in _refresh_threats. Mirrors guard_room.THREAT_SCENES.
@@ -86,9 +87,11 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_VISIBILITY_CHANGED and is_inside_tree():
 		if visible:
 			UI.full(self)
-			# Resume the live 3D feed for the room being watched (paused while lowered).
+			# Resume the live 3D feed for the room being watched (paused while lowered): render
+			# once now for an instant image, then _pump_feed governs the throttled cadence.
 			if _room_cur != "" and _room_vps.has(_room_cur):
-				_room_vps[_room_cur].render_target_update_mode = SubViewport.UPDATE_ALWAYS
+				_room_vps[_room_cur].render_target_update_mode = SubViewport.UPDATE_ONCE
+				_feed_accum = 0.0
 		else:
 			# Monitor lowered: stop every 3D room rendering so hidden feeds cost nothing.
 			for id in _room_vps:
@@ -327,10 +330,28 @@ func _mount_room(cam_id: String) -> bool:
 	for id in _room_vps:
 		_room_vps[id].render_target_update_mode = SubViewport.UPDATE_DISABLED
 	var cur: SubViewport = _room_vps[cam_id]
-	cur.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# Render this switch immediately; _pump_feed then governs the ongoing cadence per preset.
+	cur.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_feed_accum = 0.0
 	_feed.texture = cur.get_texture()
 	_room_cur = cam_id
 	return true
+
+## Drive the watched feed's re-render cadence. Below High the room renders at a throttled
+## rate (UPDATE_ONCE ticked on a timer) instead of every frame — a full room render skipped
+## on most frames, and a choppier feed reads as more authentically CCTV. High renders always.
+func _pump_feed(delta: float) -> void:
+	if _room_cur == "" or not _room_vps.has(_room_cur):
+		return
+	var vp: SubViewport = _room_vps[_room_cur]
+	var interval := Graphics.feed_render_interval()
+	if interval <= 0.0:
+		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		return
+	_feed_accum += delta
+	if _feed_accum >= interval:
+		_feed_accum = 0.0
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 ## The room scene's own Environment (each room authors its mood; Graphics only overlays perf).
 func _room_env(room: Node) -> Environment:
@@ -439,6 +460,7 @@ func _fmt_ts(gm: float) -> String:
 func _process(delta: float) -> void:
 	if not visible:
 		return
+	_pump_feed(delta)
 	if _ts_lbl and _c:
 		_ts_lbl.text = _fmt_ts(_c.game_minutes)
 	# Keep the feed's COVER fit correct for the live window aspect (so it fills any screen

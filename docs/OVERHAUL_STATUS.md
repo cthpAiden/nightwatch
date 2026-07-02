@@ -117,3 +117,35 @@ instead a runtime applier overlays the preset's perf knobs.
 - The dev GPU here is a **GTX 1050** (low-end discrete), not an RTX 3060 — reinforces the Low floor.
 - A killed headless run corrupts `.godot/imported` (missing fonts/samples → cascading Nil UI). If
   that happens, delete `.godot` and re-run `--import` to completion.
+
+## Pass 2 — measured optimization (vibe-neutral, fog untouched)
+
+Goal: best FPS on low-end, without touching the dark/fog atmosphere. Built a real-renderer
+FPS benchmark (`tools/bench.gd` + `Bench.tscn`; `NW_BENCH_Q=0|1|2`, optional `NW_BENCH_CAM=1`)
+that uncaps fps/vsync and averages frame time over 240 frames on a live Night. **Keep it** —
+reusable for future perf work.
+
+What changed (all vibe-neutral — only feed refresh *rate*, AA method, shadow-map resolution):
+- **Feed render throttle** (the big win): the watched CCTV feed and the desk CRT now re-render
+  at `Graphics.feed_render_interval()` (Low ~12fps, Medium ~20fps, High every frame) via
+  UPDATE_ONCE on a timer instead of every frame — a full room render skipped on most frames,
+  and choppier feeds read as more authentically CCTV. `camera_system._pump_feed`,
+  `guard_room._pump_crt`/`set_crt_active`.
+- **MSAA off on all feeds** (masked by the CCTV static/scanline shader) at every preset.
+- **Low upscaler FSR2 → FSR1** (spatial-only, cheaper on weak GPUs); Low shadow atlas 2048→1024.
+- **Directional (moon) shadows**: fewer PSSM splits + shorter max-distance on Low/Med (far dark
+  reads as fog anyway).
+- **Debanding on** (Medium+) for cleaner dark gradients — near-free quality win.
+- Desk-CRT feed also gets preset env/lights + `crt_viewport_size()` (320×180 on Low).
+
+Measured on the GTX 1050 (uncapped, Night 3), before → after:
+
+| Scenario | Low | Medium | High |
+|---|---|---|---|
+| Office+CRT (monitor down) | 171 → **277** FPS | 131 → 145 | 92 → 100 |
+| Monitor up (CCTV) | 177 → **240** FPS | 105 → **136** | 75 → 77 (by design) |
+
+Low frame time 5.86 → 3.60 ms (−2.26 ms/frame; ~3–4× that on integrated). High is intentionally
+near-flat — feeds aren't throttled there (no-compromise tier). Fog/glow/darkness unchanged on
+every tier. Tests green: SelfTest 119/0, IntegrityCheck 36/0 (re-run — first run flaky per note
+above), FlowTest death+win pass.

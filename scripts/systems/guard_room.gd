@@ -105,6 +105,8 @@ const ROOM_SCENES := {
 var _crt_vp: SubViewport             # single viewport the CRT samples; its room is swapped
 var _crt_room: Node                  # room scene currently loaded in _crt_vp
 var _crt_cur := ""                   # cam_id currently on the CRT
+var _crt_active := false             # desk CRT wants to render (monitor lowered) — cadence throttled per preset
+var _crt_accum := 0.0                # throttle timer for the CRT re-render
 var _screen_lit := -1                # last 'lit' uniform written (-1 = unwritten) — avoids a per-frame re-upload
 var _screen_timer := 0.0
 var _desk_mirror := false            # true = mirror the player's operated camera
@@ -937,6 +939,7 @@ func _process(delta: float) -> void:
 	_animate_mains(delta)
 	_animate_moon(delta)
 	_animate_screen(delta)
+	_pump_crt(delta)
 	_update_apparition(delta)
 	_update_threat_sprites()
 
@@ -1096,10 +1099,10 @@ func _crt_show(cam_id: String) -> bool:
 		return false
 	if _crt_vp == null:
 		_crt_vp = SubViewport.new()
-		_crt_vp.size = Vector2i(480, 270)
+		_crt_vp.size = Graphics.crt_viewport_size()
 		_crt_vp.own_world_3d = true
-		_crt_vp.msaa_3d = Viewport.MSAA_2X
-		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		Graphics.apply_to_viewport(_crt_vp, false)   # feed: MSAA off
+		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		add_child(_crt_vp)
 		if _screen_mat:
 			_screen_mat.set_shader_parameter("feed", _crt_vp.get_texture())
@@ -1108,15 +1111,44 @@ func _crt_show(cam_id: String) -> bool:
 		_crt_room.queue_free()
 	_crt_room = (load(path) as PackedScene).instantiate()
 	_crt_vp.add_child(_crt_room)
+	# Overlay the preset onto the CRT's copy of the room too (SSAO/glow, shadow budget).
+	Graphics.apply_to_env(_crt_env(_crt_room))
+	Graphics.apply_to_lights(_crt_room)
 	_crt_cur = cam_id
+	# Draw the freshly-swapped room once immediately even while throttled/paused.
+	_crt_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_crt_accum = 0.0
 	return true
+
+## The CRT room scene's own Environment (mirrors camera_system._room_env for the desk feed).
+func _crt_env(room: Node) -> Environment:
+	var we := room.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	return we.environment if we else null
 
 ## Pause the CRT render while the raised monitor covers the office (nothing to see there),
 ## resume when it's lowered — the one small viewport otherwise renders a room every frame.
+## When active, _pump_crt throttles the re-render rate per preset (below High) rather than
+## rendering every frame; this is the common monitor-DOWN state, so it's a big steady saving.
 func set_crt_active(on: bool) -> void:
-	if _crt_vp:
-		_crt_vp.render_target_update_mode = \
-			SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+	_crt_active = on
+	if _crt_vp and not on:
+		_crt_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	elif _crt_vp and on:
+		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ONCE   # instant first frame
+		_crt_accum = 0.0
+
+## Tick the CRT feed's throttled re-render. Mirrors the CCTV feed's cadence.
+func _pump_crt(delta: float) -> void:
+	if not _crt_active or _crt_vp == null:
+		return
+	var interval := Graphics.feed_render_interval()
+	if interval <= 0.0:
+		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		return
+	_crt_accum += delta
+	if _crt_accum >= interval:
+		_crt_accum = 0.0
+		_crt_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 ## Show (or clear) the threat figure composited on the desk CRT.
 func set_desk_threat(tex: Texture2D) -> void:

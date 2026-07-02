@@ -44,21 +44,29 @@ func apply_to_viewport(vp: Viewport, is_root: bool) -> void:
 		return
 	var q := quality()
 	if is_root:
-		# Render-scaling is the primary Low lever: draw 3D at 70% and FSR2-upscale to native.
+		# Render-scaling is the primary Low lever: draw 3D at 70% and upscale. FSR1 (spatial
+		# only) is cheaper than FSR2's temporal pass on weak GPUs — the target here.
 		if q == LOW:
-			vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2
+			vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR
 			vp.scaling_3d_scale = 0.7
 		else:
 			vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 			vp.scaling_3d_scale = 1.0
 		vp.use_taa = q == HIGH
 		# Positional (omni/spot) shadow atlas: the office runs 8-10 shadow-casters at once.
-		vp.positional_shadow_atlas_size = [2048, 4096, 8192][q]
+		vp.positional_shadow_atlas_size = [1024, 4096, 8192][q]
+		# Debanding dithers dark gradients so the fog/shadow falloff doesn't band — near-free,
+		# and a quality win exactly in the dark scenes this game lives in.
+		vp.use_debanding = q >= MEDIUM
+		vp.msaa_3d = Viewport.MSAA_DISABLED if q == LOW else Viewport.MSAA_2X
 		# Root AA: FXAA is cheap cover for the upscaled Low image; TAA does the smoothing on High.
 		match q:
 			LOW: vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
 			_: vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
-	vp.msaa_3d = Viewport.MSAA_DISABLED if q == LOW else Viewport.MSAA_2X
+	else:
+		# CCTV/desk-CRT feeds: MSAA is wasted — the static/scanline shader masks all aliasing —
+		# so drop it at every tier and save the fill.
+		vp.msaa_3d = Viewport.MSAA_DISABLED
 
 ## Shadow-caster budget for a scene's lights. Positional (omni/spot) shadows are the
 ## expensive ones — a room/office can run several at once — so they're dropped below
@@ -75,6 +83,20 @@ func apply_to_lights(root: Node) -> void:
 		var authored: bool = light.get_meta("nw_shadow")
 		if light is DirectionalLight3D:
 			light.shadow_enabled = authored
+			# Cheaper cascades on the lower presets: fewer PSSM splits + a shorter shadow
+			# distance so the moon only shadows the near field. The far dark reads as fog
+			# anyway, so the atmosphere is unchanged — only the shadow cost drops.
+			var dl := light as DirectionalLight3D
+			match q:
+				LOW:
+					dl.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+					dl.directional_shadow_max_distance = 22.0
+				MEDIUM:
+					dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+					dl.directional_shadow_max_distance = 45.0
+				_:
+					dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+					dl.directional_shadow_max_distance = 100.0
 		else:
 			light.shadow_enabled = authored and q >= MEDIUM
 
@@ -85,6 +107,16 @@ func _lights_under(node: Node, out: Array = []) -> Array:
 		if child.get_child_count() > 0:
 			_lights_under(child, out)
 	return out
+
+## Seconds between CCTV / desk-CRT feed re-renders. The feeds look at a near-static room,
+## and a security camera reading choppy is authentic — so on the lower presets we render
+## them well below the main framerate. This is the single biggest GPU saving in the pass:
+## a full room render is skipped on most frames. 0 = render every frame (High only).
+func feed_render_interval() -> float:
+	match quality():
+		LOW: return 1.0 / 12.0
+		MEDIUM: return 1.0 / 20.0
+		_: return 0.0
 
 ## CCTV feed render resolution — half-res on Low so 9 idle rooms + 1 live feed stay cheap.
 func cctv_viewport_size() -> Vector2i:
